@@ -35,7 +35,14 @@ public static class GameplayInputRecorder {
 
     private static bool ShouldRecord(Level level) =>
         QuicksaveTracker.Instance.IsTracking
+        && !IsSuspended
         && !QuicksavePlayback.IsActive
         && CelesteTasImports.IsTasActive?.Invoke() != true
         && level.Tracker.GetEntity<Player>() is not { Dead: true };
+
+    public static bool IsSuspended { get; private set; }
+
+    public static void Suspend() => IsSuspended = true;
+
+    public static void Resume() => IsSuspended = false;
 }
