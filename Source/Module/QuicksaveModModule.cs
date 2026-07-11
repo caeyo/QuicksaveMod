@@ -3,7 +3,7 @@ using Celeste.Mod.QuicksaveMod.Interop;
 using Celeste.Mod.QuicksaveMod.Recording;
 using MonoMod.ModInterop;
 
-namespace Celeste.Mod.QuicksaveMod;
+namespace Celeste.Mod.QuicksaveMod.Module;
 
 public class QuicksaveModModule : EverestModule {
     public static QuicksaveModModule Instance { get; private set; }
