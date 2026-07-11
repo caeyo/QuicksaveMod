@@ -133,7 +133,7 @@ public static class QuicksaveService {
         }
 
         if (File.Exists(fullPath)) {
-            relativePath = Path.GetDirectoryName(relativePath) ?? ".";
+            relativePath = Path.GetDirectoryName(relativePath) ?? "";
         } else if (!Directory.Exists(fullPath)) {
             return Path.HasExtension(fullPath) && fullPath.EndsWith(".qs", StringComparison.OrdinalIgnoreCase)
                 ? TryGetRelativeSubdirectory(Path.GetDirectoryName(fullPath)!, out subdirectory)
@@ -141,7 +141,7 @@ public static class QuicksaveService {
         }
 
         relativePath = NormalizeRelativePath(relativePath);
-        if (relativePath.Length == 0) {
+        if (relativePath.Length == 0 || relativePath is ".") {
             return true;
         }
 

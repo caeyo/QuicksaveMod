@@ -1,6 +1,9 @@
-﻿using Celeste.Mod.QuicksaveMod.Hooks;
+﻿using Celeste.Mod.ImGuiHelper;
+using Celeste.Mod.QuicksaveMod.Hooks;
 using Celeste.Mod.QuicksaveMod.Interop;
 using Celeste.Mod.QuicksaveMod.Recording;
+using Celeste.Mod.QuicksaveMod.UI;
+using FMOD.Studio;
 using MonoMod.ModInterop;
 
 namespace Celeste.Mod.QuicksaveMod.Module;
@@ -16,6 +19,8 @@ public class QuicksaveModModule : EverestModule {
 
     public override Type SaveDataType => typeof(QuicksaveModModuleSaveData);
     public static QuicksaveModModuleSaveData SaveData => (QuicksaveModModuleSaveData) Instance._SaveData;
+
+    private QuicksaveBrowserHandler? browserHandler;
 
     public QuicksaveModModule() {
         Instance = this;
@@ -34,13 +39,32 @@ public class QuicksaveModModule : EverestModule {
 
     public override void Load() {
         QuicksaveHooks.Apply();
+        QuicksaveBrowserHooks.Apply();
         GameplayInputRecorder.Apply();
         Playback.QuicksavePlayback.Apply();
+
+        browserHandler = new QuicksaveBrowserHandler();
+        if (!ImGuiManager.Handlers.OfType<QuicksaveBrowserHandler>().Any()) {
+            ImGuiManager.Handlers.Add(browserHandler);
+        }
     }
 
     public override void Unload() {
+        if (browserHandler != null) {
+            browserHandler.Close();
+            ImGuiManager.Handlers.Remove(browserHandler);
+            QuicksaveBrowserHandler.ClearInstance();
+            browserHandler = null;
+        }
+
+        QuicksaveBrowserHooks.Unapply();
         GameplayInputRecorder.Unapply();
         QuicksaveHooks.Unapply();
         Playback.QuicksavePlayback.Unapply();
+    }
+
+    public override void CreateModMenuSection(TextMenu menu, bool inGame, EventInstance snapshot) {
+        CreateModMenuSectionHeader(menu, inGame, snapshot);
+        CreateModMenuSectionKeyBindings(menu, inGame, snapshot);
     }
 }

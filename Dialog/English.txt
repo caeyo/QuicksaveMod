@@ -1,0 +1,2 @@
+modoptions_quicksavemod_title= QUICKSAVE MOD
+modoptions_quicksavemod_openbrowser= Open Quicksave Browser
