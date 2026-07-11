@@ -85,8 +85,44 @@ public static class QuicksaveService {
     }
 
     public static void DeleteQuicksave(string path) {
-        string fullPath = ResolveQuicksaveFilePath(path, mustExist: true);
-        File.Delete(fullPath);
+        string fullPath = Path.GetFullPath(path);
+        if (!IsUnderQuicksavesRoot(fullPath)) {
+            throw new ArgumentException("Path must stay within the Quicksaves folder.", nameof(path));
+        }
+
+        if (File.Exists(fullPath)) {
+            if (!fullPath.EndsWith(".qs", StringComparison.OrdinalIgnoreCase)) {
+                throw new ArgumentException("Quicksave path must point to a .qs file.", nameof(path));
+            }
+
+            File.Delete(fullPath);
+            return;
+        }
+
+        if (Directory.Exists(fullPath)) {
+            Directory.Delete(ResolveDeletableDirectoryPath(fullPath), recursive: true);
+            return;
+        }
+
+        throw new FileNotFoundException($"Quicksave path not found: {path}");
+    }
+
+    public static void CreateQuicksaveFolder(string folderName, string? parentSubdirectory = null) {
+        if (string.IsNullOrWhiteSpace(folderName)) {
+            throw new ArgumentException("Folder name must not be empty.", nameof(folderName));
+        }
+
+        ValidateSingleName(folderName, nameof(folderName));
+        ValidateCreatableFolderName(folderName);
+
+        string parentDirectory = ResolveSaveDirectory(parentSubdirectory);
+        string fullPath = Path.Combine(parentDirectory, folderName);
+
+        if (Directory.Exists(fullPath)) {
+            throw new IOException($"A quicksave folder already exists at '{fullPath}'.");
+        }
+
+        Directory.CreateDirectory(fullPath);
     }
 
     public static bool TryGetRelativeSubdirectory(string absolutePath, out string? subdirectory) {
@@ -132,6 +168,32 @@ public static class QuicksaveService {
         }
 
         Directory.Move(fullPath, destination);
+    }
+
+    private static string ResolveDeletableDirectoryPath(string fullPath) {
+        fullPath = Path.GetFullPath(fullPath);
+        string root = GetQuicksavesRootFullPath();
+
+        if (fullPath.Equals(root, StringComparison.OrdinalIgnoreCase)) {
+            throw new InvalidOperationException("The Quicksaves root folder cannot be deleted.");
+        }
+
+        if (!Directory.Exists(fullPath)) {
+            throw new FileNotFoundException($"Quicksave folder not found: {fullPath}");
+        }
+
+        string folderName = Path.GetFileName(fullPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+        if (folderName.StartsWith('.')) {
+            throw new InvalidOperationException($"The folder '{folderName}' cannot be deleted.");
+        }
+
+        return fullPath;
+    }
+
+    private static void ValidateCreatableFolderName(string folderName) {
+        if (folderName.StartsWith('.')) {
+            throw new ArgumentException("Folder name must not start with '.'.", nameof(folderName));
+        }
     }
 
     private static string ResolveQuicksaveFilePath(string path, bool mustExist) {
