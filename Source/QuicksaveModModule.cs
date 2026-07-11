@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Celeste.Mod.QuicksaveMod.Hooks;
+using Celeste.Mod.QuicksaveMod.Interop;
+using Celeste.Mod.QuicksaveMod.Recording;
+using MonoMod.ModInterop;
 
 namespace Celeste.Mod.QuicksaveMod;
 
@@ -25,11 +28,19 @@ public class QuicksaveModModule : EverestModule {
 #endif
     }
 
+    public override void Initialize() {
+        typeof(CelesteTasImports).ModInterop();
+    }
+
     public override void Load() {
-        // TODO: apply any hooks that should always be active
+        QuicksaveHooks.Apply();
+        GameplayInputRecorder.Apply();
+        Playback.QuicksavePlayback.Apply();
     }
 
     public override void Unload() {
-        // TODO: unapply any hooks applied in Load()
+        GameplayInputRecorder.Unapply();
+        QuicksaveHooks.Unapply();
+        Playback.QuicksavePlayback.Unapply();
     }
 }
