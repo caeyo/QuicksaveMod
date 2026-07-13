@@ -291,13 +291,13 @@ public static class QuicksaveService {
     private static void WriteTempTasFile(string path, QuicksaveData data) {
         using var writer = new StreamWriter(path, false);
         writer.WriteLine(data.Start.BuildConsoleLoadCommand());
-        writer.WriteLine("1");
+        writer.WriteLine(TasLineFormatter.FormatFileLine("1"));
 
         foreach (string line in data.Inputs) {
-            writer.WriteLine(line);
+            writer.WriteLine(TasLineFormatter.FormatFileLine(line));
         }
 
         writer.WriteLine("***");
-        writer.WriteLine("1");
+        writer.WriteLine(TasLineFormatter.FormatFileLine("1"));
     }
 }

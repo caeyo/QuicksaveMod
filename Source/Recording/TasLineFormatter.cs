@@ -4,6 +4,8 @@ using System.Text;
 namespace Celeste.Mod.QuicksaveMod.Recording;
 
 internal static class TasLineFormatter {
+    private const int MaxFramesDigits = 4;
+
     internal static string Format(
         int frames,
         IReadOnlyList<char> actions,
@@ -25,5 +27,18 @@ internal static class TasLineFormatter {
         }
 
         return builder.ToString();
+    }
+
+    internal static string FormatFileLine(string line) {
+        line = line.TrimStart();
+        int comma = line.IndexOf(',');
+        ReadOnlySpan<char> framePart = comma < 0 ? line : line.AsSpan(0, comma);
+        string suffix = comma < 0 ? "" : line[comma..];
+
+        if (!int.TryParse(framePart, NumberStyles.Integer, CultureInfo.InvariantCulture, out int frames)) {
+            return line;
+        }
+
+        return frames.ToString(CultureInfo.InvariantCulture).PadLeft(MaxFramesDigits) + suffix;
     }
 }
