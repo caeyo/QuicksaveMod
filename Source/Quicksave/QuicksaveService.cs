@@ -1,3 +1,4 @@
+using System.Text;
 using Celeste.Mod.QuicksaveMod.Playback;
 using Celeste.Mod.QuicksaveMod.Recording;
 
@@ -289,7 +290,8 @@ public static class QuicksaveService {
     }
 
     private static void WriteTempTasFile(string path, QuicksaveData data) {
-        using var writer = new StreamWriter(path, false);
+        using var writer = new StreamWriter(path, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        writer.WriteLine("Unsafe");
         writer.WriteLine(data.Start.BuildConsoleLoadCommand());
         writer.WriteLine(TasLineFormatter.FormatFileLine("1"));
 

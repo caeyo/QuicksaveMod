@@ -43,7 +43,6 @@ public class QuicksaveModModule : EverestModule {
         QuicksaveHooks.Apply();
         QuicksaveBrowserHooks.Apply();
         GameplayInputRecorder.Apply();
-        Playback.QuicksavePlayback.Apply();
 
         browserHandler = new QuicksaveBrowserHandler();
         if (!ImGuiManager.Handlers.OfType<QuicksaveBrowserHandler>().Any()) {
@@ -62,7 +61,6 @@ public class QuicksaveModModule : EverestModule {
         QuicksaveBrowserHooks.Unapply();
         GameplayInputRecorder.Unapply();
         QuicksaveHooks.Unapply();
-        Playback.QuicksavePlayback.Unapply();
     }
 
     public override void CreateModMenuSection(TextMenu menu, bool inGame, EventInstance snapshot) {
