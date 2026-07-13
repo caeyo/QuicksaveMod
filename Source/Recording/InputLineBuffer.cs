@@ -25,7 +25,13 @@ public class InputLineBuffer {
 
     private static string IncrementFrameCount(string line) {
         int comma = line.IndexOf(',');
-        if (comma <= 0 || !int.TryParse(line.AsSpan(0, comma), out int frames)) {
+        if (comma <= 0) {
+            return int.TryParse(line, out int neutralFrames)
+                ? $"{neutralFrames + 1}"
+                : line;
+        }
+
+        if (!int.TryParse(line.AsSpan(0, comma), out int frames)) {
             return line;
         }
 

@@ -18,9 +18,9 @@ internal static class TasLineFormatter {
         }
 
         if (featherAngle is { } angle) {
-            builder.Append(",F,").Append(angle.ToString(CultureInfo.InvariantCulture));
+            builder.Append(",F,").Append(((int) angle).ToString(CultureInfo.InvariantCulture));
             if (featherMagnitude is { } magnitude) {
-                builder.Append(',').Append(magnitude.ToString(CultureInfo.InvariantCulture));
+                builder.Append(',').Append(magnitude.ToString("0.###", CultureInfo.InvariantCulture));
             }
         }
 

@@ -35,6 +35,8 @@ public class QuicksaveModModule : EverestModule {
 
     public override void Initialize() {
         typeof(CelesteTasImports).ModInterop();
+        typeof(QuicksaveModInterop).ModInterop();
+        QuicksaveModInterop.InitExports();
     }
 
     public override void Load() {
