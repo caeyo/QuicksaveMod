@@ -22,6 +22,9 @@ public static class QuicksavePlayback {
         _watching = true;
         _playbackStarted = false;
 
+        // A prior post-playback freeze must not block Level.Update / player intro on the new load.
+        QuicksaveLoadFreeze.Cancel();
+
         Manager.AddMainThreadAction(() => {
             if (Manager.Running) {
                 Manager.DisableRun();
