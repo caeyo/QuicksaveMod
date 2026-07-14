@@ -1,5 +1,5 @@
-using Celeste;
 using Celeste.Mod.QuicksaveMod.Interop;
+using Celeste.Mod.QuicksaveMod.Playback;
 using Celeste.Mod.QuicksaveMod.Quicksave;
 using Monocle;
 
@@ -35,6 +35,7 @@ public static class GameplayInputRecorder {
     private static bool ShouldRecord(Level level) =>
         QuicksaveTracker.Instance.IsTracking
         && !IsSuspended
+        && !QuicksaveLoadFreeze.IsWaiting
         && CelesteTasImports.IsTasActive?.Invoke() != true
         && level.Tracker.GetEntity<Player>() is not { Dead: true };
 

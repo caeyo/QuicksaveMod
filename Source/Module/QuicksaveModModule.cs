@@ -1,6 +1,7 @@
 ﻿using Celeste.Mod.ImGuiHelper;
 using Celeste.Mod.QuicksaveMod.Hooks;
 using Celeste.Mod.QuicksaveMod.Interop;
+using Celeste.Mod.QuicksaveMod.Playback;
 using Celeste.Mod.QuicksaveMod.Recording;
 using Celeste.Mod.QuicksaveMod.UI;
 using FMOD.Studio;
@@ -43,6 +44,8 @@ public class QuicksaveModModule : EverestModule {
         QuicksaveHooks.Apply();
         QuicksaveBrowserHooks.Apply();
         GameplayInputRecorder.Apply();
+        QuicksavePlayback.Apply();
+        QuicksaveLoadFreeze.Apply();
 
         browserHandler = new QuicksaveBrowserHandler();
         if (!ImGuiManager.Handlers.OfType<QuicksaveBrowserHandler>().Any()) {
@@ -61,6 +64,8 @@ public class QuicksaveModModule : EverestModule {
         QuicksaveBrowserHooks.Unapply();
         GameplayInputRecorder.Unapply();
         QuicksaveHooks.Unapply();
+        QuicksavePlayback.Unapply();
+        QuicksaveLoadFreeze.Unapply();
     }
 
     public override void CreateModMenuSection(TextMenu menu, bool inGame, EventInstance snapshot) {
