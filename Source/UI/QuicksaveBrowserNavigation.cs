@@ -107,11 +107,13 @@ public static class QuicksaveBrowserNavigation {
 
     private static bool ShouldHideName(string name) => name.StartsWith('.');
 
-    public static string RenameDefaultText(QuicksaveBrowserEntry entry) {
+    public static string GetDisplayName(QuicksaveBrowserEntry entry) {
         if (entry.Kind == QuicksaveBrowserEntryKind.Folder) {
             return entry.Name;
         }
 
         return Path.GetFileNameWithoutExtension(entry.Name);
     }
+
+    public static string RenameDefaultText(QuicksaveBrowserEntry entry) => GetDisplayName(entry);
 }

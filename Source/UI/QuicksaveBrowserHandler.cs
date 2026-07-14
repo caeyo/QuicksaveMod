@@ -277,7 +277,9 @@ public sealed class QuicksaveBrowserHandler : ImGuiHandler {
             for (int i = 0; i < state.Entries.Count; i++) {
                 var entry = state.Entries[i];
                 bool selected = i == state.SelectedIndex;
-                string label = entry.Kind == QuicksaveBrowserEntryKind.Folder ? $"{entry.Name}/" : entry.Name;
+                string label = entry.Kind == QuicksaveBrowserEntryKind.Folder
+                    ? $"{entry.Name}/"
+                    : QuicksaveBrowserNavigation.GetDisplayName(entry);
 
                 if (ImGui.Selectable($"{label}##entry{i}", selected, ImGuiSelectableFlags.AllowDoubleClick)) {
                     state.SelectedIndex = i;
@@ -386,7 +388,7 @@ public sealed class QuicksaveBrowserHandler : ImGuiHandler {
             }
 
             if (ImGui.MenuItem("Delete")) {
-                state.BeginDelete(entry.FullPath, entry.Name);
+                state.BeginDelete(entry.FullPath, QuicksaveBrowserNavigation.GetDisplayName(entry));
             }
         } else {
             if (QuicksaveService.IsTracking && ImGui.MenuItem("Save To")) {
@@ -406,7 +408,7 @@ public sealed class QuicksaveBrowserHandler : ImGuiHandler {
             }
 
             if (ImGui.MenuItem("Delete")) {
-                state.BeginDelete(entry.FullPath, entry.Name);
+                state.BeginDelete(entry.FullPath, QuicksaveBrowserNavigation.GetDisplayName(entry));
             }
         }
 
@@ -420,7 +422,7 @@ public sealed class QuicksaveBrowserHandler : ImGuiHandler {
 
         dragSourcePath = entry.FullPath;
         ImGui.SetDragDropPayload(DragPayloadType, IntPtr.Zero, 0);
-        ImGui.TextUnformatted($"Move {entry.Name}");
+        ImGui.TextUnformatted($"Move {QuicksaveBrowserNavigation.GetDisplayName(entry)}");
         ImGui.EndDragDropSource();
     }
 
