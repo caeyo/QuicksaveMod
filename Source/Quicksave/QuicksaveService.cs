@@ -329,7 +329,7 @@ public static class QuicksaveService {
             writer.WriteLine(TasLineFormatter.FormatFileLine(line));
         }
 
-        // writer.WriteLine("***");
+        writer.WriteLine("***");
         writer.WriteLine(TasLineFormatter.FormatFileLine("1"));
     }
 }
