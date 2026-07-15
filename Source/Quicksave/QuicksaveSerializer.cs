@@ -25,8 +25,16 @@ public static class QuicksaveSerializer {
         var data = JsonSerializer.Deserialize<QuicksaveData>(File.ReadAllText(path), Options)
             ?? throw new InvalidDataException($"Failed to deserialize quicksave: {path}");
 
-        if (data.Version != QuicksaveData.CurrentVersion) {
+        if (data.Version is < 1 or > QuicksaveData.CurrentVersion) {
             throw new InvalidDataException($"Unsupported quicksave version {data.Version} in {path}");
+        }
+
+        if (data.Version == 1) {
+            data.SaveUid = null;
+        } else if (string.IsNullOrWhiteSpace(data.SaveUid)) {
+            data.SaveUid = null;
+        } else if (!QuicksaveData.IsValidSaveUid(data.SaveUid)) {
+            throw new InvalidDataException($"Quicksave has an invalid save UID: {path}");
         }
 
         if (string.IsNullOrWhiteSpace(data.Start.AreaSid)) {

@@ -32,6 +32,7 @@
         <PackageReference Include="CelesteMod.Publicizer" Version="*" CelesteAssembly="$(CelestePrefix)\Celeste.dll" />
         <Reference Include="$(CelestePrefix)\MMHOOK_Celeste.dll" Private="false" />
         <Reference Include="$(CelestePrefix)\FNA.dll" Private="false" />
+        <Reference Include="$(CelestePrefix)\YamlDotNet.dll" Private="false" />
         <Reference Include="CelesteTAS-EverestInterop">
           <HintPath>..\..\CelesteTAS\bin\CelesteTAS-EverestInterop.dll</HintPath>
         </Reference>

@@ -1,6 +1,5 @@
-using System.Globalization;
-using System.Text;
 using System.Text.Json.Serialization;
+using Microsoft.Xna.Framework;
 
 namespace Celeste.Mod.QuicksaveMod.Quicksave;
 
@@ -33,22 +32,48 @@ public class QuicksaveStartPoint {
         return point;
     }
 
-    public string BuildConsoleLoadCommand() {
-        var command = new StringBuilder("console ");
-        command.Append(SideMode switch {
-            "BSide" => "hard",
-            "CSide" => "rmx2",
-            _ => "load",
-        });
-        command.Append(' ').Append(AreaSid);
+    public Session BuildSession() {
+        AreaData area = AreaData.Get(AreaSid)
+            ?? throw new InvalidDataException($"Quicksave area does not exist: {AreaSid}");
+        AreaMode mode = SideMode switch {
+            "BSide" => AreaMode.BSide,
+            "CSide" => AreaMode.CSide,
+            _ => AreaMode.Normal,
+        };
+        var areaKey = new AreaKey(area.ID, mode);
 
-        if (RespawnX is { } x && RespawnY is { } y) {
-            command.Append(' ').Append(x.ToString(CultureInfo.InvariantCulture));
-            command.Append(' ').Append(y.ToString(CultureInfo.InvariantCulture));
-        } else if (!string.IsNullOrEmpty(Level)) {
-            command.Append(' ').Append(Level);
+        if (area.Mode[(int) mode] == null) {
+            throw new InvalidDataException($"Quicksave area {AreaSid} has no {mode} mode.");
         }
 
-        return command.ToString();
+        var session = new Session(areaKey);
+        if (RespawnX is { } x && RespawnY is { } y) {
+            var respawn = new Vector2(x, y);
+            LevelData levelData = session.MapData.GetAt(respawn)
+                ?? throw new InvalidDataException(
+                    $"Quicksave position {x}, {y} is not inside a room in {AreaSid}."
+                );
+
+            session.Level = levelData.Name;
+            if (AreaData.GetCheckpoint(areaKey, session.Level) != null) {
+                session = new Session(areaKey, session.Level);
+            }
+
+            session.FirstLevel = false;
+            session.StartedFromBeginning = false;
+            session.RespawnPoint = respawn;
+            return session;
+        }
+
+        if (string.IsNullOrWhiteSpace(Level) || session.MapData.Get(Level) == null) {
+            throw new InvalidDataException(
+                $"Quicksave room '{Level}' does not exist in {AreaSid}."
+            );
+        }
+
+        session.Level = Level;
+        session.FirstLevel = session.LevelData == session.MapData.StartLevel();
+        session.StartedFromBeginning = session.FirstLevel;
+        return session;
     }
 }

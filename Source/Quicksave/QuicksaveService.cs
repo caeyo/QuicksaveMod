@@ -1,6 +1,7 @@
 using System.Text;
 using Celeste.Mod.QuicksaveMod.Playback;
 using Celeste.Mod.QuicksaveMod.Recording;
+using Monocle;
 
 namespace Celeste.Mod.QuicksaveMod.Quicksave;
 
@@ -27,6 +28,7 @@ public static class QuicksaveService {
             fileName += ".qs";
         }
 
+        data.SaveUid = CelesteSaveSlotResolver.EnsureCurrentSaveUid();
         data.CreatedUtc = DateTime.UtcNow;
         string path = Path.Combine(directory, fileName);
         QuicksaveSerializer.Write(path, data);
@@ -36,6 +38,9 @@ public static class QuicksaveService {
     public static void LoadQuicksave(string filePath) {
         string fullPath = ResolveQuicksaveFilePath(filePath, mustExist: true);
         var data = QuicksaveSerializer.Read(fullPath);
+        int targetSlot = CelesteSaveSlotResolver.ResolveSlot(data.SaveUid);
+        ActivateSaveSlot(targetSlot);
+        Session session = data.Start.BuildSession();
 
         string tempDir = Path.Combine(QuicksavesRoot, ".temp");
         Directory.CreateDirectory(tempDir);
@@ -43,8 +48,12 @@ public static class QuicksaveService {
         string tempTasPath = Path.Combine(tempDir, $"playback_{Guid.NewGuid():N}.tas");
         WriteTempTasFile(tempTasPath, data);
 
+        Engine.Scene = new LevelLoader(session);
         QuicksavePlayback.Start(tempTasPath);
-        Logger.Info(nameof(QuicksaveService), $"Loading quicksave playback from {fullPath}");
+        Logger.Info(
+            nameof(QuicksaveService),
+            $"Loading quicksave playback from {fullPath} in save slot {targetSlot}"
+        );
     }
 
     public static void MoveQuicksave(string sourcePath, string targetDirectory) {
@@ -289,16 +298,38 @@ public static class QuicksaveService {
         return fileName;
     }
 
+    private static void ActivateSaveSlot(int targetSlot) {
+        if (SaveData.Instance?.FileSlot == targetSlot) {
+            return;
+        }
+
+        if (targetSlot == -1) {
+            SaveData.InitializeDebugMode();
+            return;
+        }
+
+        string saveName = SaveData.GetFilename(targetSlot);
+        SaveData? saveData = UserIO.Load<SaveData>(saveName);
+        if (saveData == null) {
+            Logger.Warn(
+                nameof(QuicksaveService),
+                $"Save slot {targetSlot} could not be loaded; falling back to debug."
+            );
+            SaveData.InitializeDebugMode();
+            return;
+        }
+
+        SaveData.Start(saveData, targetSlot);
+    }
+
     private static void WriteTempTasFile(string path, QuicksaveData data) {
         using var writer = new StreamWriter(path, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-        writer.WriteLine(data.Start.BuildConsoleLoadCommand());
-        writer.WriteLine(TasLineFormatter.FormatFileLine("1"));
 
         foreach (string line in data.Inputs) {
             writer.WriteLine(TasLineFormatter.FormatFileLine(line));
         }
 
-        writer.WriteLine("***");
+        // writer.WriteLine("***");
         writer.WriteLine(TasLineFormatter.FormatFileLine("1"));
     }
 }
