@@ -47,7 +47,7 @@ public class TasActionsMapper {
     }
 
     private void AppendJump(List<char> actions) {
-        jumpSlot = TwoSlotEncoder.Update(jumpSlot, Input.Jump.Pressed, Input.Jump.Check);
+        jumpSlot = TwoSlotEncoder.Update(jumpSlot, RawPressed(Input.Jump), Input.Jump.Check);
         AppendSlot(actions, jumpSlot, 'J', 'K');
     }
 
@@ -61,21 +61,21 @@ public class TasActionsMapper {
             return;
         }
 
-        dashSlot = TwoSlotEncoder.Update(dashSlot, Input.Dash.Pressed, Input.Dash.Check);
+        dashSlot = TwoSlotEncoder.Update(dashSlot, RawPressed(Input.Dash), Input.Dash.Check);
         AppendSlot(actions, dashSlot, 'X', 'C');
     }
 
     private void AppendCrouchDash(List<char> actions) {
         crouchDashSlot = TwoSlotEncoder.Update(
             crouchDashSlot,
-            Input.CrouchDash.Pressed,
+            RawPressed(Input.CrouchDash),
             Input.CrouchDash.Check
         );
         AppendSlot(actions, crouchDashSlot, 'Z', 'V');
     }
 
     private void AppendGrab(List<char> actions) {
-        grabSlot = TwoSlotEncoder.Update(grabSlot, Input.Grab.Pressed, Input.GrabCheck);
+        grabSlot = TwoSlotEncoder.Update(grabSlot, RawPressed(Input.Grab), Input.GrabCheck);
         AppendSlot(actions, grabSlot, 'G', 'H');
     }
 
@@ -104,6 +104,9 @@ public class TasActionsMapper {
 
         return Engine.Scene.Tracker.GetEntity<Textbox>() != null;
     }
+
+    private static bool RawPressed(VirtualButton button) =>
+        button.Binding.Pressed(button.GamepadIndex, button.Threshold);
 
     private static void AppendSlot(List<char> actions, TasSlot slot, char slotAChar, char slotBChar) {
         switch (slot) {
