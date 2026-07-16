@@ -15,9 +15,6 @@ public class QuicksaveModModule : EverestModule {
     public override Type SettingsType => typeof(QuicksaveModModuleSettings);
     public static QuicksaveModModuleSettings Settings => (QuicksaveModModuleSettings) Instance._Settings;
 
-    public override Type SessionType => typeof(QuicksaveModModuleSession);
-    public static QuicksaveModModuleSession Session => (QuicksaveModModuleSession) Instance._Session;
-
     public override Type SaveDataType => typeof(QuicksaveModModuleSaveData);
     public static QuicksaveModModuleSaveData SaveData => (QuicksaveModModuleSaveData) Instance._SaveData;
 
