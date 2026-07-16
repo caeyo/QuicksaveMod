@@ -20,13 +20,16 @@ public class TasActionsMapper {
         float? featherAngle = null;
         float? featherMagnitude = null;
         Player? player = level.Tracker.GetEntity<Player>();
+        bool menu = IsMenuContext(level);
 
         AppendMovement(level, player, actions, ref featherAngle, ref featherMagnitude);
-        AppendJump(actions);
-        AppendDash(level, actions);
-        AppendCrouchDash(actions);
-        AppendGrab(actions);
-        AppendMenuInputs(level, actions);
+        if (!menu) {
+            AppendJump(actions);
+            AppendDash(actions);
+            AppendCrouchDash(actions);
+            AppendGrab(actions);
+        }
+        AppendMenuInputs(menu, actions);
 
         return TasLineFormatter.Format(1, actions, featherAngle, featherMagnitude);
     }
@@ -51,16 +54,7 @@ public class TasActionsMapper {
         AppendSlot(actions, jumpSlot, 'J', 'K');
     }
 
-    private void AppendDash(Level level, List<char> actions) {
-        if (IsMenuContext(level) && Input.MenuCancel.Pressed) {
-            actions.Add('C');
-            return;
-        }
-
-        if (IsMenuContext(level)) {
-            return;
-        }
-
+    private void AppendDash(List<char> actions) {
         dashSlot = TwoSlotEncoder.Update(dashSlot, RawPressed(Input.Dash), Input.Dash.Check);
         AppendSlot(actions, dashSlot, 'X', 'C');
     }
@@ -79,7 +73,7 @@ public class TasActionsMapper {
         AppendSlot(actions, grabSlot, 'G', 'H');
     }
 
-    private static void AppendMenuInputs(Level level, List<char> actions) {
+    private static void AppendMenuInputs(bool menu, List<char> actions) {
         if (Input.Pause.Pressed || Input.Pause.Check) {
             actions.Add('S');
         }
@@ -88,12 +82,8 @@ public class TasActionsMapper {
             actions.Add('Q');
         }
 
-        if (Input.MenuConfirm.Pressed) {
+        if (menu && Input.MenuConfirm.Pressed) {
             actions.Add('O');
-        }
-
-        if (Input.MenuJournal.Pressed || !IsMenuContext(level) && Input.Talk.Pressed) {
-            actions.Add('N');
         }
     }
 
