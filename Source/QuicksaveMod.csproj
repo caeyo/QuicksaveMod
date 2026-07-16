@@ -39,6 +39,9 @@
         <Reference Include="ImGuiHelper">
           <HintPath>..\..\ImGuiHelper\bin\ImGuiHelper.dll</HintPath>
         </Reference>
+        <Reference Include="SpeedrunTool">
+          <HintPath>..\..\SpeedrunTool\SpeedrunTool.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
     <Target Name="CopyFiles" AfterTargets="Build" Inputs="$(OutputPath)\$(AssemblyName).dll;$(OutputPath)\$(AssemblyName).pdb" Outputs="..\bin\$(AssemblyName).dll;..\bin\$(AssemblyName).pdb">
