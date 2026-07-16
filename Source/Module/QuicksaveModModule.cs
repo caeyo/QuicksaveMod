@@ -4,7 +4,6 @@ using Celeste.Mod.QuicksaveMod.Interop;
 using Celeste.Mod.QuicksaveMod.Playback;
 using Celeste.Mod.QuicksaveMod.Recording;
 using Celeste.Mod.QuicksaveMod.UI;
-using FMOD.Studio;
 using MonoMod.ModInterop;
 
 namespace Celeste.Mod.QuicksaveMod.Module;
@@ -12,11 +11,11 @@ namespace Celeste.Mod.QuicksaveMod.Module;
 public class QuicksaveModModule : EverestModule {
     public static QuicksaveModModule Instance { get; private set; }
 
-    public override Type SettingsType => typeof(QuicksaveModModuleSettings);
-    public static QuicksaveModModuleSettings Settings => (QuicksaveModModuleSettings) Instance._Settings;
+    public override Type SettingsType => typeof(QuicksaveModSettings);
+    public static QuicksaveModSettings Settings => (QuicksaveModSettings) Instance._Settings;
 
-    public override Type SaveDataType => typeof(QuicksaveModModuleSaveData);
-    public static QuicksaveModModuleSaveData SaveData => (QuicksaveModModuleSaveData) Instance._SaveData;
+    public override Type SaveDataType => typeof(QuicksaveModSaveData);
+    public static QuicksaveModSaveData SaveData => (QuicksaveModSaveData) Instance._SaveData;
 
     private QuicksaveBrowserHandler? browserHandler;
 
@@ -63,10 +62,5 @@ public class QuicksaveModModule : EverestModule {
         QuicksaveHooks.Unapply();
         QuicksavePlayback.Unapply();
         QuicksaveLoadFreeze.Unapply();
-    }
-
-    public override void CreateModMenuSection(TextMenu menu, bool inGame, EventInstance snapshot) {
-        CreateModMenuSectionHeader(menu, inGame, snapshot);
-        CreateModMenuSectionKeyBindings(menu, inGame, snapshot);
     }
 }

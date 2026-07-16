@@ -1,6 +1,6 @@
 namespace Celeste.Mod.QuicksaveMod.Module;
 
-public class QuicksaveModModuleSaveData : EverestModuleSaveData {
+public class QuicksaveModSaveData : EverestModuleSaveData {
     public string? SaveUid { get; set; }
 
     public string EnsureSaveUid() {

@@ -1,0 +1,27 @@
+using Microsoft.Xna.Framework.Input;
+
+namespace Celeste.Mod.QuicksaveMod.Module;
+
+public enum PlaybackSpeed {
+    Speed10 = 10,
+    Speed20 = 20,
+    Speed30 = 30,
+    Speed40 = 40,
+    Speed50 = 50,
+    Speed100 = 100,
+    Speed150 = 150,
+    Speed200 = 200,
+    Speed250 = 250,
+    Speed300 = 300,
+    Speed350 = 350,
+    Max = 10_000,
+}
+
+public class QuicksaveModSettings : EverestModuleSettings {
+    [SettingName("modoptions_quicksavemod_openbrowser")]
+    [DefaultButtonBinding(buttons: [], keys: new[] { Keys.Q })]
+    public ButtonBinding OpenBrowser { get; set; }
+
+    [SettingName("modoptions_quicksavemod_playbackspeed")]
+    public PlaybackSpeed PlaybackSpeed { get; set; } = PlaybackSpeed.Max;
+}

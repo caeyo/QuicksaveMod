@@ -1,4 +1,5 @@
 using System.Text;
+using Celeste.Mod.QuicksaveMod.Module;
 using Celeste.Mod.QuicksaveMod.Playback;
 using Celeste.Mod.QuicksaveMod.Recording;
 using Monocle;
@@ -329,7 +330,12 @@ public static class QuicksaveService {
             writer.WriteLine(TasLineFormatter.FormatFileLine(line));
         }
 
-        writer.WriteLine("***");
+        writer.WriteLine(GetPlaybackBreakpointLine());
         writer.WriteLine(TasLineFormatter.FormatFileLine("1"));
+    }
+
+    private static string GetPlaybackBreakpointLine() {
+        PlaybackSpeed speed = QuicksaveModModule.Settings.PlaybackSpeed;
+        return speed == PlaybackSpeed.Max ? "***" : $"***{(int)speed}";
     }
 }

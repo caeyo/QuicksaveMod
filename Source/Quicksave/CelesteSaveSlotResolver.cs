@@ -73,7 +73,7 @@ internal static class CelesteSaveSlotResolver {
 
         try {
             // Peek a disposable copy — DeserializeSaveData would replace the live module save data.
-            var data = YamlHelper.Deserializer.Deserialize<QuicksaveModModuleSaveData>(
+            var data = YamlHelper.Deserializer.Deserialize<QuicksaveModSaveData>(
                 Encoding.UTF8.GetString(bytes)
             );
             return string.IsNullOrWhiteSpace(data?.SaveUid) ? null : data.SaveUid;
