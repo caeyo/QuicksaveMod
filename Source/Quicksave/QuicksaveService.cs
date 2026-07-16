@@ -21,6 +21,14 @@ public static class QuicksaveService {
         var data = QuicksaveTracker.Instance.Current
             ?? throw new InvalidOperationException("No quicksave tracking session is active.");
 
+        if (Engine.Scene is not Level) {
+            throw new InvalidOperationException("Quicksaves can only be saved while in a level.");
+        }
+
+        if (SaveData.Instance == null) {
+            throw new InvalidOperationException("No SaveData is loaded.");
+        }
+
         string directory = ResolveSaveDirectory(subdirectory);
         Directory.CreateDirectory(directory);
 
@@ -41,7 +49,12 @@ public static class QuicksaveService {
         var data = QuicksaveSerializer.Read(fullPath);
         int targetSlot = CelesteSaveSlotResolver.ResolveSlot(data.SaveUid);
         ActivateSaveSlot(targetSlot);
-        Session session = data.Start.BuildSession();
+
+        Session session = BuildSessionForLoad(data);
+        SessionSnapshot.RestoreModSessions(data.ModSessions);
+        if (SaveData.Instance != null) {
+            SaveData.Instance.CurrentSession = session;
+        }
 
         string tempDir = Path.Combine(QuicksavesRoot, ".temp");
         Directory.CreateDirectory(tempDir);
@@ -55,6 +68,14 @@ public static class QuicksaveService {
             nameof(QuicksaveService),
             $"Loading quicksave playback from {fullPath} in save slot {targetSlot}"
         );
+    }
+
+    private static Session BuildSessionForLoad(QuicksaveData data) {
+        if (!string.IsNullOrWhiteSpace(data.SessionXml)) {
+            return SessionSnapshot.RestoreSession(data.SessionXml, data.Start);
+        }
+
+        return data.Start.BuildSession();
     }
 
     public static void MoveQuicksave(string sourcePath, string targetDirectory) {

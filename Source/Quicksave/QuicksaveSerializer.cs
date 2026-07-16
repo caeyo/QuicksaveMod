@@ -41,6 +41,10 @@ public static class QuicksaveSerializer {
             throw new InvalidDataException($"Quicksave missing start area SID: {path}");
         }
 
+        if (data.Version >= 3 && string.IsNullOrWhiteSpace(data.SessionXml)) {
+            throw new InvalidDataException($"Quicksave missing session snapshot: {path}");
+        }
+
         return data;
     }
 }
