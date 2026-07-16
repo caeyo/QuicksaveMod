@@ -34,6 +34,21 @@ public sealed class QuicksaveTracker {
         buffer.Clear();
     }
 
+    /// <summary>
+    /// After loading a quicksave, keep its start point and inputs as the base of the
+    /// current tracking session so later saves include the full path.
+    /// </summary>
+    public void SeedFrom(QuicksaveData data) {
+        startPoint = new QuicksaveStartPoint {
+            AreaSid = data.Start.AreaSid,
+            SideMode = data.Start.SideMode,
+            Level = data.Start.Level,
+            RespawnX = data.Start.RespawnX,
+            RespawnY = data.Start.RespawnY,
+        };
+        buffer.Seed(data.Inputs);
+    }
+
     public void RecordFrame(string line) {
         if (!IsTracking) {
             return;

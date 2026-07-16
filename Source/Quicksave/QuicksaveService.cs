@@ -50,7 +50,7 @@ public static class QuicksaveService {
         WriteTempTasFile(tempTasPath, data);
 
         Engine.Scene = new LevelLoader(session);
-        QuicksavePlayback.Start(tempTasPath);
+        QuicksavePlayback.Start(tempTasPath, data);
         Logger.Info(
             nameof(QuicksaveService),
             $"Loading quicksave playback from {fullPath} in save slot {targetSlot}"

@@ -1,5 +1,6 @@
 using Celeste.Mod.QuicksaveMod.Interop;
 using Celeste.Mod.QuicksaveMod.Module;
+using Celeste.Mod.QuicksaveMod.Quicksave;
 using Monocle;
 using TAS;
 
@@ -11,6 +12,7 @@ public static class QuicksavePlayback {
     private static string? _previousFilePath;
     private static bool _filePathOverridden;
     private static string? _tempTasPath;
+    private static QuicksaveData? _loadedQuicksave;
 
     public static void Apply() {
         On.Monocle.Engine.Update += WatchForEnd;
@@ -22,12 +24,14 @@ public static class QuicksavePlayback {
         DeleteTempTasFile();
         _watching = false;
         _playbackStarted = false;
+        _loadedQuicksave = null;
     }
 
-    public static void Start(string tasFilePath) {
+    public static void Start(string tasFilePath, QuicksaveData loadedQuicksave) {
         string fullPath = Path.GetFullPath(tasFilePath);
         string? orphanedTemp = _tempTasPath;
         _tempTasPath = fullPath;
+        _loadedQuicksave = loadedQuicksave.Clone();
         _watching = true;
         _playbackStarted = false;
 
@@ -92,6 +96,7 @@ public static class QuicksavePlayback {
 
         RestorePreviousFilePath();
         DeleteTempTasFile();
+        SeedTrackerFromLoadedQuicksave();
 
         if (ShouldSavestateOnLoad() && SpeedrunToolBridge.TrySaveState()) {
             Logger.Info(nameof(QuicksavePlayback), "Quicksave playback finished; created SpeedrunTool savestate.");
@@ -100,6 +105,21 @@ public static class QuicksavePlayback {
 
         QuicksaveLoadFreeze.Begin();
         Logger.Info(nameof(QuicksavePlayback), "Quicksave playback finished; CelesteTAS stopped.");
+    }
+
+    private static void SeedTrackerFromLoadedQuicksave() {
+        QuicksaveData? data = _loadedQuicksave;
+        _loadedQuicksave = null;
+        if (data == null) {
+            return;
+        }
+
+        QuicksaveTracker.Instance.SeedFrom(data);
+        Recording.GameplayInputRecorder.ResetMapper();
+        Logger.Info(
+            nameof(QuicksavePlayback),
+            $"Seeded input tracker with {data.Inputs.Count} lines from loaded quicksave."
+        );
     }
 
     private static bool ShouldSavestateOnLoad() {

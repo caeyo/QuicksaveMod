@@ -21,7 +21,27 @@ public class InputLineBuffer {
         pendingLine = null;
     }
 
+    public void Seed(IReadOnlyList<string> seededLines) {
+        Clear();
+        if (seededLines.Count == 0) {
+            return;
+        }
+
+        lines.AddRange(seededLines);
+        // Sample() always emits a 1-frame line; normalize so RLE can continue holding.
+        pendingLine = ToSingleFrameLine(lines[^1]);
+    }
+
     public List<string> Snapshot() => [..lines];
+
+    private static string ToSingleFrameLine(string line) {
+        int comma = line.IndexOf(',');
+        if (comma <= 0) {
+            return "1";
+        }
+
+        return "1" + line[comma..];
+    }
 
     private static string IncrementFrameCount(string line) {
         int comma = line.IndexOf(',');
