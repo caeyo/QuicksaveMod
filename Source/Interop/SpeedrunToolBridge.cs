@@ -16,9 +16,40 @@ public static class SpeedrunToolBridge {
 
     private static bool? _loaded;
     private static MethodInfo? _saveState;
+    private static PropertyInfo? _stateManagerInstance;
+    private static PropertyInfo? _stateManagerState;
     private static bool _resolveAttempted;
 
     public static bool IsLoaded => _loaded ??= Everest.Loader.DependencyLoaded(Meta);
+
+    /// <summary>
+    /// True while SpeedrunTool is saving, loading, or frozen waiting for input.
+    /// </summary>
+    public static bool IsGameFrozen {
+        get {
+            if (!IsLoaded) {
+                return false;
+            }
+
+            EnsureResolved();
+            if (_stateManagerInstance == null || _stateManagerState == null) {
+                return false;
+            }
+
+            try {
+                object? manager = _stateManagerInstance.GetValue(null);
+                if (manager == null) {
+                    return false;
+                }
+
+                object? state = _stateManagerState.GetValue(manager);
+                // State.None == 0; Saving / Loading / Waiting are non-zero.
+                return state != null && Convert.ToInt32(state) != 0;
+            } catch {
+                return false;
+            }
+        }
+    }
 
     /// <summary>
     /// Attempts a SpeedrunTool savestate on the current slot.
@@ -58,14 +89,15 @@ public static class SpeedrunToolBridge {
                 continue;
             }
 
-            Type? type = module.GetType().Assembly
-                .GetType("Celeste.Mod.SpeedrunTool.SaveLoad.SaveSlotsManager");
-            if (type == null) {
+            Assembly assembly = module.GetType().Assembly;
+
+            Type? saveSlotsType = assembly.GetType("Celeste.Mod.SpeedrunTool.SaveLoad.SaveSlotsManager");
+            if (saveSlotsType == null) {
                 Logger.Warn(nameof(SpeedrunToolBridge), "Could not find SaveSlotsManager type.");
                 return;
             }
 
-            _saveState = type.GetMethod(
+            _saveState = saveSlotsType.GetMethod(
                 "SaveState",
                 BindingFlags.Public | BindingFlags.Static,
                 binder: null,
@@ -75,6 +107,25 @@ public static class SpeedrunToolBridge {
 
             if (_saveState == null) {
                 Logger.Warn(nameof(SpeedrunToolBridge), "Could not find SaveSlotsManager.SaveState.");
+            }
+
+            Type? stateManagerType = assembly.GetType("Celeste.Mod.SpeedrunTool.SaveLoad.StateManager");
+            if (stateManagerType == null) {
+                Logger.Warn(nameof(SpeedrunToolBridge), "Could not find StateManager type.");
+                return;
+            }
+
+            _stateManagerInstance = stateManagerType.GetProperty(
+                "Instance",
+                BindingFlags.Public | BindingFlags.Static
+            );
+            _stateManagerState = stateManagerType.GetProperty(
+                "State",
+                BindingFlags.Public | BindingFlags.Instance
+            );
+
+            if (_stateManagerInstance == null || _stateManagerState == null) {
+                Logger.Warn(nameof(SpeedrunToolBridge), "Could not find StateManager.Instance/State.");
             }
 
             return;

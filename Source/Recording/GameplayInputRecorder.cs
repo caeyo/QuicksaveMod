@@ -36,6 +36,7 @@ public static class GameplayInputRecorder {
         QuicksaveTracker.Instance.IsTracking
         && !IsSuspended
         && !QuicksaveLoadFreeze.IsWaiting
+        && !SpeedrunToolBridge.IsGameFrozen
         && CelesteTasImports.IsTasActive?.Invoke() != true
         && level.Tracker.GetEntity<Player>() is not { Dead: true };
 
