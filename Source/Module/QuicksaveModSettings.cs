@@ -24,4 +24,20 @@ public class QuicksaveModSettings : EverestModuleSettings {
 
     [SettingName("modoptions_quicksavemod_playbackspeed")]
     public PlaybackSpeed PlaybackSpeed { get; set; } = PlaybackSpeed.Max;
+
+    [SettingName("modoptions_quicksavemod_savestateonquicksaveload")]
+    public bool SavestateOnQuicksaveLoad { get; set; } = true;
+
+    public void CreateSavestateOnQuicksaveLoadEntry(TextMenu menu, bool inGame) {
+        if (!Interop.SpeedrunToolBridge.IsLoaded) {
+            return;
+        }
+
+        menu.Add(
+            new TextMenu.OnOff(
+                Dialog.Clean("modoptions_quicksavemod_savestateonquicksaveload"),
+                SavestateOnQuicksaveLoad
+            ).Change(value => SavestateOnQuicksaveLoad = value)
+        );
+    }
 }

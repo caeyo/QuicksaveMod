@@ -1,3 +1,5 @@
+using Celeste.Mod.QuicksaveMod.Interop;
+using Celeste.Mod.QuicksaveMod.Module;
 using Monocle;
 using TAS;
 
@@ -65,7 +67,7 @@ public static class QuicksavePlayback {
 
             // *** breakpoint: CelesteTAS pauses with Break set.
             if (Manager.CurrState == Manager.State.Paused && Manager.Controller.Break) {
-                FinishPlaybackAndFreeze();
+                FinishPlayback();
             }
 
             return;
@@ -77,10 +79,10 @@ public static class QuicksavePlayback {
         }
 
         // Unexpected stop (EOF without pause, abort, etc.).
-        FinishPlaybackAndFreeze();
+        FinishPlayback();
     }
 
-    private static void FinishPlaybackAndFreeze() {
+    private static void FinishPlayback() {
         _watching = false;
         _playbackStarted = false;
 
@@ -90,8 +92,19 @@ public static class QuicksavePlayback {
 
         RestorePreviousFilePath();
         DeleteTempTasFile();
+
+        if (ShouldSavestateOnLoad() && SpeedrunToolBridge.TrySaveState()) {
+            Logger.Info(nameof(QuicksavePlayback), "Quicksave playback finished; created SpeedrunTool savestate.");
+            return;
+        }
+
         QuicksaveLoadFreeze.Begin();
         Logger.Info(nameof(QuicksavePlayback), "Quicksave playback finished; CelesteTAS stopped.");
+    }
+
+    private static bool ShouldSavestateOnLoad() {
+        return QuicksaveModModule.Settings.SavestateOnQuicksaveLoad
+            && SpeedrunToolBridge.IsLoaded;
     }
 
     private static void RestorePreviousFilePath() {
