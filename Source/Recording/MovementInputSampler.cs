@@ -10,7 +10,7 @@ internal static class MovementInputSampler {
         }
 
         int state = player.StateMachine.State;
-        if (state == Player.StSwim || state == Player.StStarFly) {
+        if (state is Player.StSwim or Player.StStarFly) {
             return true;
         }
 
@@ -83,7 +83,7 @@ internal static class MovementInputSampler {
             return Vector2.Zero;
         }
 
-        // MoveY is screen-space: negative is up, positive is down.
+        // MoveY is screen-space: negative is up, positive is down
         return new Vector2(moveX, -moveY);
     }
 }

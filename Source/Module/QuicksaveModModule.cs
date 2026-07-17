@@ -10,7 +10,9 @@ using MonoMod.ModInterop;
 namespace Celeste.Mod.QuicksaveMod.Module;
 
 public class QuicksaveModModule : EverestModule {
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     public static QuicksaveModModule Instance { get; private set; }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
     public override Type SettingsType => typeof(QuicksaveModSettings);
     public static QuicksaveModSettings Settings => (QuicksaveModSettings) Instance._Settings;

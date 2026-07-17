@@ -1,6 +1,5 @@
 using Celeste.Mod.QuicksaveMod.Playback;
 using Celeste.Mod.QuicksaveMod.Recording;
-using Monocle;
 
 namespace Celeste.Mod.QuicksaveMod.Hooks;
 

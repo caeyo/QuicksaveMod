@@ -1,5 +1,6 @@
 using System.Text;
 using System.Xml.Serialization;
+using Microsoft.Xna.Framework;
 using Monocle;
 
 namespace Celeste.Mod.QuicksaveMod.Quicksave;
@@ -16,7 +17,7 @@ internal static class SessionSnapshot {
 
     public static Session RestoreSession(string sessionXml, QuicksaveStartPoint start) {
         byte[] bytes = Encoding.UTF8.GetBytes(sessionXml);
-        using var stream = new MemoryStream(bytes);
+        using MemoryStream stream = new(bytes);
 
         Session session;
         try {
@@ -25,7 +26,7 @@ internal static class SessionSnapshot {
             throw new InvalidDataException("Failed to deserialize quicksave session snapshot.", e);
         }
 
-        // Inputs were recorded from tracker start, not the player's current room.
+        // Inputs were recorded from tracker start, not the player's current room
         ApplyStartPoint(session, start);
         session.JustStarted = false;
         session.InArea = true;
@@ -33,7 +34,7 @@ internal static class SessionSnapshot {
     }
 
     public static Dictionary<string, string> CaptureModSessions() {
-        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, string> result = new(StringComparer.OrdinalIgnoreCase);
         int slot = RequireFileSlot();
 
         foreach (EverestModule module in Everest.Modules) {
@@ -47,7 +48,7 @@ internal static class SessionSnapshot {
                     continue;
                 }
 
-                // YAML ModSessions are UTF-8 text; binary sessions stay base64-prefixed.
+                // YAML ModSessions are UTF-8 text; binary sessions stay base64-prefixed
                 result[module.Metadata.Name] = module._Session is EverestModuleBinarySession
                     ? BinaryModSessionPrefix + Convert.ToBase64String(data)
                     : Encoding.UTF8.GetString(data);
@@ -89,7 +90,7 @@ internal static class SessionSnapshot {
     }
 
     private static Dictionary<string, EverestModule> BuildModuleLookup() {
-        var lookup = new Dictionary<string, EverestModule>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, EverestModule> lookup = new(StringComparer.OrdinalIgnoreCase);
         foreach (EverestModule module in Everest.Modules) {
             lookup.TryAdd(module.Metadata.Name, module);
         }
@@ -115,7 +116,7 @@ internal static class SessionSnapshot {
 
     private static void ApplyStartPoint(Session session, QuicksaveStartPoint start) {
         if (start.RespawnX is { } x && start.RespawnY is { } y) {
-            var respawn = new Microsoft.Xna.Framework.Vector2(x, y);
+            Vector2 respawn = new(x, y);
             LevelData? levelData = session.MapData.GetAt(respawn);
             if (levelData != null) {
                 session.Level = levelData.Name;

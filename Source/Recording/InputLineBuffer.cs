@@ -8,7 +8,6 @@ internal class InputLineBuffer {
     private float? pendingFeatherAngle;
     private float? pendingFeatherMagnitude;
     private int pendingFrames;
-    // Set after Seed; otherwise computed from structural pending at flush.
     private string? pendingSuffix;
     private bool hasPending;
 
@@ -61,9 +60,9 @@ internal class InputLineBuffer {
     }
 
     public List<string> Snapshot() {
-        var result = new List<string>(lines.Count + (hasPending ? 1 : 0));
-        for (int i = 0; i < lines.Count; i++) {
-            result.Add(Materialize(lines[i]));
+        List<string> result = new(lines.Count + (hasPending ? 1 : 0));
+        foreach (CommittedEntry t in lines) {
+            result.Add(Materialize(t));
         }
 
         if (hasPending) {

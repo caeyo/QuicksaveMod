@@ -13,7 +13,7 @@ internal static class QuicksavePath {
     public static string TempDirectory =>
         Path.Combine(QuicksavesRoot, QuicksaveConstants.TempFolderName);
 
-    public static string TempDirectoryFullPath =>
+    private static string TempDirectoryFullPath =>
         Path.GetFullPath(TempDirectory)
             .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
@@ -29,8 +29,7 @@ internal static class QuicksavePath {
         } else if (!Directory.Exists(fullPath)) {
             return Path.HasExtension(fullPath)
                 && fullPath.EndsWith(QuicksaveConstants.Extension, StringComparison.OrdinalIgnoreCase)
-                    ? TryGetRelativeSubdirectory(Path.GetDirectoryName(fullPath)!, out subdirectory)
-                    : false;
+                && TryGetRelativeSubdirectory(Path.GetDirectoryName(fullPath)!, out subdirectory);
         }
 
         relativePath = NormalizeRelativePath(relativePath);
@@ -108,7 +107,7 @@ internal static class QuicksavePath {
             && fileName.EndsWith(".tas", StringComparison.OrdinalIgnoreCase);
     }
 
-    public static string NormalizeRelativePath(string path) =>
+    private static string NormalizeRelativePath(string path) =>
         path.Replace('\\', Path.DirectorySeparatorChar)
             .Replace('/', Path.DirectorySeparatorChar)
             .Trim(Path.DirectorySeparatorChar);

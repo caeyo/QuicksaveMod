@@ -17,7 +17,6 @@ internal sealed class BrowserHandler : ImGuiHandler {
     private const float WindowHeight = 420f;
 
     private readonly BrowserState state = new();
-    private readonly BrowserCommands commands;
     private readonly BrowserView view;
     private readonly BrowserModals modals;
 
@@ -28,7 +27,7 @@ internal sealed class BrowserHandler : ImGuiHandler {
         Instance = this;
         Visible = false;
 
-        commands = new BrowserCommands(state, Close);
+        BrowserCommands commands = new(state, Close);
         view = new BrowserView(state, commands);
         modals = new BrowserModals(state, commands);
     }
@@ -81,7 +80,7 @@ internal sealed class BrowserHandler : ImGuiHandler {
         view.FlushPendingActivate();
     }
 
-    public void Open() {
+    private void Open() {
         BrowserNavigation.EnsureRootExists();
 
         state.NavigateTo(BrowserNavigation.RootPath);
@@ -93,7 +92,7 @@ internal sealed class BrowserHandler : ImGuiHandler {
 
         appliedFreeze = false;
         if (Engine.Scene is Level level) {
-            if (!level.Paused && !level.Frozen) {
+            if (level is { Paused: false, Frozen: false }) {
                 level.Frozen = true;
                 appliedFreeze = true;
             }

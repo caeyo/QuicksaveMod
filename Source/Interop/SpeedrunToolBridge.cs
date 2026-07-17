@@ -4,10 +4,6 @@ using Celeste.Mod.QuicksaveMod.Quicksave;
 
 namespace Celeste.Mod.QuicksaveMod.Interop;
 
-// Optional SpeedrunTool bridge via reflection.
-// Normal (non-TAS) SaveState is not in SpeedrunTool's ModInterop exports —
-// only SpeedrunTool.TasAction exists for TAS slots — so we call
-// SaveSlotsManager.SaveState directly when the mod is loaded.
 public static class SpeedrunToolBridge {
     private static readonly EverestModuleMetadata Meta = new() {
         Name = "SpeedrunTool",
@@ -24,7 +20,7 @@ public static class SpeedrunToolBridge {
 
     public static bool IsLoaded => loaded ??= Everest.Loader.DependencyLoaded(Meta);
 
-    // True while SpeedrunTool is saving, loading, or frozen waiting for input.
+    // True while SpeedrunTool is saving, loading, or frozen waiting for input
     public static bool IsGameFrozen {
         get {
             if (!IsLoaded) {
@@ -42,7 +38,7 @@ public static class SpeedrunToolBridge {
                     return false;
                 }
 
-                // State.None == 0; Saving / Loading / Waiting are non-zero.
+                // State.None == 0; Saving / Loading / Waiting are non-zero
                 return getStateAsInt(manager) != 0;
             } catch {
                 return false;
@@ -50,7 +46,7 @@ public static class SpeedrunToolBridge {
         }
     }
 
-    // On success, SpeedrunTool applies its own post-save freeze.
+    // On success, SpeedrunTool applies its own post-save freeze
     public static bool TrySaveState() {
         if (!IsLoaded) {
             return false;
@@ -63,7 +59,7 @@ public static class SpeedrunToolBridge {
 
         try {
             SaveStateArgs[0] = null;
-            return (bool)saveState.Invoke(null, SaveStateArgs)!;
+            return (bool) saveState.Invoke(null, SaveStateArgs)!;
         } catch (Exception e) {
             Logger.Warn(
                 QuicksaveConstants.LogTag,

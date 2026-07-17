@@ -5,10 +5,10 @@ namespace Celeste.Mod.QuicksaveMod.Recording;
 
 internal static class TasLineFormatter {
     private const int MaxFramesDigits = 4;
-    // Shared across calls; safe because Celeste's update loop is single-threaded.
+    // Shared across calls; safe because Celeste's update loop is single-threaded
     private static readonly StringBuilder SharedBuilder = new(64);
 
-    // Everything after the frame count (e.g. ",L,J" or ",F,90,1"), or empty for a neutral frame.
+    // Everything after the frame count (e.g. ",L,J" or ",F,90,1"), or empty for a neutral frame
     internal static string FormatSuffix(
         IReadOnlyList<char> actions,
         float? featherAngle = null,
@@ -26,7 +26,7 @@ internal static class TasLineFormatter {
         return SharedBuilder.ToString();
     }
 
-    // Left-padded (4-digit) TAS line matching historic FormatFileLine output.
+    // Left-padded (4-digit) TAS line matching historic FormatFileLine output
     internal static void WriteFileLine(TextWriter writer, string line) {
         ReadOnlySpan<char> span = line.AsSpan().TrimStart();
         int comma = span.IndexOf(',');

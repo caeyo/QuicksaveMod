@@ -3,19 +3,14 @@ using ImGuiNET;
 
 namespace Celeste.Mod.QuicksaveMod.UI;
 
-internal sealed class BrowserView {
+internal sealed class BrowserView(
+    BrowserState state,
+    BrowserCommands commands
+) {
     private const string DragPayloadType = "QS_FILE";
-
-    private readonly BrowserState state;
-    private readonly BrowserCommands commands;
 
     private string? dragSourcePath;
     private BrowserEntry? pendingActivate;
-
-    public BrowserView(BrowserState state, BrowserCommands commands) {
-        this.state = state;
-        this.commands = commands;
-    }
 
     private static float InlineEditAreaHeight =>
         ImGui.GetFrameHeightWithSpacing() + ImGui.GetStyle().ItemSpacing.Y;
@@ -59,7 +54,7 @@ internal sealed class BrowserView {
                 ImGui.SameLine();
             }
 
-            var crumb = state.Breadcrumbs[i];
+            BrowserBreadcrumb crumb = state.Breadcrumbs[i];
             if (ImGui.SmallButton(state.BreadcrumbButtonIds[i])) {
                 state.NavigateTo(crumb.AbsolutePath);
             }
@@ -77,7 +72,7 @@ internal sealed class BrowserView {
             }
 
             for (int i = 0; i < state.Entries.Count; i++) {
-                var entry = state.Entries[i];
+                BrowserEntry entry = state.Entries[i];
                 bool selected = i == state.SelectedIndex;
 
                 if (ImGui.Selectable(state.EntrySelectableIds[i], selected, ImGuiSelectableFlags.AllowDoubleClick)) {

@@ -3,15 +3,10 @@ using Celeste.Mod.QuicksaveMod.Quicksave.Storage;
 
 namespace Celeste.Mod.QuicksaveMod.UI;
 
-internal sealed class BrowserCommands {
-    private readonly BrowserState state;
-    private readonly Action closeBrowser;
-
-    public BrowserCommands(BrowserState state, Action closeBrowser) {
-        this.state = state;
-        this.closeBrowser = closeBrowser;
-    }
-
+internal sealed class BrowserCommands(
+    BrowserState state,
+    Action closeBrowser
+) {
     public void TryMoveFile(string sourcePath, string targetDirectory) {
         try {
             string sourceDirectory = Path.GetDirectoryName(Path.GetFullPath(sourcePath))!;
@@ -42,7 +37,7 @@ internal sealed class BrowserCommands {
         LoadEntry(entry);
     }
 
-    public void LoadEntry(BrowserEntry entry) {
+    private void LoadEntry(BrowserEntry entry) {
         closeBrowser();
         QuicksaveService.LoadQuicksave(entry.FullPath);
     }

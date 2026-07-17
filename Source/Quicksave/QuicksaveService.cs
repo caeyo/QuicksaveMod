@@ -19,7 +19,7 @@ internal static class QuicksaveService {
     public static void ResumeTracking() => GameplayInputRecorder.Resume();
 
     public static void SaveQuicksave(string? fileName = null, string? subdirectory = null) {
-        var data = QuicksaveTracker.Current
+        QuicksaveData data = QuicksaveTracker.Current
             ?? throw new InvalidOperationException("No quicksave tracking session is active.");
 
         if (Engine.Scene is not Level) {
@@ -47,7 +47,7 @@ internal static class QuicksaveService {
 
     public static void LoadQuicksave(string filePath) {
         string fullPath = QuicksavePath.ResolveQuicksaveFilePath(filePath, mustExist: true);
-        var data = QuicksaveSerializer.Read(fullPath);
+        QuicksaveData data = QuicksaveSerializer.Read(fullPath);
         int targetSlot = SaveSlotResolver.ResolveSlot(data.SaveUid);
         SaveSlotResolver.ActivateSaveSlot(targetSlot);
 
@@ -83,7 +83,7 @@ internal static class QuicksaveService {
     }
 
     private static void WriteTempTasFile(string path, QuicksaveData data) {
-        using var writer = new StreamWriter(path, false, TasFileEncoding);
+        using StreamWriter writer = new(path, false, TasFileEncoding);
 
         foreach (string line in data.Inputs) {
             TasLineFormatter.WriteFileLine(writer, line);
@@ -95,6 +95,6 @@ internal static class QuicksaveService {
 
     private static string GetPlaybackBreakpointLine() {
         PlaybackSpeed speed = QuicksaveModModule.Settings.PlaybackSpeed;
-        return speed == PlaybackSpeed.Max ? "***" : $"***{(int)speed}";
+        return speed == PlaybackSpeed.Max ? "***" : $"***{(int) speed}";
     }
 }

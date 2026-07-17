@@ -4,13 +4,13 @@ using Microsoft.Xna.Framework;
 namespace Celeste.Mod.QuicksaveMod.Quicksave;
 
 internal class QuicksaveStartPoint {
-    public string AreaSid { get; set; } = "";
+    public string AreaSid { get; private init; } = "";
 
     [JsonPropertyName("areaMode")]
-    public string SideMode { get; set; } = "Normal";
-    public string? Level { get; set; }
-    public int? RespawnX { get; set; }
-    public int? RespawnY { get; set; }
+    private string SideMode { get; init; } = "Normal";
+    public string? Level { get; private init; }
+    public int? RespawnX { get; private set; }
+    public int? RespawnY { get; private set; }
 
     public QuicksaveStartPoint Clone() => new() {
         AreaSid = AreaSid,
@@ -21,7 +21,7 @@ internal class QuicksaveStartPoint {
     };
 
     public static QuicksaveStartPoint FromSession(Session session) {
-        var point = new QuicksaveStartPoint {
+        QuicksaveStartPoint point = new() {
             AreaSid = session.Area.SID,
             SideMode = session.Area.Mode switch {
                 AreaMode.Normal => "Normal",
@@ -48,15 +48,15 @@ internal class QuicksaveStartPoint {
             "CSide" => AreaMode.CSide,
             _ => AreaMode.Normal,
         };
-        var areaKey = new AreaKey(area.ID, mode);
+        AreaKey areaKey = new(area.ID, mode);
 
         if (area.Mode[(int) mode] == null) {
             throw new InvalidDataException($"Quicksave area {AreaSid} has no {mode} mode.");
         }
 
-        var session = new Session(areaKey);
+        Session session = new(areaKey);
         if (RespawnX is { } x && RespawnY is { } y) {
-            var respawn = new Vector2(x, y);
+            Vector2 respawn = new(x, y);
             LevelData levelData = session.MapData.GetAt(respawn)
                 ?? throw new InvalidDataException(
                     $"Quicksave position {x}, {y} is not inside a room in {AreaSid}."

@@ -63,7 +63,7 @@ internal static class SaveSlotResolver {
     }
 
     private static IEnumerable<int> EnumerateSlotsWithModSave() {
-        var slots = new SortedSet<int> { DebugSlot };
+        SortedSet<int> slots = [DebugSlot];
         string saveDirectory = UserIO.GetSaveFilePath();
         string modName = QuicksaveModModule.Instance.Metadata.Name;
         string suffix = $"-modsave-{modName}.celeste";
@@ -97,10 +97,10 @@ internal static class SaveSlotResolver {
 
         try {
             // Peek a disposable copy — DeserializeSaveData would replace the live module save data.
-            var data = YamlHelper.Deserializer.Deserialize<QuicksaveModSaveData>(
+            QuicksaveModSaveData data = YamlHelper.Deserializer.Deserialize<QuicksaveModSaveData>(
                 Encoding.UTF8.GetString(bytes)
             );
-            return string.IsNullOrWhiteSpace(data?.SaveUid) ? null : data.SaveUid;
+            return string.IsNullOrWhiteSpace(data.SaveUid) ? null : data.SaveUid;
         } catch (Exception e) {
             Logger.Warn(
                 QuicksaveConstants.LogTag,

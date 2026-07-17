@@ -1,5 +1,4 @@
 using Celeste.Mod.QuicksaveMod.Playback;
-using Monocle;
 
 namespace Celeste.Mod.QuicksaveMod.Hooks;
 

@@ -6,22 +6,22 @@ internal class QuicksaveData {
     public int Version { get; set; } = CurrentVersion;
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
     public string? SaveUid { get; set; }
-    public QuicksaveStartPoint Start { get; set; } = new();
-    public List<string> Inputs { get; set; } = [];
+    public QuicksaveStartPoint Start { get; init; } = new();
+    public List<string> Inputs { get; init; } = [];
 
     // Session XML at input-buffer start (last death / load), not at save time.
-    public string? SessionXml { get; set; }
+    public string? SessionXml { get; init; }
 
     // Everest ModSession payloads at buffer start (YAML text, or base64: for binary).
-    public Dictionary<string, string>? ModSessions { get; set; }
+    public Dictionary<string, string>? ModSessions { get; init; }
 
     internal static bool IsValidSaveUid(string? value) {
         if (value is not { Length: 32 }) {
             return false;
         }
 
-        for (int i = 0; i < value.Length; i++) {
-            if (!Uri.IsHexDigit(value[i])) {
+        foreach (char t in value) {
+            if (!Uri.IsHexDigit(t)) {
                 return false;
             }
         }

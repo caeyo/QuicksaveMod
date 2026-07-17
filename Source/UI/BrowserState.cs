@@ -16,11 +16,10 @@ internal readonly record struct PendingInlineEditRequest(
 );
 
 internal sealed class BrowserState {
-    public string CurrentDirectory { get; set; } = BrowserNavigation.RootPath;
+    public string CurrentDirectory { get; private set; } = BrowserNavigation.RootPath;
 
     public List<BrowserEntry> Entries { get; } = [];
 
-    // Rebuilt alongside Entries by RefreshEntries.
     public List<string> EntrySelectableIds { get; } = [];
     public List<string> EntryPopupIds { get; } = [];
 
@@ -30,27 +29,27 @@ internal sealed class BrowserState {
 
     public int SelectedIndex { get; set; } = -1;
 
-    public InlineEditMode EditMode { get; set; }
+    public InlineEditMode EditMode { get; private set; }
 
     public string EditBuffer = "";
 
-    public string? EditTargetPath { get; set; }
+    public string? EditTargetPath { get; private set; }
 
-    public string? PendingDeletePath { get; set; }
+    public string? PendingDeletePath { get; private set; }
 
-    public string? PendingDeleteLabel { get; set; }
+    public string? PendingDeleteLabel { get; private set; }
 
-    public bool ShowDeleteModal { get; set; }
+    public bool ShowDeleteModal { get; private set; }
 
-    public string? ConflictMessage { get; set; }
+    public string? ConflictMessage { get; private set; }
 
-    public bool ShowConflictModal { get; set; }
+    public bool ShowConflictModal { get; private set; }
 
     public bool FocusWindow { get; set; }
 
     public bool FocusEditField { get; set; }
 
-    public PendingInlineEditRequest? PendingInlineEdit { get; set; }
+    private PendingInlineEditRequest? PendingInlineEdit { get; set; }
 
     public void RefreshEntries() {
         Entries.Clear();
@@ -98,7 +97,7 @@ internal sealed class BrowserState {
         SelectedIndex = NormalizeSelection(SelectedIndex + delta);
     }
 
-    public void ClampSelection() {
+    private void ClampSelection() {
         SelectedIndex = NormalizeSelection(SelectedIndex);
     }
 
@@ -118,7 +117,7 @@ internal sealed class BrowserState {
         BeginInlineEdit(pending.Mode, pending.DefaultText, pending.TargetPath);
     }
 
-    public void BeginInlineEdit(InlineEditMode mode, string defaultText, string? targetPath = null) {
+    private void BeginInlineEdit(InlineEditMode mode, string defaultText, string? targetPath = null) {
         EditMode = mode;
         EditBuffer = defaultText;
         EditTargetPath = targetPath;

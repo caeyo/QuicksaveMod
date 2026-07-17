@@ -2,7 +2,6 @@ using Celeste.Mod.QuicksaveMod.Interop;
 using Celeste.Mod.QuicksaveMod.Module;
 using Celeste.Mod.QuicksaveMod.Quicksave;
 using Celeste.Mod.QuicksaveMod.Quicksave.Storage;
-using Monocle;
 using TAS;
 
 namespace Celeste.Mod.QuicksaveMod.Playback;
@@ -15,7 +14,7 @@ internal static class QuicksavePlayback {
     private static string? tempTasPath;
     private static QuicksaveData? loadedQuicksave;
 
-    // Wired by Module so Playback does not call into Tracker/Recorder directly.
+    // Wired by Module so Playback does not call into Tracker/Recorder directly
     public static Action<QuicksaveData>? OnSeedNeeded { get; set; }
 
     public static void Reset() {
@@ -34,7 +33,7 @@ internal static class QuicksavePlayback {
         watching = true;
         playbackStarted = false;
 
-        // A prior post-playback freeze must not block Level.Update / player intro on the new load.
+        // A prior post-playback freeze must not block Level.Update / player intro on the new load
         QuicksaveLoadFreeze.Cancel();
 
         Manager.AddMainThreadAction(() => {
@@ -47,7 +46,7 @@ internal static class QuicksavePlayback {
                 filePathOverridden = true;
             }
 
-            // RefreshInputs clears parsed inputs when NextState is Disabled.
+            // RefreshInputs clears parsed inputs when NextState is Disabled
             Manager.NextState = Manager.State.Running;
             Manager.Controller.FilePath = fullPath;
 
@@ -66,7 +65,7 @@ internal static class QuicksavePlayback {
         if (Manager.Running) {
             playbackStarted = true;
 
-            // *** breakpoint: CelesteTAS pauses with Break set.
+            // *** breakpoint: CelesteTAS pauses with Break set
             if (Manager.CurrState == Manager.State.Paused && Manager.Controller.Break) {
                 Finish();
             }
@@ -74,12 +73,12 @@ internal static class QuicksavePlayback {
             return;
         }
 
-        // EnableRun happens on a later Manager.Update after we set NextState.
+        // EnableRun happens on a later Manager.Update after we set NextState
         if (!playbackStarted) {
             return;
         }
 
-        // Unexpected stop (EOF without pause, abort, etc.).
+        // Unexpected stop (EOF without pause, abort, etc.)
         Finish();
     }
 
@@ -136,7 +135,7 @@ internal static class QuicksavePlayback {
             return;
         }
 
-        // Avoid re-triggering DisableRunLater; we already stopped playback.
+        // Avoid re-triggering DisableRunLater; we already stopped playback
         if (Manager.Running) {
             Manager.DisableRun();
         }

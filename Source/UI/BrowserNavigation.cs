@@ -29,7 +29,7 @@ internal static class BrowserNavigation {
     public static List<BrowserEntry> ListDirectory(string absolutePath) {
         absolutePath = Path.GetFullPath(absolutePath);
 
-        var entries = new List<BrowserEntry>();
+        List<BrowserEntry> entries = new();
 
         foreach (string directory in Directory.GetDirectories(absolutePath)) {
             string name = Path.GetFileName(directory);
@@ -59,9 +59,9 @@ internal static class BrowserNavigation {
         currentPath = Path.GetFullPath(currentPath);
         string root = RootPath;
 
-        var breadcrumbs = new List<BrowserBreadcrumb> {
+        List<BrowserBreadcrumb> breadcrumbs = [
             new("Quicksaves", root),
-        };
+        ];
 
         if (currentPath.Equals(root, StringComparison.OrdinalIgnoreCase)) {
             return breadcrumbs;

@@ -22,7 +22,7 @@ internal static class QuicksaveSerializer {
             throw new FileNotFoundException($"Quicksave file not found: {path}");
         }
 
-        var data = JsonSerializer.Deserialize<QuicksaveData>(File.ReadAllText(path), Options)
+        QuicksaveData data = JsonSerializer.Deserialize<QuicksaveData>(File.ReadAllText(path), Options)
             ?? throw new InvalidDataException($"Failed to deserialize quicksave: {path}");
 
         if (data.Version is < 1 or > QuicksaveData.CurrentVersion) {

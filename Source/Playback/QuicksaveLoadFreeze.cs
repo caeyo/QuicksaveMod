@@ -49,8 +49,8 @@ internal static class QuicksaveLoadFreeze {
             return;
         }
 
-        for (int i = 0; i < UnfreezeInputs.Length; i++) {
-            if (IsActive(UnfreezeInputs[i])) {
+        foreach (VirtualInput t in UnfreezeInputs) {
+            if (IsActive(t)) {
                 Cancel();
                 Logger.Info(QuicksaveConstants.LogTag, "Resumed after input.");
                 return;

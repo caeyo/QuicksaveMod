@@ -2,21 +2,16 @@ using ImGuiNET;
 
 namespace Celeste.Mod.QuicksaveMod.UI;
 
-internal sealed class BrowserModals {
+internal sealed class BrowserModals(
+    BrowserState state,
+    BrowserCommands commands
+) {
     private const string DeleteModalId = "Quicksave Confirm Delete";
     private const string ConflictModalId = "Quicksave Conflict";
     private const float ModalButtonWidth = 120f;
 
-    private readonly BrowserState state;
-    private readonly BrowserCommands commands;
-
     private bool deletePopupOpened;
     private bool conflictPopupOpened;
-
-    public BrowserModals(BrowserState state, BrowserCommands commands) {
-        this.state = state;
-        this.commands = commands;
-    }
 
     public void Render() {
         RenderDeleteModal();

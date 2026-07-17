@@ -41,7 +41,7 @@ internal static class GameplayInputRecorder {
         && !IsSuspended
         && !SpeedrunToolBridge.IsGameFrozen
         && CelesteTasImports.IsTasActive?.Invoke() != true
-        && !(level.Paused && !level.PauseMainMenuOpen);
+        && level is not { Paused: true, PauseMainMenuOpen: false };
 
     public static bool IsSuspended { get; private set; }
 

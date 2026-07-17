@@ -3,7 +3,7 @@ using Monocle;
 namespace Celeste.Mod.QuicksaveMod.Recording;
 
 internal class TasActionsMapper {
-    private readonly List<char> actions = new(16);
+    private readonly List<char> currActions = new(16);
 
     private TasPressSlot jumpSlot = TasPressSlot.None;
     private TasPressSlot dashSlot = TasPressSlot.None;
@@ -22,21 +22,21 @@ internal class TasActionsMapper {
     }
 
     public void Sample(Level level, Player? player, InputLineBuffer buffer) {
-        actions.Clear();
+        currActions.Clear();
         float? featherAngle = null;
         float? featherMagnitude = null;
         bool menu = IsMenuContext(level);
 
-        AppendMovement(level, player, actions, ref featherAngle, ref featherMagnitude);
+        AppendMovement(level, player, currActions, ref featherAngle, ref featherMagnitude);
         if (!menu) {
-            AppendJump(actions);
-            AppendDash(actions);
-            AppendCrouchDash(actions);
-            AppendGrab(actions);
+            AppendJump(currActions);
+            AppendDash(currActions);
+            AppendCrouchDash(currActions);
+            AppendGrab(currActions);
         }
-        AppendMenuInputs(level, menu, actions);
+        AppendMenuInputs(level, menu, currActions);
 
-        buffer.PushFrame(actions, featherAngle, featherMagnitude);
+        buffer.PushFrame(currActions, featherAngle, featherMagnitude);
     }
 
     private static void AppendMovement(
