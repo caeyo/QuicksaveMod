@@ -20,6 +20,16 @@ public sealed class QuicksaveBrowserState {
 
     public List<QuicksaveBrowserEntry> Entries { get; } = [];
 
+    /// <summary>ImGui selectable ids rebuilt with <see cref="RefreshEntries"/>.</summary>
+    public List<string> EntrySelectableIds { get; } = [];
+
+    /// <summary>Context-menu popup ids rebuilt with <see cref="RefreshEntries"/>.</summary>
+    public List<string> EntryPopupIds { get; } = [];
+
+    public List<QuicksaveBrowserBreadcrumb> Breadcrumbs { get; } = [];
+
+    public List<string> BreadcrumbButtonIds { get; } = [];
+
     public int SelectedIndex { get; set; } = -1;
 
     public InlineEditMode EditMode { get; set; }
@@ -47,11 +57,13 @@ public sealed class QuicksaveBrowserState {
     public void RefreshEntries() {
         Entries.Clear();
         Entries.AddRange(QuicksaveBrowserNavigation.ListDirectory(CurrentDirectory));
+        RebuildEntryIds();
         ClampSelection();
     }
 
     public void NavigateTo(string absolutePath) {
         CurrentDirectory = Path.GetFullPath(absolutePath);
+        RebuildBreadcrumbs();
         RefreshEntries();
         SelectedIndex = Entries.Count > 0 ? 0 : -1;
         CancelInlineEdit();
@@ -63,6 +75,12 @@ public sealed class QuicksaveBrowserState {
         }
 
         NavigateTo(parentPath);
+    }
+
+    public void EnsureBreadcrumbs() {
+        if (Breadcrumbs.Count == 0) {
+            RebuildBreadcrumbs();
+        }
     }
 
     public QuicksaveBrowserEntry? SelectedEntry =>
@@ -146,5 +164,31 @@ public sealed class QuicksaveBrowserState {
         PendingInlineEdit = null;
         FocusWindow = false;
         FocusEditField = false;
+    }
+
+    private void RebuildBreadcrumbs() {
+        Breadcrumbs.Clear();
+        BreadcrumbButtonIds.Clear();
+        Breadcrumbs.AddRange(QuicksaveBrowserNavigation.GetBreadcrumbs(CurrentDirectory));
+        for (int i = 0; i < Breadcrumbs.Count; i++) {
+            BreadcrumbButtonIds.Add($"{Breadcrumbs[i].Label}##crumb{i}");
+        }
+    }
+
+    private void RebuildEntryIds() {
+        EntrySelectableIds.Clear();
+        EntryPopupIds.Clear();
+        for (int i = 0; i < Entries.Count; i++) {
+            QuicksaveBrowserEntry entry = Entries[i];
+            string label = entry.Kind == QuicksaveBrowserEntryKind.Folder
+                ? $"{entry.Name}/"
+                : QuicksaveBrowserNavigation.GetDisplayName(entry);
+            EntrySelectableIds.Add($"{label}##entry{i}");
+            EntryPopupIds.Add(
+                entry.Kind == QuicksaveBrowserEntryKind.Folder
+                    ? $"folder_ctx_{i}"
+                    : $"file_ctx_{i}"
+            );
+        }
     }
 }

@@ -66,11 +66,11 @@ public sealed class QuicksaveTracker {
         buffer.Seed(data.Inputs);
     }
 
-    public void RecordFrame(string line) {
+    public void RecordFrame(TasActionsMapper mapper, Level level, Player? player) {
         if (!IsTracking) {
             return;
         }
 
-        buffer.PushFrame(line);
+        mapper.Sample(level, player, buffer);
     }
 }

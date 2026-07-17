@@ -3,11 +3,6 @@ using Microsoft.Xna.Framework;
 namespace Celeste.Mod.QuicksaveMod.Recording;
 
 internal static class MovementInputSampler {
-    private static readonly HashSet<int> VanillaAnalogLocomotionStates = [
-        Player.StSwim,
-        Player.StStarFly,
-    ];
-
     private static readonly List<Func<Player, bool>> ModAnalogLocomotionChecks = [];
 
     internal static void RegisterAnalogLocomotionCheck(Func<Player, bool> check) {
@@ -23,7 +18,8 @@ internal static class MovementInputSampler {
             return false;
         }
 
-        if (VanillaAnalogLocomotionStates.Contains(player.StateMachine.State)) {
+        int state = player.StateMachine.State;
+        if (state == Player.StSwim || state == Player.StStarFly) {
             return true;
         }
 

@@ -23,6 +23,7 @@ public sealed class QuicksaveBrowserHandler : ImGuiHandler {
     private bool deletePopupOpened;
     private bool conflictPopupOpened;
     private string? dragSourcePath;
+    private QuicksaveBrowserEntry? pendingActivate;
 
     public QuicksaveBrowserHandler() {
         Instance = this;
@@ -58,6 +59,7 @@ public sealed class QuicksaveBrowserHandler : ImGuiHandler {
         if (!ImGui.Begin(WindowId, ImGuiWindowFlags.NoDocking)) {
             ImGui.End();
             RenderModals();
+            FlushPendingActivate();
             return;
         }
 
@@ -73,6 +75,7 @@ public sealed class QuicksaveBrowserHandler : ImGuiHandler {
 
         ImGui.End();
         RenderModals();
+        FlushPendingActivate();
     }
 
     private void RenderModals() {
@@ -113,9 +116,7 @@ public sealed class QuicksaveBrowserHandler : ImGuiHandler {
     public void Open() {
         QuicksaveBrowserNavigation.EnsureRootExists();
 
-        state.CurrentDirectory = QuicksaveBrowserNavigation.RootPath;
-        state.RefreshEntries();
-        state.SelectedIndex = state.Entries.Count > 0 ? 0 : -1;
+        state.NavigateTo(QuicksaveBrowserNavigation.RootPath);
         state.ResetTransient();
         state.FocusWindow = true;
 
@@ -144,6 +145,7 @@ public sealed class QuicksaveBrowserHandler : ImGuiHandler {
         deletePopupOpened = false;
         conflictPopupOpened = false;
         dragSourcePath = null;
+        pendingActivate = null;
 
         if (appliedFreeze && Engine.Scene is Level level) {
             level.Frozen = false;
@@ -229,17 +231,17 @@ public sealed class QuicksaveBrowserHandler : ImGuiHandler {
         ImGui.GetFrameHeightWithSpacing() + ImGui.GetStyle().ItemSpacing.Y;
 
     private void RenderBreadcrumbs() {
-        var breadcrumbs = QuicksaveBrowserNavigation.GetBreadcrumbs(state.CurrentDirectory);
+        state.EnsureBreadcrumbs();
 
-        for (int i = 0; i < breadcrumbs.Count; i++) {
+        for (int i = 0; i < state.Breadcrumbs.Count; i++) {
             if (i > 0) {
                 ImGui.SameLine();
                 ImGui.TextUnformatted(" / ");
                 ImGui.SameLine();
             }
 
-            var crumb = breadcrumbs[i];
-            if (ImGui.SmallButton($"{crumb.Label}##crumb{i}")) {
+            var crumb = state.Breadcrumbs[i];
+            if (ImGui.SmallButton(state.BreadcrumbButtonIds[i])) {
                 state.NavigateTo(crumb.AbsolutePath);
             }
 
@@ -258,15 +260,13 @@ public sealed class QuicksaveBrowserHandler : ImGuiHandler {
             for (int i = 0; i < state.Entries.Count; i++) {
                 var entry = state.Entries[i];
                 bool selected = i == state.SelectedIndex;
-                string label = entry.Kind == QuicksaveBrowserEntryKind.Folder
-                    ? $"{entry.Name}/"
-                    : QuicksaveBrowserNavigation.GetDisplayName(entry);
 
-                if (ImGui.Selectable($"{label}##entry{i}", selected, ImGuiSelectableFlags.AllowDoubleClick)) {
+                if (ImGui.Selectable(state.EntrySelectableIds[i], selected, ImGuiSelectableFlags.AllowDoubleClick)) {
                     state.SelectedIndex = i;
 
                     if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) {
-                        ActivateEntry(entry);
+                        // Defer: ActivateEntry may NavigateTo/Close and invalidate cached ids mid-loop.
+                        pendingActivate = entry;
                     }
                 }
 
@@ -274,9 +274,7 @@ public sealed class QuicksaveBrowserHandler : ImGuiHandler {
                     state.SelectedIndex = i;
                 }
 
-                string popupId = entry.Kind == QuicksaveBrowserEntryKind.Folder
-                    ? $"folder_ctx_{i}"
-                    : $"file_ctx_{i}";
+                string popupId = state.EntryPopupIds[i];
                 ImGui.OpenPopupOnItemClick(popupId, ImGuiPopupFlags.MouseButtonRight);
                 RenderEntryContextMenu(entry, popupId);
 
@@ -357,7 +355,7 @@ public sealed class QuicksaveBrowserHandler : ImGuiHandler {
 
         if (entry.Kind == QuicksaveBrowserEntryKind.File) {
             if (ImGui.MenuItem("Load")) {
-                LoadEntry(entry);
+                pendingActivate = entry;
             }
 
             if (ImGui.MenuItem("Rename")) {
@@ -453,8 +451,17 @@ public sealed class QuicksaveBrowserHandler : ImGuiHandler {
 
     private void ActivateSelectedEntry() {
         if (state.SelectedEntry is { } entry) {
-            ActivateEntry(entry);
+            pendingActivate = entry;
         }
+    }
+
+    private void FlushPendingActivate() {
+        if (pendingActivate is not { } entry) {
+            return;
+        }
+
+        pendingActivate = null;
+        ActivateEntry(entry);
     }
 
     private void ActivateEntry(QuicksaveBrowserEntry entry) {

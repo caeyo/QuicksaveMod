@@ -21,24 +21,33 @@ public static class GameplayInputRecorder {
     private static void OnMInputUpdate(On.Monocle.MInput.orig_Update orig) {
         orig();
 
-        if (mapper == null || Engine.Scene is not Level level || !ShouldRecord(level)) {
+        if (mapper == null || Engine.Scene is not Level level) {
             return;
         }
 
-        QuicksaveTracker.Instance.RecordFrame(mapper.Sample(level));
+        if (!ShouldRecordCheap(level)) {
+            return;
+        }
+
+        Player? player = level.Tracker.GetEntity<Player>();
+        if (player is { Dead: true }) {
+            return;
+        }
+
+        QuicksaveTracker.Instance.RecordFrame(mapper, level, player);
     }
 
     public static void ResetMapper() {
         mapper?.Reset();
     }
 
-    private static bool ShouldRecord(Level level) =>
+    /// <summary>Gates that do not need a Player lookup.</summary>
+    private static bool ShouldRecordCheap(Level level) =>
         QuicksaveTracker.Instance.IsTracking
         && !IsSuspended
         && !QuicksaveLoadFreeze.IsWaiting
         && !SpeedrunToolBridge.IsGameFrozen
         && CelesteTasImports.IsTasActive?.Invoke() != true
-        && level.Tracker.GetEntity<Player>() is not { Dead: true }
         && !(level.Paused && !level.PauseMainMenuOpen);
 
     public static bool IsSuspended { get; private set; }

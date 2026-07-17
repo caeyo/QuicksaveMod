@@ -64,9 +64,12 @@ public static class QuicksaveLoadFreeze {
             return;
         }
 
-        if (UnfreezeInputs.Any(IsActive)) {
-            Cancel();
-            Logger.Info(nameof(QuicksaveLoadFreeze), "Resumed after input.");
+        for (int i = 0; i < UnfreezeInputs.Length; i++) {
+            if (IsActive(UnfreezeInputs[i])) {
+                Cancel();
+                Logger.Info(nameof(QuicksaveLoadFreeze), "Resumed after input.");
+                return;
+            }
         }
     }
 

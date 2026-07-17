@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Celeste.Mod.QuicksaveMod.Interop;
@@ -14,10 +15,12 @@ public static class SpeedrunToolBridge {
         Version = new Version(3, 27, 16),
     };
 
+    private static readonly object?[] SaveStateArgs = [null];
+
     private static bool? _loaded;
     private static MethodInfo? _saveState;
-    private static PropertyInfo? _stateManagerInstance;
-    private static PropertyInfo? _stateManagerState;
+    private static Func<object?>? _getStateManagerInstance;
+    private static Func<object, int>? _getStateAsInt;
     private static bool _resolveAttempted;
 
     public static bool IsLoaded => _loaded ??= Everest.Loader.DependencyLoaded(Meta);
@@ -32,19 +35,18 @@ public static class SpeedrunToolBridge {
             }
 
             EnsureResolved();
-            if (_stateManagerInstance == null || _stateManagerState == null) {
+            if (_getStateManagerInstance == null || _getStateAsInt == null) {
                 return false;
             }
 
             try {
-                object? manager = _stateManagerInstance.GetValue(null);
+                object? manager = _getStateManagerInstance();
                 if (manager == null) {
                     return false;
                 }
 
-                object? state = _stateManagerState.GetValue(manager);
                 // State.None == 0; Saving / Loading / Waiting are non-zero.
-                return state != null && Convert.ToInt32(state) != 0;
+                return _getStateAsInt(manager) != 0;
             } catch {
                 return false;
             }
@@ -66,8 +68,8 @@ public static class SpeedrunToolBridge {
         }
 
         try {
-            object?[] args = [null];
-            return (bool)_saveState.Invoke(null, args)!;
+            SaveStateArgs[0] = null;
+            return (bool)_saveState.Invoke(null, SaveStateArgs)!;
         } catch (Exception e) {
             Logger.Warn(
                 nameof(SpeedrunToolBridge),
@@ -115,20 +117,46 @@ public static class SpeedrunToolBridge {
                 return;
             }
 
-            _stateManagerInstance = stateManagerType.GetProperty(
+            PropertyInfo? instanceProperty = stateManagerType.GetProperty(
                 "Instance",
                 BindingFlags.Public | BindingFlags.Static
             );
-            _stateManagerState = stateManagerType.GetProperty(
+            PropertyInfo? stateProperty = stateManagerType.GetProperty(
                 "State",
                 BindingFlags.Public | BindingFlags.Instance
             );
 
-            if (_stateManagerInstance == null || _stateManagerState == null) {
+            if (instanceProperty == null || stateProperty == null) {
                 Logger.Warn(nameof(SpeedrunToolBridge), "Could not find StateManager.Instance/State.");
+                return;
+            }
+
+            try {
+                _getStateManagerInstance = CompileStaticObjectGetter(instanceProperty);
+                _getStateAsInt = CompileInstanceEnumAsIntGetter(stateProperty, stateManagerType);
+            } catch (Exception e) {
+                Logger.Warn(
+                    nameof(SpeedrunToolBridge),
+                    $"Failed to compile StateManager accessors: {e.Message}"
+                );
             }
 
             return;
         }
+    }
+
+    private static Func<object?> CompileStaticObjectGetter(PropertyInfo property) {
+        // () => (object)Property
+        Expression body = Expression.Convert(Expression.Property(null, property), typeof(object));
+        return Expression.Lambda<Func<object?>>(body).Compile();
+    }
+
+    private static Func<object, int> CompileInstanceEnumAsIntGetter(PropertyInfo property, Type instanceType) {
+        // (object instance) => (int)((InstanceType)instance).Property
+        ParameterExpression instanceParam = Expression.Parameter(typeof(object), "instance");
+        UnaryExpression castInstance = Expression.Convert(instanceParam, instanceType);
+        MemberExpression propertyAccess = Expression.Property(castInstance, property);
+        UnaryExpression asInt = Expression.Convert(propertyAccess, typeof(int));
+        return Expression.Lambda<Func<object, int>>(asInt, instanceParam).Compile();
     }
 }

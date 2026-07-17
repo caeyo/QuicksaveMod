@@ -13,6 +13,15 @@ public static class QuicksaveService {
 
     public static string QuicksavesRoot => Path.Combine(Everest.PathGame, "Quicksaves");
 
+    private static string? cachedQuicksavesRootFullPath;
+
+    /// <summary>Cached full path of the Quicksaves folder (no trailing separator).</summary>
+    public static string QuicksavesRootFullPath =>
+        cachedQuicksavesRootFullPath ??= Path.GetFullPath(QuicksavesRoot)
+            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+    private static string GetQuicksavesRootFullPath() => QuicksavesRootFullPath;
+
     public static void SuspendTracking() => GameplayInputRecorder.Suspend();
 
     public static void ResumeTracking() => GameplayInputRecorder.Resume();
@@ -290,9 +299,6 @@ public static class QuicksaveService {
         return fullPath.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
     }
 
-    private static string GetQuicksavesRootFullPath() =>
-        Path.GetFullPath(QuicksavesRoot).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-
     private static string NormalizeRelativePath(string path) =>
         path.Replace('\\', Path.DirectorySeparatorChar)
             .Replace('/', Path.DirectorySeparatorChar)
@@ -344,15 +350,17 @@ public static class QuicksaveService {
         SaveData.Start(saveData, targetSlot);
     }
 
+    private static readonly UTF8Encoding TasFileEncoding = new(encoderShouldEmitUTF8Identifier: false);
+
     private static void WriteTempTasFile(string path, QuicksaveData data) {
-        using var writer = new StreamWriter(path, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        using var writer = new StreamWriter(path, false, TasFileEncoding);
 
         foreach (string line in data.Inputs) {
-            writer.WriteLine(TasLineFormatter.FormatFileLine(line));
+            TasLineFormatter.WriteFileLine(writer, line);
         }
 
         writer.WriteLine(GetPlaybackBreakpointLine());
-        writer.WriteLine(TasLineFormatter.FormatFileLine("1"));
+        TasLineFormatter.WriteFileLine(writer, "1");
     }
 
     private static string GetPlaybackBreakpointLine() {

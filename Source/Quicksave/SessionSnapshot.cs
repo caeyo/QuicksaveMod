@@ -11,6 +11,8 @@ namespace Celeste.Mod.QuicksaveMod.Quicksave;
 internal static class SessionSnapshot {
     private const string BinaryModSessionPrefix = "base64:";
 
+    private static readonly XmlSerializer SessionXmlSerializer = new(typeof(Session));
+
     public static string CaptureSessionXml(Session session) {
         byte[] bytes = UserIO.Serialize(session);
         return Encoding.UTF8.GetString(bytes);
@@ -22,7 +24,7 @@ internal static class SessionSnapshot {
 
         Session session;
         try {
-            session = (Session)new XmlSerializer(typeof(Session)).Deserialize(stream)!;
+            session = (Session)SessionXmlSerializer.Deserialize(stream)!;
         } catch (Exception e) {
             throw new InvalidDataException("Failed to deserialize quicksave session snapshot.", e);
         }
@@ -71,12 +73,11 @@ internal static class SessionSnapshot {
         }
 
         int slot = RequireFileSlot();
+        Dictionary<string, EverestModule> modulesByName = BuildModuleLookup();
 
         foreach ((string name, string payload) in modSessions) {
-            EverestModule? module = Everest.Modules.FirstOrDefault(
-                m => string.Equals(m.Metadata.Name, name, StringComparison.OrdinalIgnoreCase)
-            );
-            if (module?.SessionType == null) {
+            if (!modulesByName.TryGetValue(name, out EverestModule? module)
+                || module.SessionType == null) {
                 continue;
             }
 
@@ -90,6 +91,15 @@ internal static class SessionSnapshot {
                 );
             }
         }
+    }
+
+    private static Dictionary<string, EverestModule> BuildModuleLookup() {
+        var lookup = new Dictionary<string, EverestModule>(StringComparer.OrdinalIgnoreCase);
+        foreach (EverestModule module in Everest.Modules) {
+            lookup.TryAdd(module.Metadata.Name, module);
+        }
+
+        return lookup;
     }
 
     private static int RequireFileSlot() {

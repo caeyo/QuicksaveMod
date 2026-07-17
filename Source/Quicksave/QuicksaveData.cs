@@ -21,8 +21,19 @@ public class QuicksaveData {
     /// </summary>
     public Dictionary<string, string>? ModSessions { get; set; }
 
-    internal static bool IsValidSaveUid(string? value) =>
-        value is { Length: 32 } && value.All(Uri.IsHexDigit);
+    internal static bool IsValidSaveUid(string? value) {
+        if (value is not { Length: 32 }) {
+            return false;
+        }
+
+        for (int i = 0; i < value.Length; i++) {
+            if (!Uri.IsHexDigit(value[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     public QuicksaveData Clone() {
         return new QuicksaveData {

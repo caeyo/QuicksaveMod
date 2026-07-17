@@ -19,7 +19,7 @@ public readonly record struct QuicksaveBrowserBreadcrumb(
 );
 
 public static class QuicksaveBrowserNavigation {
-    public static string RootPath => Path.GetFullPath(QuicksaveService.QuicksavesRoot);
+    public static string RootPath => QuicksaveService.QuicksavesRootFullPath;
 
     public static void EnsureRootExists() {
         Directory.CreateDirectory(RootPath);

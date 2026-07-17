@@ -5,40 +5,76 @@ namespace Celeste.Mod.QuicksaveMod.Recording;
 
 internal static class TasLineFormatter {
     private const int MaxFramesDigits = 4;
+    private static readonly StringBuilder SharedBuilder = new(64);
 
-    internal static string Format(
-        int frames,
+    /// <summary>
+    /// Everything after the frame count (e.g. ",L,J" or ",F,90,1"), or empty for a neutral frame.
+    /// </summary>
+    internal static string FormatSuffix(
         IReadOnlyList<char> actions,
         float? featherAngle = null,
         float? featherMagnitude = null
     ) {
-        var builder = new StringBuilder();
-        builder.Append(frames.ToString(CultureInfo.InvariantCulture));
+        SharedBuilder.Clear();
+        AppendSuffix(SharedBuilder, actions, featherAngle, featherMagnitude);
+        return SharedBuilder.ToString();
+    }
 
+    internal static string FormatLine(int frames, string suffix) {
+        SharedBuilder.Clear();
+        SharedBuilder.Append(frames);
+        SharedBuilder.Append(suffix);
+        return SharedBuilder.ToString();
+    }
+
+    /// <summary>
+    /// Writes a left-padded (4-digit) TAS line matching historic <c>FormatFileLine</c> output.
+    /// </summary>
+    internal static void WriteFileLine(TextWriter writer, string line) {
+        ReadOnlySpan<char> span = line.AsSpan().TrimStart();
+        int comma = span.IndexOf(',');
+        ReadOnlySpan<char> framePart = comma < 0 ? span : span[..comma];
+        ReadOnlySpan<char> suffix = comma < 0 ? ReadOnlySpan<char>.Empty : span[comma..];
+
+        if (!int.TryParse(framePart, NumberStyles.Integer, CultureInfo.InvariantCulture, out int frames)) {
+            writer.WriteLine(span);
+            return;
+        }
+
+        Span<char> digits = stackalloc char[16];
+        if (!frames.TryFormat(digits, out int written, provider: CultureInfo.InvariantCulture)) {
+            writer.WriteLine(span);
+            return;
+        }
+
+        int pad = MaxFramesDigits - written;
+        for (int i = 0; i < pad; i++) {
+            writer.Write(' ');
+        }
+
+        writer.Write(digits[..written]);
+        if (!suffix.IsEmpty) {
+            writer.Write(suffix);
+        }
+
+        writer.WriteLine();
+    }
+
+    private static void AppendSuffix(
+        StringBuilder builder,
+        IReadOnlyList<char> actions,
+        float? featherAngle,
+        float? featherMagnitude
+    ) {
         foreach (char action in actions) {
             builder.Append(',').Append(action);
         }
 
         if (featherAngle is { } angle) {
-            builder.Append(",F,").Append(((int) angle).ToString(CultureInfo.InvariantCulture));
+            builder.Append(",F,").Append((int) angle);
             if (featherMagnitude is { } magnitude) {
                 builder.Append(',').Append(magnitude.ToString("0.###", CultureInfo.InvariantCulture));
             }
         }
-
-        return builder.ToString();
-    }
-
-    internal static string FormatFileLine(string line) {
-        line = line.TrimStart();
-        int comma = line.IndexOf(',');
-        ReadOnlySpan<char> framePart = comma < 0 ? line : line.AsSpan(0, comma);
-        string suffix = comma < 0 ? "" : line[comma..];
-
-        if (!int.TryParse(framePart, NumberStyles.Integer, CultureInfo.InvariantCulture, out int frames)) {
-            return line;
-        }
-
-        return frames.ToString(CultureInfo.InvariantCulture).PadLeft(MaxFramesDigits) + suffix;
     }
 }

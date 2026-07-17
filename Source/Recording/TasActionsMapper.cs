@@ -3,10 +3,16 @@ using Monocle;
 namespace Celeste.Mod.QuicksaveMod.Recording;
 
 public class TasActionsMapper {
+    private readonly List<char> actions = new(16);
+
     private TasSlot jumpSlot = TasSlot.None;
     private TasSlot dashSlot = TasSlot.None;
     private TasSlot crouchDashSlot = TasSlot.None;
     private TasSlot grabSlot = TasSlot.None;
+
+    private string? cachedResumeLabel;
+    private string? cachedSkipCutsceneLabel;
+    private string? cachedDialogLanguage;
 
     public void Reset() {
         jumpSlot = TasSlot.None;
@@ -15,11 +21,10 @@ public class TasActionsMapper {
         grabSlot = TasSlot.None;
     }
 
-    public string Sample(Level level) {
-        var actions = new List<char>();
+    public void Sample(Level level, Player? player, InputLineBuffer buffer) {
+        actions.Clear();
         float? featherAngle = null;
         float? featherMagnitude = null;
-        Player? player = level.Tracker.GetEntity<Player>();
         bool menu = IsMenuContext(level);
 
         AppendMovement(level, player, actions, ref featherAngle, ref featherMagnitude);
@@ -31,7 +36,7 @@ public class TasActionsMapper {
         }
         AppendMenuInputs(level, menu, actions);
 
-        return TasLineFormatter.Format(1, actions, featherAngle, featherMagnitude);
+        buffer.PushFrame(actions, featherAngle, featherMagnitude);
     }
 
     private static void AppendMovement(
@@ -73,7 +78,7 @@ public class TasActionsMapper {
         AppendSlot(actions, grabSlot, 'G', 'H');
     }
 
-    private static void AppendMenuInputs(Level level, bool menu, List<char> actions) {
+    private void AppendMenuInputs(Level level, bool menu, List<char> actions) {
         if (Input.Pause.Pressed || Input.Pause.Check) {
             actions.Add('S');
         }
@@ -87,7 +92,7 @@ public class TasActionsMapper {
         }
     }
 
-    private static bool ShouldRecordConfirm(Level level) {
+    private bool ShouldRecordConfirm(Level level) {
         // Dialogue / other non-pause menus: always record confirm.
         if (!level.Paused) {
             return true;
@@ -101,14 +106,28 @@ public class TasActionsMapper {
         return IsResumeOrSkipCutsceneSelected(level);
     }
 
-    private static bool IsResumeOrSkipCutsceneSelected(Level level) {
+    private bool IsResumeOrSkipCutsceneSelected(Level level) {
         if (level.Entities.FindFirst<TextMenu>() is not { } menu
             || menu.Current is not TextMenu.Button button) {
             return false;
         }
 
-        return button.Label == Dialog.Clean("menu_pause_resume")
-            || button.Label == Dialog.Clean("menu_pause_skip_cutscene");
+        EnsureDialogLabelsCached();
+        return button.Label == cachedResumeLabel
+            || button.Label == cachedSkipCutsceneLabel;
+    }
+
+    private void EnsureDialogLabelsCached() {
+        string? language = Dialog.Language?.Id;
+        if (cachedDialogLanguage == language
+            && cachedResumeLabel != null
+            && cachedSkipCutsceneLabel != null) {
+            return;
+        }
+
+        cachedDialogLanguage = language;
+        cachedResumeLabel = Dialog.Clean("menu_pause_resume");
+        cachedSkipCutsceneLabel = Dialog.Clean("menu_pause_skip_cutscene");
     }
 
     private static bool IsMenuContext(Level level) {
