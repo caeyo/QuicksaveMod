@@ -13,8 +13,9 @@ internal sealed class BrowserHandler : ImGuiHandler {
     internal static void ClearInstance() => Instance = null;
 
     private const string WindowId = "Quicksave Browser";
-    private const float WindowWidth = 520f;
-    private const float WindowHeight = 420f;
+    private const float BaseWindowWidth = 520f;
+    private const float BaseWindowHeight = 420f;
+    private const float DesignDisplayHeight = 1080f;
 
     private readonly BrowserState state = new();
     private readonly BrowserView view;
@@ -22,6 +23,9 @@ internal sealed class BrowserHandler : ImGuiHandler {
 
     private bool savedMouseVisible;
     private bool appliedFreeze;
+    private float savedFontGlobalScale = 1f;
+    private float appliedUiScale = 1f;
+    private bool forceWindowSize;
 
     public BrowserHandler() {
         Instance = this;
@@ -51,12 +55,20 @@ internal sealed class BrowserHandler : ImGuiHandler {
             return;
         }
 
+        float uiScale = ComputeUiScale();
+        ApplyUiScale(uiScale);
+
         if (state.FocusWindow) {
             ImGui.SetNextWindowFocus();
             state.FocusWindow = false;
         }
 
-        ImGui.SetNextWindowSize(new System.Numerics.Vector2(WindowWidth, WindowHeight), ImGuiCond.FirstUseEver);
+        ImGuiCond sizeCond = forceWindowSize ? ImGuiCond.Always : ImGuiCond.FirstUseEver;
+        ImGui.SetNextWindowSize(
+            new System.Numerics.Vector2(BaseWindowWidth * uiScale, BaseWindowHeight * uiScale),
+            sizeCond
+        );
+        forceWindowSize = false;
 
         if (!ImGui.Begin(WindowId, ImGuiWindowFlags.NoDocking)) {
             ImGui.End();
@@ -98,6 +110,10 @@ internal sealed class BrowserHandler : ImGuiHandler {
             }
         }
 
+        savedFontGlobalScale = ImGui.GetIO().FontGlobalScale;
+        appliedUiScale = 0f;
+        forceWindowSize = true;
+
         QuicksaveService.SuspendTracking();
         Visible = true;
     }
@@ -112,6 +128,9 @@ internal sealed class BrowserHandler : ImGuiHandler {
         view.ResetTransient();
         modals.ResetTransient();
 
+        ImGui.GetIO().FontGlobalScale = savedFontGlobalScale;
+        appliedUiScale = 1f;
+
         if (appliedFreeze && Engine.Scene is Level level) {
             level.Frozen = false;
         }
@@ -119,6 +138,30 @@ internal sealed class BrowserHandler : ImGuiHandler {
         appliedFreeze = false;
         QuicksaveService.ResumeTracking();
         Engine.Instance.IsMouseVisible = savedMouseVisible;
+    }
+
+    private void ApplyUiScale(float uiScale) {
+        if (Math.Abs(uiScale - appliedUiScale) < 0.001f) {
+            return;
+        }
+
+        ImGui.GetIO().FontGlobalScale = savedFontGlobalScale * uiScale;
+        if (appliedUiScale > 0f) {
+            forceWindowSize = true;
+        }
+
+        appliedUiScale = uiScale;
+    }
+
+    private static float ComputeUiScale() {
+        float displayHeight = ImGui.GetIO().DisplaySize.Y;
+        if (displayHeight <= 1f) {
+            displayHeight = DesignDisplayHeight;
+        }
+
+        float auto = Math.Clamp(displayHeight / DesignDisplayHeight, 1f, 2f);
+        float user = Math.Clamp(QuicksaveModModule.Settings.BrowserUiScalePercent / 100f, 1f, 2f);
+        return Math.Clamp(auto * user, 1f, 2.5f);
     }
 
     internal void OnAfterInputUpdate() {

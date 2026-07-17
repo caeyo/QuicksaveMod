@@ -16,6 +16,22 @@ public class QuicksaveModSettings : EverestModuleSettings {
     [SettingName("modoptions_quicksavemod_savestateonquicksaveload")]
     public bool SavestateOnQuicksaveLoad { get; set; } = true;
 
+    [SettingName("modoptions_quicksavemod_browseruiscale")]
+    public int BrowserUiScalePercent { get; set; } = 100;
+
+    public void CreateBrowserUiScalePercentEntry(TextMenu menu, bool inGame) {
+        int index = Math.Clamp((BrowserUiScalePercent - 100) / 10, 0, 10);
+        menu.Add(
+            new TextMenu.Slider(
+                Dialog.Clean("modoptions_quicksavemod_browseruiscale"),
+                i => $"{100 + i * 10}%",
+                0,
+                10,
+                index
+            ).Change(i => BrowserUiScalePercent = 100 + i * 10)
+        );
+    }
+
     public void CreateSavestateOnQuicksaveLoadEntry(TextMenu menu, bool inGame) {
         if (!Interop.SpeedrunToolBridge.IsLoaded) {
             return;
