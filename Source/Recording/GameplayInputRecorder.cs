@@ -38,7 +38,8 @@ public static class GameplayInputRecorder {
         && !QuicksaveLoadFreeze.IsWaiting
         && !SpeedrunToolBridge.IsGameFrozen
         && CelesteTasImports.IsTasActive?.Invoke() != true
-        && level.Tracker.GetEntity<Player>() is not { Dead: true };
+        && level.Tracker.GetEntity<Player>() is not { Dead: true }
+        && !(level.Paused && !level.PauseMainMenuOpen);
 
     public static bool IsSuspended { get; private set; }
 

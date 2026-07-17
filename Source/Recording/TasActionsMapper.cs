@@ -29,7 +29,7 @@ public class TasActionsMapper {
             AppendCrouchDash(actions);
             AppendGrab(actions);
         }
-        AppendMenuInputs(menu, actions);
+        AppendMenuInputs(level, menu, actions);
 
         return TasLineFormatter.Format(1, actions, featherAngle, featherMagnitude);
     }
@@ -73,7 +73,7 @@ public class TasActionsMapper {
         AppendSlot(actions, grabSlot, 'G', 'H');
     }
 
-    private static void AppendMenuInputs(bool menu, List<char> actions) {
+    private static void AppendMenuInputs(Level level, bool menu, List<char> actions) {
         if (Input.Pause.Pressed || Input.Pause.Check) {
             actions.Add('S');
         }
@@ -82,9 +82,33 @@ public class TasActionsMapper {
             actions.Add('Q');
         }
 
-        if (menu && Input.MenuConfirm.Pressed) {
+        if (menu && Input.MenuConfirm.Pressed && ShouldRecordConfirm(level)) {
             actions.Add('O');
         }
+    }
+
+    private static bool ShouldRecordConfirm(Level level) {
+        // Dialogue / other non-pause menus: always record confirm.
+        if (!level.Paused) {
+            return true;
+        }
+
+        // Main pause only: Resume / Skip Cutscene
+        if (!level.PauseMainMenuOpen) {
+            return false;
+        }
+
+        return IsResumeOrSkipCutsceneSelected(level);
+    }
+
+    private static bool IsResumeOrSkipCutsceneSelected(Level level) {
+        if (level.Entities.FindFirst<TextMenu>() is not { } menu
+            || menu.Current is not TextMenu.Button button) {
+            return false;
+        }
+
+        return button.Label == Dialog.Clean("menu_pause_resume")
+            || button.Label == Dialog.Clean("menu_pause_skip_cutscene");
     }
 
     private static bool IsMenuContext(Level level) {
