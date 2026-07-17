@@ -190,34 +190,15 @@ public sealed class QuicksaveBrowserHandler : ImGuiHandler {
     }
 
     private static void ConsumeUnderlyingInput() {
-        ConsumeCloseInput();
-        ConsumeMenuNavigationInput();
+        foreach (VirtualInput input in MInput.VirtualInputs) {
+            if (input is VirtualButton button) {
+                button.ConsumePress();
+                button.ConsumeBuffer();
+            }
+        }
+
         MInput.Disabled = true;
         MInput.Active = false;
-    }
-
-    private static void ConsumeMenuNavigationInput() {
-        Input.MenuUp.ConsumePress();
-        Input.MenuUp.ConsumeBuffer();
-        Input.MenuDown.ConsumePress();
-        Input.MenuDown.ConsumeBuffer();
-        Input.MenuLeft.ConsumePress();
-        Input.MenuLeft.ConsumeBuffer();
-        Input.MenuRight.ConsumePress();
-        Input.MenuRight.ConsumeBuffer();
-        Input.MenuConfirm.ConsumePress();
-        Input.MenuConfirm.ConsumeBuffer();
-        Input.MenuJournal.ConsumePress();
-        Input.MenuJournal.ConsumeBuffer();
-    }
-
-    private static void ConsumeCloseInput() {
-        Input.ESC.ConsumePress();
-        Input.ESC.ConsumeBuffer();
-        Input.Pause.ConsumePress();
-        Input.Pause.ConsumeBuffer();
-        Input.MenuCancel.ConsumePress();
-        Input.MenuCancel.ConsumeBuffer();
     }
 
     private void HandleWindowKeyboardShortcuts() {
