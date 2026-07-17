@@ -4,13 +4,13 @@ using Microsoft.Xna.Framework;
 namespace Celeste.Mod.QuicksaveMod.Quicksave;
 
 internal class QuicksaveStartPoint {
-    public string AreaSid { get; private init; } = "";
+    public string AreaSid { get; init; } = "";
 
     [JsonPropertyName("areaMode")]
-    private string SideMode { get; init; } = "Normal";
-    public string? Level { get; private init; }
-    public int? RespawnX { get; private set; }
-    public int? RespawnY { get; private set; }
+    public string SideMode { get; init; } = "Normal";
+    public string? Level { get; init; }
+    public int? RespawnX { get; set; }
+    public int? RespawnY { get; set; }
 
     public QuicksaveStartPoint Clone() => new() {
         AreaSid = AreaSid,
