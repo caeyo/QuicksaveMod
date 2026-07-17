@@ -1,6 +1,6 @@
 namespace Celeste.Mod.QuicksaveMod.Quicksave;
 
-public class QuicksaveData {
+internal class QuicksaveData {
     public const int CurrentVersion = 3;
 
     public int Version { get; set; } = CurrentVersion;
@@ -9,16 +9,10 @@ public class QuicksaveData {
     public QuicksaveStartPoint Start { get; set; } = new();
     public List<string> Inputs { get; set; } = [];
 
-    /// <summary>
-    /// XML serialization of <see cref="Session"/> at the start of the input buffer
-    /// (last death / load), not at save time.
-    /// </summary>
+    // Session XML at input-buffer start (last death / load), not at save time.
     public string? SessionXml { get; set; }
 
-    /// <summary>
-    /// Everest ModSession payloads at input-buffer start, keyed by mod name
-    /// (YAML text, or base64: for binary sessions).
-    /// </summary>
+    // Everest ModSession payloads at buffer start (YAML text, or base64: for binary).
     public Dictionary<string, string>? ModSessions { get; set; }
 
     internal static bool IsValidSaveUid(string? value) {
@@ -40,13 +34,7 @@ public class QuicksaveData {
             Version = Version,
             CreatedUtc = CreatedUtc,
             SaveUid = SaveUid,
-            Start = new QuicksaveStartPoint {
-                AreaSid = Start.AreaSid,
-                SideMode = Start.SideMode,
-                Level = Start.Level,
-                RespawnX = Start.RespawnX,
-                RespawnY = Start.RespawnY,
-            },
+            Start = Start.Clone(),
             Inputs = [..Inputs],
             SessionXml = SessionXml,
             ModSessions = ModSessions == null

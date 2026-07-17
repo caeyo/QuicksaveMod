@@ -2,23 +2,23 @@ using Monocle;
 
 namespace Celeste.Mod.QuicksaveMod.Recording;
 
-public class TasActionsMapper {
+internal class TasActionsMapper {
     private readonly List<char> actions = new(16);
 
-    private TasSlot jumpSlot = TasSlot.None;
-    private TasSlot dashSlot = TasSlot.None;
-    private TasSlot crouchDashSlot = TasSlot.None;
-    private TasSlot grabSlot = TasSlot.None;
+    private TasPressSlot jumpSlot = TasPressSlot.None;
+    private TasPressSlot dashSlot = TasPressSlot.None;
+    private TasPressSlot crouchDashSlot = TasPressSlot.None;
+    private TasPressSlot grabSlot = TasPressSlot.None;
 
     private string? cachedResumeLabel;
     private string? cachedSkipCutsceneLabel;
     private string? cachedDialogLanguage;
 
     public void Reset() {
-        jumpSlot = TasSlot.None;
-        dashSlot = TasSlot.None;
-        crouchDashSlot = TasSlot.None;
-        grabSlot = TasSlot.None;
+        jumpSlot = TasPressSlot.None;
+        dashSlot = TasPressSlot.None;
+        crouchDashSlot = TasPressSlot.None;
+        grabSlot = TasPressSlot.None;
     }
 
     public void Sample(Level level, Player? player, InputLineBuffer buffer) {
@@ -141,13 +141,13 @@ public class TasActionsMapper {
     private static bool RawPressed(VirtualButton button) =>
         button.Binding.Pressed(button.GamepadIndex, button.Threshold);
 
-    private static void AppendSlot(List<char> actions, TasSlot slot, char slotAChar, char slotBChar) {
+    private static void AppendSlot(List<char> actions, TasPressSlot slot, char slotAChar, char slotBChar) {
         switch (slot) {
-            case TasSlot.A:
-            case TasSlot.B:
+            case TasPressSlot.A:
+            case TasPressSlot.B:
                 actions.Add(TwoSlotEncoder.CharFor(slot, slotAChar, slotBChar));
                 break;
-            case TasSlot.None:
+            case TasPressSlot.None:
                 break;
         }
     }

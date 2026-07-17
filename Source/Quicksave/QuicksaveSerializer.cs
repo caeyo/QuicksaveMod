@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Celeste.Mod.QuicksaveMod.Quicksave;
 
-public static class QuicksaveSerializer {
+internal static class QuicksaveSerializer {
     private static readonly JsonSerializerOptions Options = new() {
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,

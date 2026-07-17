@@ -1,28 +1,28 @@
 namespace Celeste.Mod.QuicksaveMod.Recording;
 
-internal enum TasSlot {
+internal enum TasPressSlot {
     None,
     A,
     B,
 }
 
 internal static class TwoSlotEncoder {
-    internal static TasSlot Update(TasSlot current, bool pressed, bool check) {
+    internal static TasPressSlot Update(TasPressSlot current, bool pressed, bool check) {
         if (pressed) {
-            return current == TasSlot.A ? TasSlot.B : TasSlot.A;
+            return current == TasPressSlot.A ? TasPressSlot.B : TasPressSlot.A;
         }
 
         if (check) {
-            return current == TasSlot.None ? TasSlot.A : current;
+            return current == TasPressSlot.None ? TasPressSlot.A : current;
         }
 
-        return TasSlot.None;
+        return TasPressSlot.None;
     }
 
-    internal static char CharFor(TasSlot slot, char slotAChar, char slotBChar) =>
+    internal static char CharFor(TasPressSlot slot, char slotAChar, char slotBChar) =>
         slot switch {
-            TasSlot.A => slotAChar,
-            TasSlot.B => slotBChar,
+            TasPressSlot.A => slotAChar,
+            TasPressSlot.B => slotBChar,
             _ => ' ',
         };
 }

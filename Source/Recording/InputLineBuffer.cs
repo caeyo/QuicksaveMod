@@ -2,13 +2,13 @@ using System.Globalization;
 
 namespace Celeste.Mod.QuicksaveMod.Recording;
 
-public class InputLineBuffer {
+internal class InputLineBuffer {
     private readonly List<CommittedEntry> lines = [];
     private readonly List<char> pendingActions = [];
     private float? pendingFeatherAngle;
     private float? pendingFeatherMagnitude;
     private int pendingFrames;
-    /// <summary>Set after <see cref="Seed"/>; otherwise computed from structural pending at flush.</summary>
+    // Set after Seed; otherwise computed from structural pending at flush.
     private string? pendingSuffix;
     private bool hasPending;
 
@@ -128,9 +128,7 @@ public class InputLineBuffer {
         return true;
     }
 
-    /// <summary>
-    /// Match the formatter's "0.###" rounding so hold detection agrees with written output.
-    /// </summary>
+    // Match the formatter's "0.###" rounding so hold detection agrees with written output.
     private static bool MagnitudesEqual(float left, float right) =>
         ToMilli(left) == ToMilli(right);
 

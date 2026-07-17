@@ -2,6 +2,7 @@
 using Celeste.Mod.QuicksaveMod.Hooks;
 using Celeste.Mod.QuicksaveMod.Interop;
 using Celeste.Mod.QuicksaveMod.Playback;
+using Celeste.Mod.QuicksaveMod.Quicksave;
 using Celeste.Mod.QuicksaveMod.Recording;
 using Celeste.Mod.QuicksaveMod.UI;
 using MonoMod.ModInterop;
@@ -17,16 +18,14 @@ public class QuicksaveModModule : EverestModule {
     public override Type SaveDataType => typeof(QuicksaveModSaveData);
     public static QuicksaveModSaveData SaveData => (QuicksaveModSaveData) Instance._SaveData;
 
-    private QuicksaveBrowserHandler? browserHandler;
+    private BrowserHandler? browserHandler;
 
     public QuicksaveModModule() {
         Instance = this;
 #if DEBUG
-        // debug builds use verbose logging
-        Logger.SetLogLevel(nameof(QuicksaveModModule), LogLevel.Verbose);
+        Logger.SetLogLevel(QuicksaveConstants.LogTag, LogLevel.Verbose);
 #else
-        // release builds use info logging to reduce spam in log files
-        Logger.SetLogLevel(nameof(QuicksaveModModule), LogLevel.Info);
+        Logger.SetLogLevel(QuicksaveConstants.LogTag, LogLevel.Info);
 #endif
     }
 
@@ -37,14 +36,16 @@ public class QuicksaveModModule : EverestModule {
     }
 
     public override void Load() {
-        QuicksaveHooks.Apply();
-        QuicksaveBrowserHooks.Apply();
-        GameplayInputRecorder.Apply();
-        QuicksavePlayback.Apply();
-        QuicksaveLoadFreeze.Apply();
+        QuicksavePlayback.OnSeedNeeded = SeedTrackerFromLoadedQuicksave;
 
-        browserHandler = new QuicksaveBrowserHandler();
-        if (!ImGuiManager.Handlers.OfType<QuicksaveBrowserHandler>().Any()) {
+        LevelLoadHooks.Apply();
+        BrowserInputHooks.Apply();
+        RecordingHooks.Apply();
+        PlaybackHooks.Apply();
+        LoadFreezeHooks.Apply();
+
+        browserHandler = new BrowserHandler();
+        if (!ImGuiManager.Handlers.OfType<BrowserHandler>().Any()) {
             ImGuiManager.Handlers.Add(browserHandler);
         }
     }
@@ -53,14 +54,21 @@ public class QuicksaveModModule : EverestModule {
         if (browserHandler != null) {
             browserHandler.Close();
             ImGuiManager.Handlers.Remove(browserHandler);
-            QuicksaveBrowserHandler.ClearInstance();
+            BrowserHandler.ClearInstance();
             browserHandler = null;
         }
 
-        QuicksaveBrowserHooks.Unapply();
-        GameplayInputRecorder.Unapply();
-        QuicksaveHooks.Unapply();
-        QuicksavePlayback.Unapply();
-        QuicksaveLoadFreeze.Unapply();
+        LoadFreezeHooks.Unapply();
+        PlaybackHooks.Unapply();
+        RecordingHooks.Unapply();
+        BrowserInputHooks.Unapply();
+        LevelLoadHooks.Unapply();
+
+        QuicksavePlayback.OnSeedNeeded = null;
+    }
+
+    private static void SeedTrackerFromLoadedQuicksave(QuicksaveData data) {
+        QuicksaveTracker.SeedFrom(data);
+        GameplayInputRecorder.ResetMapper();
     }
 }

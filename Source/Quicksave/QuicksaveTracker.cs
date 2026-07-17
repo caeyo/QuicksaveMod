@@ -2,31 +2,23 @@ using Celeste.Mod.QuicksaveMod.Recording;
 
 namespace Celeste.Mod.QuicksaveMod.Quicksave;
 
-public sealed class QuicksaveTracker {
-    public static QuicksaveTracker Instance { get; } = new();
+internal static class QuicksaveTracker {
+    private static readonly InputLineBuffer Buffer = new();
+    private static QuicksaveStartPoint? startPoint;
+    private static string? startSessionXml;
+    private static Dictionary<string, string>? startModSessions;
 
-    private readonly InputLineBuffer buffer = new();
-    private QuicksaveStartPoint? startPoint;
-    private string? startSessionXml;
-    private Dictionary<string, string>? startModSessions;
+    public static bool IsTracking => startPoint != null && startSessionXml != null;
 
-    public bool IsTracking => startPoint != null && startSessionXml != null;
-
-    public QuicksaveData? Current {
+    public static QuicksaveData? Current {
         get {
             if (startPoint == null || startSessionXml == null) {
                 return null;
             }
 
             return new QuicksaveData {
-                Start = new QuicksaveStartPoint {
-                    AreaSid = startPoint.AreaSid,
-                    SideMode = startPoint.SideMode,
-                    Level = startPoint.Level,
-                    RespawnX = startPoint.RespawnX,
-                    RespawnY = startPoint.RespawnY,
-                },
-                Inputs = buffer.Snapshot(),
+                Start = startPoint.Clone(),
+                Inputs = Buffer.Snapshot(),
                 // Session at input-buffer start — must match what playback begins from.
                 SessionXml = startSessionXml,
                 ModSessions = startModSessions == null
@@ -36,41 +28,34 @@ public sealed class QuicksaveTracker {
         }
     }
 
-    public void Reset(Session session, Level level) {
+    public static void Reset(Session session, Level level) {
         startPoint = QuicksaveStartPoint.FromSession(session);
         startSessionXml = SessionSnapshot.CaptureSessionXml(session);
         startModSessions = SessionSnapshot.CaptureModSessions();
-        buffer.Clear();
+        Buffer.Clear();
     }
 
-    /// <summary>
-    /// After loading a quicksave, keep its start point, start session, and inputs as the
-    /// base of the current tracking session so later saves include the full path.
-    /// </summary>
-    public void SeedFrom(QuicksaveData data) {
+    // After load, keep the quicksave's start + inputs as the base of the next tracking session.
+    public static void SeedFrom(QuicksaveData data) {
         if (string.IsNullOrWhiteSpace(data.SessionXml)) {
-            throw new InvalidOperationException("Cannot seed tracker from a quicksave without a session snapshot.");
+            throw new InvalidOperationException(
+                "Cannot seed tracker from a quicksave without a session snapshot."
+            );
         }
 
-        startPoint = new QuicksaveStartPoint {
-            AreaSid = data.Start.AreaSid,
-            SideMode = data.Start.SideMode,
-            Level = data.Start.Level,
-            RespawnX = data.Start.RespawnX,
-            RespawnY = data.Start.RespawnY,
-        };
+        startPoint = data.Start.Clone();
         startSessionXml = data.SessionXml;
         startModSessions = data.ModSessions == null
             ? null
             : new Dictionary<string, string>(data.ModSessions, StringComparer.OrdinalIgnoreCase);
-        buffer.Seed(data.Inputs);
+        Buffer.Seed(data.Inputs);
     }
 
-    public void RecordFrame(TasActionsMapper mapper, Level level, Player? player) {
+    public static void RecordFrame(TasActionsMapper mapper, Level level, Player? player) {
         if (!IsTracking) {
             return;
         }
 
-        mapper.Sample(level, player, buffer);
+        mapper.Sample(level, player, Buffer);
     }
 }

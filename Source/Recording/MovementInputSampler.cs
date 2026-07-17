@@ -1,18 +1,9 @@
+using Celeste.Mod.QuicksaveMod.Interop;
 using Microsoft.Xna.Framework;
 
 namespace Celeste.Mod.QuicksaveMod.Recording;
 
 internal static class MovementInputSampler {
-    private static readonly List<Func<Player, bool>> ModAnalogLocomotionChecks = [];
-
-    internal static void RegisterAnalogLocomotionCheck(Func<Player, bool> check) {
-        ModAnalogLocomotionChecks.Add(check);
-    }
-
-    internal static void ClearAnalogLocomotionChecks() {
-        ModAnalogLocomotionChecks.Clear();
-    }
-
     internal static bool UsesAnalogLocomotion(Player? player) {
         if (player is not { Dead: false }) {
             return false;
@@ -23,13 +14,7 @@ internal static class MovementInputSampler {
             return true;
         }
 
-        foreach (Func<Player, bool> check in ModAnalogLocomotionChecks) {
-            if (check(player)) {
-                return true;
-            }
-        }
-
-        return false;
+        return QuicksaveModInterop.UsesAnalogLocomotion(player);
     }
 
     internal static void AppendCardinalDirections(Level level, List<char> actions) {

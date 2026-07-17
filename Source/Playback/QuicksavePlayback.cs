@@ -1,39 +1,38 @@
 using Celeste.Mod.QuicksaveMod.Interop;
 using Celeste.Mod.QuicksaveMod.Module;
 using Celeste.Mod.QuicksaveMod.Quicksave;
+using Celeste.Mod.QuicksaveMod.Quicksave.Storage;
 using Monocle;
 using TAS;
 
 namespace Celeste.Mod.QuicksaveMod.Playback;
 
-public static class QuicksavePlayback {
-    private static bool _watching;
-    private static bool _playbackStarted;
-    private static string? _previousFilePath;
-    private static bool _filePathOverridden;
-    private static string? _tempTasPath;
-    private static QuicksaveData? _loadedQuicksave;
+internal static class QuicksavePlayback {
+    private static bool watching;
+    private static bool playbackStarted;
+    private static string? previousFilePath;
+    private static bool filePathOverridden;
+    private static string? tempTasPath;
+    private static QuicksaveData? loadedQuicksave;
 
-    public static void Apply() {
-        On.Monocle.Engine.Update += WatchForEnd;
-    }
+    // Wired by Module so Playback does not call into Tracker/Recorder directly.
+    public static Action<QuicksaveData>? OnSeedNeeded { get; set; }
 
-    public static void Unapply() {
-        On.Monocle.Engine.Update -= WatchForEnd;
+    public static void Reset() {
         RestorePreviousFilePath();
         DeleteTempTasFile();
-        _watching = false;
-        _playbackStarted = false;
-        _loadedQuicksave = null;
+        watching = false;
+        playbackStarted = false;
+        loadedQuicksave = null;
     }
 
-    public static void Start(string tasFilePath, QuicksaveData loadedQuicksave) {
+    public static void Start(string tasFilePath, QuicksaveData loaded) {
         string fullPath = Path.GetFullPath(tasFilePath);
-        string? orphanedTemp = _tempTasPath;
-        _tempTasPath = fullPath;
-        _loadedQuicksave = loadedQuicksave.Clone();
-        _watching = true;
-        _playbackStarted = false;
+        string? orphanedTemp = tempTasPath;
+        tempTasPath = fullPath;
+        loadedQuicksave = loaded.Clone();
+        watching = true;
+        playbackStarted = false;
 
         // A prior post-playback freeze must not block Level.Update / player intro on the new load.
         QuicksaveLoadFreeze.Cancel();
@@ -43,9 +42,9 @@ public static class QuicksavePlayback {
                 Manager.DisableRun();
             }
 
-            if (!_filePathOverridden) {
-                _previousFilePath = Manager.Controller.FilePath;
-                _filePathOverridden = true;
+            if (!filePathOverridden) {
+                previousFilePath = Manager.Controller.FilePath;
+                filePathOverridden = true;
             }
 
             // RefreshInputs clears parsed inputs when NextState is Disabled.
@@ -59,36 +58,34 @@ public static class QuicksavePlayback {
         });
     }
 
-    private static void WatchForEnd(On.Monocle.Engine.orig_Update orig, Engine engine, Microsoft.Xna.Framework.GameTime gameTime) {
-        orig(engine, gameTime);
-
-        if (!_watching) {
+    public static void OnEngineUpdate() {
+        if (!watching) {
             return;
         }
 
         if (Manager.Running) {
-            _playbackStarted = true;
+            playbackStarted = true;
 
             // *** breakpoint: CelesteTAS pauses with Break set.
             if (Manager.CurrState == Manager.State.Paused && Manager.Controller.Break) {
-                FinishPlayback();
+                Finish();
             }
 
             return;
         }
 
         // EnableRun happens on a later Manager.Update after we set NextState.
-        if (!_playbackStarted) {
+        if (!playbackStarted) {
             return;
         }
 
         // Unexpected stop (EOF without pause, abort, etc.).
-        FinishPlayback();
+        Finish();
     }
 
-    private static void FinishPlayback() {
-        _watching = false;
-        _playbackStarted = false;
+    private static void Finish() {
+        watching = false;
+        playbackStarted = false;
 
         if (Manager.Running) {
             Manager.DisableRun();
@@ -96,28 +93,27 @@ public static class QuicksavePlayback {
 
         RestorePreviousFilePath();
         DeleteTempTasFile();
-        SeedTrackerFromLoadedQuicksave();
+        RaiseSeedNeeded();
 
         if (ShouldSavestateOnLoad() && SpeedrunToolBridge.TrySaveState()) {
-            Logger.Info(nameof(QuicksavePlayback), "Quicksave playback finished; created SpeedrunTool savestate.");
+            Logger.Info(QuicksaveConstants.LogTag, "Quicksave playback finished; created SpeedrunTool savestate.");
             return;
         }
 
         QuicksaveLoadFreeze.Begin();
-        Logger.Info(nameof(QuicksavePlayback), "Quicksave playback finished; CelesteTAS stopped.");
+        Logger.Info(QuicksaveConstants.LogTag, "Quicksave playback finished; CelesteTAS stopped.");
     }
 
-    private static void SeedTrackerFromLoadedQuicksave() {
-        QuicksaveData? data = _loadedQuicksave;
-        _loadedQuicksave = null;
+    private static void RaiseSeedNeeded() {
+        QuicksaveData? data = loadedQuicksave;
+        loadedQuicksave = null;
         if (data == null) {
             return;
         }
 
-        QuicksaveTracker.Instance.SeedFrom(data);
-        Recording.GameplayInputRecorder.ResetMapper();
+        OnSeedNeeded?.Invoke(data);
         Logger.Info(
-            nameof(QuicksavePlayback),
+            QuicksaveConstants.LogTag,
             $"Seeded input tracker with {data.Inputs.Count} lines from loaded quicksave."
         );
     }
@@ -128,13 +124,13 @@ public static class QuicksavePlayback {
     }
 
     private static void RestorePreviousFilePath() {
-        if (!_filePathOverridden) {
+        if (!filePathOverridden) {
             return;
         }
 
-        string? previous = _previousFilePath;
-        _previousFilePath = null;
-        _filePathOverridden = false;
+        string? previous = previousFilePath;
+        previousFilePath = null;
+        filePathOverridden = false;
 
         if (previous == null) {
             return;
@@ -149,13 +145,13 @@ public static class QuicksavePlayback {
     }
 
     private static void DeleteTempTasFile() {
-        string? path = _tempTasPath;
-        _tempTasPath = null;
+        string? path = tempTasPath;
+        tempTasPath = null;
         TryDeleteTempFile(path);
     }
 
     private static void TryDeleteTempFile(string? path) {
-        if (path == null || !IsTempPlaybackPath(path)) {
+        if (path == null || !QuicksavePath.IsTempPlaybackPath(path)) {
             return;
         }
 
@@ -164,21 +160,7 @@ public static class QuicksavePlayback {
                 File.Delete(path);
             }
         } catch (Exception e) {
-            Logger.Warn(nameof(QuicksavePlayback), $"Failed to delete temp TAS file '{path}': {e.Message}");
+            Logger.Warn(QuicksaveConstants.LogTag, $"Failed to delete temp TAS file '{path}': {e.Message}");
         }
-    }
-
-    private static bool IsTempPlaybackPath(string path) {
-        string fullPath = Path.GetFullPath(path);
-        string tempRoot = Path.GetFullPath(Path.Combine(Everest.PathGame, "Quicksaves", ".temp"));
-
-        if (!fullPath.StartsWith(tempRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
-            && !fullPath.Equals(tempRoot, StringComparison.OrdinalIgnoreCase)) {
-            return false;
-        }
-
-        string fileName = Path.GetFileName(fullPath);
-        return fileName.StartsWith("playback_", StringComparison.Ordinal)
-            && fileName.EndsWith(".tas", StringComparison.OrdinalIgnoreCase);
     }
 }

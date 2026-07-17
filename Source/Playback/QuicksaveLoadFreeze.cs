@@ -1,11 +1,9 @@
+using Celeste.Mod.QuicksaveMod.Quicksave;
 using Monocle;
 
 namespace Celeste.Mod.QuicksaveMod.Playback;
 
-/// <summary>
-/// SpeedrunTool-style post-load freeze: skip Level.Update until a gameplay input is pressed.
-/// </summary>
-public static class QuicksaveLoadFreeze {
+internal static class QuicksaveLoadFreeze {
     private static readonly VirtualInput[] UnfreezeInputs = [
         Input.Dash,
         Input.Jump,
@@ -25,27 +23,16 @@ public static class QuicksaveLoadFreeze {
 
     public static bool IsWaiting { get; private set; }
 
-    public static void Apply() {
-        On.Celeste.Level.Update += UpdateBackdropWhenWaiting;
-        On.Monocle.MInput.Update += ThawAfterInputUpdate;
-    }
-
-    public static void Unapply() {
-        On.Celeste.Level.Update -= UpdateBackdropWhenWaiting;
-        On.Monocle.MInput.Update -= ThawAfterInputUpdate;
-        Cancel();
-    }
-
     public static void Begin() {
         IsWaiting = true;
-        Logger.Info(nameof(QuicksaveLoadFreeze), "Waiting for input after quicksave playback.");
+        Logger.Info(QuicksaveConstants.LogTag, "Waiting for input after quicksave playback.");
     }
 
     public static void Cancel() {
         IsWaiting = false;
     }
 
-    private static void UpdateBackdropWhenWaiting(On.Celeste.Level.orig_Update orig, Level level) {
+    public static void OnLevelUpdate(On.Celeste.Level.orig_Update orig, Level level) {
         if (!IsWaiting) {
             orig(level);
             return;
@@ -57,9 +44,7 @@ public static class QuicksaveLoadFreeze {
         level.Background.Update(level);
     }
 
-    private static void ThawAfterInputUpdate(On.Monocle.MInput.orig_Update orig) {
-        orig();
-
+    public static void OnAfterInputUpdate() {
         if (!IsWaiting || Engine.Scene is not Level) {
             return;
         }
@@ -67,7 +52,7 @@ public static class QuicksaveLoadFreeze {
         for (int i = 0; i < UnfreezeInputs.Length; i++) {
             if (IsActive(UnfreezeInputs[i])) {
                 Cancel();
-                Logger.Info(nameof(QuicksaveLoadFreeze), "Resumed after input.");
+                Logger.Info(QuicksaveConstants.LogTag, "Resumed after input.");
                 return;
             }
         }

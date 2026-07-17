@@ -4,10 +4,6 @@ using Monocle;
 
 namespace Celeste.Mod.QuicksaveMod.Quicksave;
 
-/// <summary>
-/// Captures and restores vanilla <see cref="Session"/> plus Everest ModSessions as they
-/// were at the start of the input buffer, so playback can re-apply mid-run session changes.
-/// </summary>
 internal static class SessionSnapshot {
     private const string BinaryModSessionPrefix = "base64:";
 
@@ -29,8 +25,7 @@ internal static class SessionSnapshot {
             throw new InvalidDataException("Failed to deserialize quicksave session snapshot.", e);
         }
 
-        // Inputs were recorded from the tracker start (last death / load), not the
-        // player's current room — pin spawn to Start while keeping session progress.
+        // Inputs were recorded from tracker start, not the player's current room.
         ApplyStartPoint(session, start);
         session.JustStarted = false;
         session.InArea = true;
@@ -58,7 +53,7 @@ internal static class SessionSnapshot {
                     : Encoding.UTF8.GetString(data);
             } catch (Exception e) {
                 Logger.Warn(
-                    nameof(SessionSnapshot),
+                    QuicksaveConstants.LogTag,
                     $"Failed to serialize ModSession for {module.Metadata.Name}: {e.Message}"
                 );
             }
@@ -86,7 +81,7 @@ internal static class SessionSnapshot {
                 module.DeserializeSession(slot, data);
             } catch (Exception e) {
                 Logger.Warn(
-                    nameof(SessionSnapshot),
+                    QuicksaveConstants.LogTag,
                     $"Failed to deserialize ModSession for {name}: {e.Message}"
                 );
             }

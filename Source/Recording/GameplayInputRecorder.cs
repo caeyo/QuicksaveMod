@@ -1,26 +1,25 @@
 using Celeste.Mod.QuicksaveMod.Interop;
-using Celeste.Mod.QuicksaveMod.Playback;
 using Celeste.Mod.QuicksaveMod.Quicksave;
 using Monocle;
 
 namespace Celeste.Mod.QuicksaveMod.Recording;
 
-public static class GameplayInputRecorder {
+internal static class GameplayInputRecorder {
     private static TasActionsMapper? mapper;
 
-    public static void Apply() {
-        mapper = new TasActionsMapper();
-        On.Monocle.MInput.Update += OnMInputUpdate;
+    public static void EnsureMapper() {
+        mapper ??= new TasActionsMapper();
     }
 
-    public static void Unapply() {
-        On.Monocle.MInput.Update -= OnMInputUpdate;
+    public static void ClearMapper() {
         mapper = null;
     }
 
-    private static void OnMInputUpdate(On.Monocle.MInput.orig_Update orig) {
-        orig();
+    public static void ResetMapper() {
+        mapper?.Reset();
+    }
 
+    public static void OnAfterInputUpdate() {
         if (mapper == null || Engine.Scene is not Level level) {
             return;
         }
@@ -34,18 +33,12 @@ public static class GameplayInputRecorder {
             return;
         }
 
-        QuicksaveTracker.Instance.RecordFrame(mapper, level, player);
+        QuicksaveTracker.RecordFrame(mapper, level, player);
     }
 
-    public static void ResetMapper() {
-        mapper?.Reset();
-    }
-
-    /// <summary>Gates that do not need a Player lookup.</summary>
     private static bool ShouldRecordCheap(Level level) =>
-        QuicksaveTracker.Instance.IsTracking
+        QuicksaveTracker.IsTracking
         && !IsSuspended
-        && !QuicksaveLoadFreeze.IsWaiting
         && !SpeedrunToolBridge.IsGameFrozen
         && CelesteTasImports.IsTasActive?.Invoke() != true
         && !(level.Paused && !level.PauseMainMenuOpen);
