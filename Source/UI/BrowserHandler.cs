@@ -1,4 +1,5 @@
 using Celeste.Mod.ImGuiHelper;
+using Celeste.Mod.QuicksaveMod.Hooks;
 using Celeste.Mod.QuicksaveMod.Module;
 using Celeste.Mod.QuicksaveMod.Quicksave;
 using ImGuiNET;
@@ -116,6 +117,7 @@ internal sealed class BrowserHandler : ImGuiHandler {
 
         QuicksaveService.SuspendTracking();
         Visible = true;
+        BrowserInputHooks.OnBrowserOpened();
     }
 
     public void Close() {
@@ -124,6 +126,7 @@ internal sealed class BrowserHandler : ImGuiHandler {
         }
 
         Visible = false;
+        BrowserInputHooks.OnBrowserClosed();
         state.ResetTransient();
         view.ResetTransient();
         modals.ResetTransient();
@@ -138,6 +141,9 @@ internal sealed class BrowserHandler : ImGuiHandler {
         appliedFreeze = false;
         QuicksaveService.ResumeTracking();
         Engine.Instance.IsMouseVisible = savedMouseVisible;
+
+        MInput.Disabled = false;
+        MInput.Active = true;
     }
 
     private void ApplyUiScale(float uiScale) {
