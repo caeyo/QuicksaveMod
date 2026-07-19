@@ -54,6 +54,9 @@ internal static class QuicksaveService {
         Session session = BuildSessionForLoad(data);
         SessionSnapshot.RestoreModSessions(data.ModSessions);
         if (SaveData.Instance != null) {
+            // Treat this load as the overworld stats baseline so return-to-map does not
+            // count up deaths/berries that were already on the file before the load.
+            session.OldStats = SaveData.Instance.Areas[session.Area.ID].Clone();
             SaveData.Instance.CurrentSession = session;
         }
 
