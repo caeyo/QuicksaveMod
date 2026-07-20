@@ -34,7 +34,7 @@
         <Reference Include="$(CelestePrefix)\FNA.dll" Private="false" />
         <Reference Include="$(CelestePrefix)\YamlDotNet.dll" Private="false" />
         <Reference Include="CelesteTAS-EverestInterop">
-          <HintPath>..\..\CelesteTAS\bin\CelesteTAS-EverestInterop.dll</HintPath>
+          <HintPath>..\..\CelesteTAS-EverestInterop\bin\CelesteTAS-EverestInterop.dll</HintPath>
         </Reference>
         <Reference Include="ImGuiHelper">
           <HintPath>..\..\ImGuiHelper\bin\ImGuiHelper.dll</HintPath>
