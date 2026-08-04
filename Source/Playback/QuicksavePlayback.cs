@@ -119,7 +119,8 @@ internal static class QuicksavePlayback {
 
     private static bool ShouldSavestateOnLoad() {
         return QuicksaveModModule.Settings.SavestateOnQuicksaveLoad
-            && SpeedrunToolBridge.IsLoaded;
+            && SpeedrunToolBridge.IsLoaded
+            && SpeedrunToolBridge.IsEnabled;
     }
 
     private static void RestorePreviousFilePath() {
