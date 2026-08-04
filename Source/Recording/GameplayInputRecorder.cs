@@ -1,3 +1,4 @@
+using Celeste.Mod.QuicksaveMod.Ghost;
 using Celeste.Mod.QuicksaveMod.Interop;
 using Celeste.Mod.QuicksaveMod.Quicksave;
 using Monocle;
@@ -11,6 +12,8 @@ internal static class GameplayInputRecorder {
         mapper ??= new TasActionsMapper();
     }
 
+    internal static TasActionsMapper? GetMapper() => mapper;
+
     public static void ClearMapper() {
         mapper = null;
     }
@@ -20,25 +23,42 @@ internal static class GameplayInputRecorder {
     }
 
     public static void OnAfterInputUpdate() {
-        if (mapper == null || Engine.Scene is not Level level) {
+        if (mapper == null || Engine.Scene is not Level level || !ShouldRecordFrame(level)) {
             return;
         }
 
-        if (!ShouldRecordCheap(level)) {
+        bool trackQuicksave = QuicksaveTracker.IsTracking;
+        bool trackGhost = GhostRecordingSession.IsRecordingInputs;
+        if (!trackQuicksave && !trackGhost) {
             return;
         }
 
         Player? player = level.Tracker.GetEntity<Player>();
-        if (player is { Dead: true }) {
+        if (trackQuicksave && player is { Dead: true }) {
+            trackQuicksave = false;
+            if (!trackGhost) {
+                return;
+            }
+        }
+
+        InputLineBuffer? quicksaveBuffer = trackQuicksave ? QuicksaveTracker.Buffer : null;
+        InputLineBuffer? ghostBuffer = trackGhost ? GhostRecordingSession.InputBuffer : null;
+        if (quicksaveBuffer == null) {
+            mapper.Sample(level, player, ghostBuffer!);
             return;
         }
 
-        QuicksaveTracker.RecordFrame(mapper, level, player);
+        if (ghostBuffer == null) {
+            mapper.Sample(level, player, quicksaveBuffer);
+            return;
+        }
+
+        // One Sample per frame — TwoSlotEncoder state must not advance twice (breaks J/K, X/C, etc.).
+        mapper.Sample(level, player, quicksaveBuffer, ghostBuffer);
     }
 
-    private static bool ShouldRecordCheap(Level level) =>
-        QuicksaveTracker.IsTracking
-        && !IsSuspended
+    private static bool ShouldRecordFrame(Level level) =>
+        !IsSuspended
         && !SpeedrunToolBridge.IsGameFrozen
         && CelesteTasImports.IsTasActive?.Invoke() != true
         && level is not { Paused: true, PauseMainMenuOpen: false };

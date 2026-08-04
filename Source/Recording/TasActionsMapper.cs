@@ -22,6 +22,15 @@ internal class TasActionsMapper {
     }
 
     public void Sample(Level level, Player? player, InputLineBuffer buffer) {
+        Sample(level, player, buffer, null);
+    }
+
+    public void Sample(
+        Level level,
+        Player? player,
+        InputLineBuffer primary,
+        InputLineBuffer? secondary
+    ) {
         currActions.Clear();
         float? featherAngle = null;
         float? featherMagnitude = null;
@@ -36,7 +45,8 @@ internal class TasActionsMapper {
         }
         AppendMenuInputs(level, menu, currActions);
 
-        buffer.PushFrame(currActions, featherAngle, featherMagnitude);
+        primary.PushFrame(currActions, featherAngle, featherMagnitude);
+        secondary?.PushFrame(currActions, featherAngle, featherMagnitude);
     }
 
     private static void AppendMovement(

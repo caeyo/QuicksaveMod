@@ -1,3 +1,4 @@
+using Celeste.Mod.QuicksaveMod.Ghost.Playback;
 using Celeste.Mod.QuicksaveMod.Playback;
 
 namespace Celeste.Mod.QuicksaveMod.Hooks;
@@ -17,5 +18,6 @@ internal static class LoadFreezeHooks {
     private static void OnMInputUpdate(On.Monocle.MInput.orig_Update orig) {
         orig();
         QuicksaveLoadFreeze.OnAfterInputUpdate();
+        GhostRaceController.TryStartOnPlayerInput();
     }
 }

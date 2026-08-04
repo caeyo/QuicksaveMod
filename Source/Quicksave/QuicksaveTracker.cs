@@ -3,7 +3,7 @@ using Celeste.Mod.QuicksaveMod.Recording;
 namespace Celeste.Mod.QuicksaveMod.Quicksave;
 
 internal static class QuicksaveTracker {
-    private static readonly InputLineBuffer Buffer = new();
+    internal static InputLineBuffer Buffer { get; } = new();
     private static QuicksaveStartPoint? startPoint;
     private static string? startSessionXml;
     private static Dictionary<string, string>? startModSessions;
@@ -49,13 +49,5 @@ internal static class QuicksaveTracker {
             ? null
             : new Dictionary<string, string>(data.ModSessions, StringComparer.OrdinalIgnoreCase);
         Buffer.Seed(data.Inputs);
-    }
-
-    public static void RecordFrame(TasActionsMapper mapper, Level level, Player? player) {
-        if (!IsTracking) {
-            return;
-        }
-
-        mapper.Sample(level, player, Buffer);
     }
 }

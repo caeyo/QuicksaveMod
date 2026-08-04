@@ -52,6 +52,7 @@ internal static class QuicksaveLoadFreeze {
         foreach (VirtualInput t in UnfreezeInputs) {
             if (IsActive(t)) {
                 Cancel();
+                Ghost.Playback.GhostPlaybackHooks.OnLoadFreezeEnded();
                 Logger.Info(QuicksaveConstants.LogTag, "Resumed after input.");
                 return;
             }

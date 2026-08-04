@@ -1,3 +1,4 @@
+using Celeste.Mod.QuicksaveMod.Ghost.Playback;
 using Celeste.Mod.QuicksaveMod.Playback;
 using Monocle;
 
@@ -11,6 +12,7 @@ internal static class PlaybackHooks {
     public static void Unapply() {
         On.Monocle.Engine.Update -= OnEngineUpdate;
         QuicksavePlayback.Reset();
+        GhostSpectateController.Reset();
     }
 
     private static void OnEngineUpdate(
@@ -20,5 +22,6 @@ internal static class PlaybackHooks {
     ) {
         orig(engine, gameTime);
         QuicksavePlayback.OnEngineUpdate();
+        GhostSpectateController.OnEngineUpdate();
     }
 }

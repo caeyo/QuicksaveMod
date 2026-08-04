@@ -1,4 +1,7 @@
 ﻿using Celeste.Mod.ImGuiHelper;
+using Celeste.Mod.QuicksaveMod.Ghost;
+using Celeste.Mod.QuicksaveMod.Ghost.Playback;
+using Celeste.Mod.QuicksaveMod.Ghost.Recording;
 using Celeste.Mod.QuicksaveMod.Hooks;
 using Celeste.Mod.QuicksaveMod.Interop;
 using Celeste.Mod.QuicksaveMod.Playback;
@@ -21,13 +24,17 @@ public class QuicksaveModModule : EverestModule {
     public static QuicksaveModSaveData SaveData => (QuicksaveModSaveData) Instance._SaveData;
 
     private BrowserHandler? browserHandler;
+    private GhostBrowserHandler? ghostBrowserHandler;
+    private ModBrowserCoordinator? browserCoordinator;
 
     public QuicksaveModModule() {
         Instance = this;
 #if DEBUG
         Logger.SetLogLevel(QuicksaveConstants.LogTag, LogLevel.Verbose);
+        Logger.SetLogLevel(GhostConstants.LogTag, LogLevel.Verbose);
 #else
         Logger.SetLogLevel(QuicksaveConstants.LogTag, LogLevel.Info);
+        Logger.SetLogLevel(GhostConstants.LogTag, LogLevel.Info);
 #endif
     }
 
@@ -40,7 +47,8 @@ public class QuicksaveModModule : EverestModule {
     public override void Load() {
         typeof(SpeedrunToolSaveLoadImports).ModInterop();
 
-        QuicksavePlayback.OnSeedNeeded = SeedTrackerFromLoadedQuicksave;
+        QuicksavePlayback.OnSeedNeeded = data =>
+            InputTimelineRestorer.Restore(data, InputTimelineRestorer.GhostRestoreMode.AlwaysAnchor);
 
         LevelLoadHooks.Apply();
         BrowserInputHooks.Apply();
@@ -48,10 +56,20 @@ public class QuicksaveModModule : EverestModule {
         PlaybackHooks.Apply();
         LoadFreezeHooks.Apply();
         SpeedrunToolSaveLoadImports.Apply();
+        GhostRecordingHooks.Apply();
+        GhostPlaybackHooks.Apply();
 
         browserHandler = new BrowserHandler();
+        ghostBrowserHandler = new GhostBrowserHandler();
+        browserCoordinator = new ModBrowserCoordinator(browserHandler, ghostBrowserHandler);
+        browserHandler.SetCoordinator(browserCoordinator);
+
         if (!ImGuiManager.Handlers.OfType<BrowserHandler>().Any()) {
             ImGuiManager.Handlers.Add(browserHandler);
+        }
+
+        if (!ImGuiManager.Handlers.OfType<GhostBrowserHandler>().Any()) {
+            ImGuiManager.Handlers.Add(ghostBrowserHandler);
         }
     }
 
@@ -63,6 +81,17 @@ public class QuicksaveModModule : EverestModule {
             browserHandler = null;
         }
 
+        if (ghostBrowserHandler != null) {
+            ghostBrowserHandler.Close();
+            ImGuiManager.Handlers.Remove(ghostBrowserHandler);
+            GhostBrowserHandler.ClearInstance();
+            ghostBrowserHandler = null;
+        }
+
+        browserCoordinator = null;
+
+        GhostPlaybackHooks.Unapply();
+        GhostRecordingHooks.Unapply();
         LoadFreezeHooks.Unapply();
         PlaybackHooks.Unapply();
         RecordingHooks.Unapply();
@@ -71,10 +100,5 @@ public class QuicksaveModModule : EverestModule {
         LevelLoadHooks.Unapply();
 
         QuicksavePlayback.OnSeedNeeded = null;
-    }
-
-    private static void SeedTrackerFromLoadedQuicksave(QuicksaveData data) {
-        QuicksaveTracker.SeedFrom(data);
-        GameplayInputRecorder.ResetMapper();
     }
 }

@@ -1,7 +1,7 @@
 using Celeste.Mod.ImGuiHelper;
 using Celeste.Mod.QuicksaveMod.Hooks;
 using Celeste.Mod.QuicksaveMod.Module;
-using Celeste.Mod.QuicksaveMod.Quicksave;
+using Celeste.Mod.QuicksaveMod.Recording;
 using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Monocle;
@@ -28,27 +28,19 @@ internal sealed class BrowserHandler : ImGuiHandler {
     private float appliedUiScale = 1f;
     private bool forceWindowSize;
 
+    private ModBrowserCoordinator? coordinator;
+
     public BrowserHandler() {
         Instance = this;
         Visible = false;
 
-        BrowserCommands commands = new(state, Close);
+        BrowserCommands commands = new(state, ModBrowserCoordinator.CloseAll);
         view = new BrowserView(state, commands);
         modals = new BrowserModals(state, commands);
     }
 
     public override void Update(GameTime gameTime) {
-        if (Visible) {
-            return;
-        }
-
-        if (!QuicksaveModModule.Settings.OpenBrowser.Pressed) {
-            return;
-        }
-
-        QuicksaveModModule.Settings.OpenBrowser.ConsumePress();
-        QuicksaveModModule.Settings.OpenBrowser.ConsumeBuffer();
-        Open();
+        coordinator?.Update(gameTime);
     }
 
     public override void Render() {
@@ -93,12 +85,14 @@ internal sealed class BrowserHandler : ImGuiHandler {
         view.FlushPendingActivate();
     }
 
-    private void Open() {
+    internal void SetCoordinator(ModBrowserCoordinator value) => coordinator = value;
+
+    public void Open(bool focusWindow = true) {
         BrowserNavigation.EnsureRootExists();
 
         state.NavigateTo(BrowserNavigation.RootPath);
         state.ResetTransient();
-        state.FocusWindow = true;
+        state.FocusWindow = focusWindow;
 
         savedMouseVisible = Engine.Instance.IsMouseVisible;
         Engine.Instance.IsMouseVisible = true;
@@ -115,9 +109,12 @@ internal sealed class BrowserHandler : ImGuiHandler {
         appliedUiScale = 0f;
         forceWindowSize = true;
 
-        QuicksaveService.SuspendTracking();
+        RecordingSessionControls.SuspendAll();
+        bool openingFirst = !ModBrowserCoordinator.AnyVisible;
         Visible = true;
-        BrowserInputHooks.OnBrowserOpened();
+        if (openingFirst) {
+            BrowserInputHooks.OnBrowserOpened();
+        }
     }
 
     public void Close() {
@@ -126,7 +123,6 @@ internal sealed class BrowserHandler : ImGuiHandler {
         }
 
         Visible = false;
-        BrowserInputHooks.OnBrowserClosed();
         state.ResetTransient();
         view.ResetTransient();
         modals.ResetTransient();
@@ -139,11 +135,15 @@ internal sealed class BrowserHandler : ImGuiHandler {
         }
 
         appliedFreeze = false;
-        QuicksaveService.ResumeTracking();
+        RecordingSessionControls.ResumeAll();
         Engine.Instance.IsMouseVisible = savedMouseVisible;
 
         MInput.Disabled = false;
         MInput.Active = true;
+
+        if (!ModBrowserCoordinator.AnyVisible) {
+            BrowserInputHooks.OnBrowserClosed();
+        }
     }
 
     private void ApplyUiScale(float uiScale) {
@@ -170,6 +170,10 @@ internal sealed class BrowserHandler : ImGuiHandler {
         return Math.Clamp(auto * user, 1f, 2.5f);
     }
 
+    internal void SetNextWindowPos(System.Numerics.Vector2 pos, System.Numerics.Vector2 pivot) {
+        ImGui.SetNextWindowPos(pos, ImGuiCond.Always, pivot);
+    }
+
     internal void OnAfterInputUpdate() {
         if (!Visible) {
             return;
@@ -177,7 +181,7 @@ internal sealed class BrowserHandler : ImGuiHandler {
 
         if (Input.ESC.Pressed) {
             if (!TryCancelSubOperationOnEscape()) {
-                Close();
+                ModBrowserCoordinator.CloseAll();
             }
         }
 

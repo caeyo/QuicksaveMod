@@ -1,6 +1,9 @@
+using Celeste.Mod.QuicksaveMod.Ghost;
+using Celeste.Mod.QuicksaveMod.Quicksave;
+using Microsoft.Xna.Framework;
+using Monocle;
 using System.Linq.Expressions;
 using System.Reflection;
-using Celeste.Mod.QuicksaveMod.Quicksave;
 
 namespace Celeste.Mod.QuicksaveMod.Interop;
 
@@ -80,6 +83,56 @@ public static class SpeedrunToolBridge {
             return false;
         }
     }
+
+    internal static void ConfigureRaceTimer(GhostFinishData? finish) {
+        if (!IsLoaded || !IsEnabled || finish == null) {
+            return;
+        }
+
+        EnsureRaceTimerResolved();
+        pendingRaceFinish = finish;
+        try {
+            switchRoomTimer?.Invoke(null, [currentRoomTimerTypeValue]);
+            clearPbTimes?.Invoke(null, [false]);
+        } catch (Exception e) {
+            Logger.Warn(GhostConstants.LogTag, $"Failed to configure SRT race timer: {e.Message}");
+        }
+    }
+
+    internal static void UpdateRaceTimerEndpoint(Level level) {
+        if (pendingRaceFinish == null || !IsLoaded || !IsEnabled) {
+            return;
+        }
+
+        if (level.Session.Level != pendingRaceFinish.Room) {
+            return;
+        }
+
+        EnsureRaceTimerResolved();
+        Player? player = level.Tracker.GetEntity<Player>();
+        if (player is not { Dead: false }) {
+            return;
+        }
+
+        try {
+            if (createEndPointAtPosition != null) {
+                createEndPointAtPosition(level, player, pendingRaceFinish.Position);
+            }
+
+            seedPbTime?.Invoke(level, pendingRaceFinish.SessionTimeTicks);
+            pendingRaceFinish = null;
+        } catch (Exception e) {
+            Logger.Warn(GhostConstants.LogTag, $"Failed to spawn SRT race endpoint: {e.Message}");
+        }
+    }
+
+    private static GhostFinishData? pendingRaceFinish;
+    private static bool raceTimerResolveAttempted;
+    private static object? currentRoomTimerTypeValue;
+    private static MethodInfo? switchRoomTimer;
+    private static MethodInfo? clearPbTimes;
+    private static Action<Level, Player, Vector2>? createEndPointAtPosition;
+    private static Action<Level, long>? seedPbTime;
 
     private static void EnsureResolved() {
         if (resolveAttempted) {
@@ -161,6 +214,102 @@ public static class SpeedrunToolBridge {
                         QuicksaveConstants.LogTag,
                         $"Failed to compile SpeedrunToolSettings.Enabled accessor: {e.Message}"
                     );
+                }
+            }
+
+            return;
+        }
+    }
+
+    private static void EnsureRaceTimerResolved() {
+        if (raceTimerResolveAttempted) {
+            return;
+        }
+
+        raceTimerResolveAttempted = true;
+
+        foreach (EverestModule module in Everest.Modules) {
+            if (module.Metadata.Name != Meta.Name) {
+                continue;
+            }
+
+            Assembly assembly = module.GetType().Assembly;
+
+            Type? roomTimerManagerType = assembly.GetType("Celeste.Mod.SpeedrunTool.RoomTimer.RoomTimerManager");
+            Type? roomTimerType = assembly.GetType("Celeste.Mod.SpeedrunTool.RoomTimer.RoomTimerType");
+            Type? endPointType = assembly.GetType("Celeste.Mod.SpeedrunTool.RoomTimer.EndPoint");
+            Type? roomTimerDataType = assembly.GetType("Celeste.Mod.SpeedrunTool.RoomTimer.RoomTimerData");
+
+            if (roomTimerManagerType == null || roomTimerType == null || endPointType == null) {
+                Logger.Warn(GhostConstants.LogTag, "Could not resolve SpeedrunTool room timer types.");
+                return;
+            }
+
+            currentRoomTimerTypeValue = Enum.Parse(roomTimerType, "CurrentRoom");
+            switchRoomTimer = roomTimerManagerType.GetMethod(
+                "SwitchRoomTimer",
+                BindingFlags.Public | BindingFlags.Static
+            );
+            clearPbTimes = roomTimerManagerType.GetMethod(
+                "ClearPbTimes",
+                BindingFlags.Public | BindingFlags.Static
+            );
+
+            ConstructorInfo? endPointCtor = endPointType.GetConstructor(
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                binder: null,
+                types: [typeof(Player)],
+                modifiers: null
+            );
+
+            if (endPointCtor != null) {
+                createEndPointAtPosition = (level, player, position) => {
+                    Vector2 saved = player.Position;
+                    player.Position = position;
+                    try {
+                        endPointType.GetMethod(
+                            "ClearAll",
+                            BindingFlags.Public | BindingFlags.Static
+                        )?.Invoke(null, null);
+                        object endpoint = endPointCtor.Invoke([player]);
+                        level.Add((Entity) endpoint);
+                    } finally {
+                        player.Position = saved;
+                    }
+                };
+            }
+
+            if (roomTimerDataType != null) {
+                FieldInfo? currentDataField = roomTimerManagerType.GetField(
+                    "CurrentRoomTimerData",
+                    BindingFlags.NonPublic | BindingFlags.Static
+                );
+                PropertyInfo? pbTimesProperty = roomTimerDataType.GetProperty(
+                    "PbTimes",
+                    BindingFlags.Public | BindingFlags.Instance
+                );
+                MethodInfo? updateTimeKeys = roomTimerDataType.GetMethod(
+                    "UpdateTimeKeys",
+                    BindingFlags.NonPublic | BindingFlags.Instance
+                );
+
+                if (currentDataField != null && pbTimesProperty != null && updateTimeKeys != null) {
+                    seedPbTime = (level, ticks) => {
+                        object? timerData = currentDataField.GetValue(null);
+                        if (timerData == null) {
+                            return;
+                        }
+
+                        updateTimeKeys.Invoke(timerData, [level]);
+                        if (pbTimesProperty.GetValue(timerData) is not Dictionary<string, long> pbTimes) {
+                            return;
+                        }
+
+                        string prefix = (string) roomTimerDataType
+                            .GetProperty("TimeKeyPrefix", BindingFlags.Public | BindingFlags.Instance)!
+                            .GetValue(timerData)!;
+                        pbTimes[prefix + "EndPoint"] = ticks;
+                    };
                 }
             }
 

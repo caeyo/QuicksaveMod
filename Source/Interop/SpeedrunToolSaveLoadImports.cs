@@ -75,8 +75,11 @@ public static class SpeedrunToolSaveLoadImports {
             return;
         }
 
-        QuicksaveTracker.SeedFrom(timeline);
-        GameplayInputRecorder.ResetMapper();
+        InputTimelineRestorer.Restore(
+            timeline,
+            InputTimelineRestorer.GhostRestoreMode.MatchRecordingStartOrRaceAnchor
+        );
+
         Logger.Info(
             QuicksaveConstants.LogTag,
             $"Restored input timeline on SRT load ({timeline.Inputs.Count} lines)."

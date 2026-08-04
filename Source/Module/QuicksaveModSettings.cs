@@ -10,6 +10,9 @@ public class QuicksaveModSettings : EverestModuleSettings {
     public ButtonBinding OpenBrowser { get; set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
+    [SettingName("modoptions_quicksavemod_addtimertorace")]
+    public bool AddTimerToRace { get; set; } = true;
+
     [SettingName("modoptions_quicksavemod_playbackspeed")]
     public PlaybackSpeed PlaybackSpeed { get; set; } = PlaybackSpeed.Max;
 
@@ -42,6 +45,19 @@ public class QuicksaveModSettings : EverestModuleSettings {
                 Dialog.Clean("modoptions_quicksavemod_savestateonquicksaveload"),
                 SavestateOnQuicksaveLoad
             ).Change(value => SavestateOnQuicksaveLoad = value)
+        );
+    }
+
+    public void CreateAddTimerToRaceEntry(TextMenu menu, bool inGame) {
+        if (!Interop.SpeedrunToolBridge.IsLoaded) {
+            return;
+        }
+
+        menu.Add(
+            new TextMenu.OnOff(
+                Dialog.Clean("modoptions_quicksavemod_addtimertorace"),
+                AddTimerToRace
+            ).Change(value => AddTimerToRace = value)
         );
     }
 }

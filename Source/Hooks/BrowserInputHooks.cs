@@ -21,11 +21,12 @@ internal static class BrowserInputHooks {
 
     internal static void OnBrowserClosed() => HotkeyBlocker.Detach();
 
-    private static bool ShouldPauseScreenWipe => BrowserHandler.Instance?.Visible == true;
+    private static bool ShouldPauseScreenWipe => ModBrowserCoordinator.AnyVisible;
 
     private static void OnMInputUpdate(On.Monocle.MInput.orig_Update orig) {
         orig();
         BrowserHandler.Instance?.OnAfterInputUpdate();
+        GhostBrowserHandler.Instance?.OnAfterInputUpdate();
     }
 
     private static void OnScreenWipeUpdate(On.Celeste.ScreenWipe.orig_Update orig, ScreenWipe self, Scene scene) {
