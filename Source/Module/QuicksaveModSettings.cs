@@ -10,14 +10,14 @@ public class QuicksaveModSettings : EverestModuleSettings {
     public ButtonBinding OpenBrowser { get; set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-    [SettingName("modoptions_quicksavemod_addtimertorace")]
-    public bool AddTimerToRace { get; set; } = true;
-
     [SettingName("modoptions_quicksavemod_playbackspeed")]
     public PlaybackSpeed PlaybackSpeed { get; set; } = PlaybackSpeed.Max;
 
     [SettingName("modoptions_quicksavemod_savestateonquicksaveload")]
     public bool SavestateOnQuicksaveLoad { get; set; } = true;
+
+    [SettingName("modoptions_quicksavemod_addtimertorace")]
+    public bool AddTimerToRace { get; set; } = true;
 
     [SettingName("modoptions_quicksavemod_browseruiscale")]
     public int BrowserUiScalePercent { get; set; } = 100;
