@@ -38,6 +38,8 @@ public class QuicksaveModModule : EverestModule {
     }
 
     public override void Load() {
+        typeof(SpeedrunToolSaveLoadImports).ModInterop();
+
         QuicksavePlayback.OnSeedNeeded = SeedTrackerFromLoadedQuicksave;
 
         LevelLoadHooks.Apply();
@@ -45,6 +47,7 @@ public class QuicksaveModModule : EverestModule {
         RecordingHooks.Apply();
         PlaybackHooks.Apply();
         LoadFreezeHooks.Apply();
+        SpeedrunToolSaveLoadImports.Apply();
 
         browserHandler = new BrowserHandler();
         if (!ImGuiManager.Handlers.OfType<BrowserHandler>().Any()) {
@@ -64,6 +67,7 @@ public class QuicksaveModModule : EverestModule {
         PlaybackHooks.Unapply();
         RecordingHooks.Unapply();
         BrowserInputHooks.Unapply();
+        SpeedrunToolSaveLoadImports.Unapply();
         LevelLoadHooks.Unapply();
 
         QuicksavePlayback.OnSeedNeeded = null;
