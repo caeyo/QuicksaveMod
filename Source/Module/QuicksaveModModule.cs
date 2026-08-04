@@ -47,9 +47,6 @@ public class QuicksaveModModule : EverestModule {
     public override void Load() {
         typeof(SpeedrunToolSaveLoadImports).ModInterop();
 
-        QuicksavePlayback.OnSeedNeeded = data =>
-            InputTimelineRestorer.Restore(data, InputTimelineRestorer.GhostRestoreMode.AlwaysAnchor);
-
         LevelLoadHooks.Apply();
         BrowserInputHooks.Apply();
         RecordingHooks.Apply();
@@ -98,7 +95,5 @@ public class QuicksaveModModule : EverestModule {
         BrowserInputHooks.Unapply();
         SpeedrunToolSaveLoadImports.Unapply();
         LevelLoadHooks.Unapply();
-
-        QuicksavePlayback.OnSeedNeeded = null;
     }
 }

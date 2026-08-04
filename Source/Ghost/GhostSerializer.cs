@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Celeste.Mod.QuicksaveMod.Serialization;
 
 namespace Celeste.Mod.QuicksaveMod.Ghost;
 
@@ -8,6 +9,7 @@ internal static class GhostSerializer {
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        Converters = { new Vector2JsonConverter() },
     };
 
     public static void Write(string path, GhostData data) {

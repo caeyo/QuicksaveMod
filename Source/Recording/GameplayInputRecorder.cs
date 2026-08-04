@@ -1,5 +1,6 @@
 using Celeste.Mod.QuicksaveMod.Ghost;
 using Celeste.Mod.QuicksaveMod.Interop;
+using Celeste.Mod.QuicksaveMod.Playback;
 using Celeste.Mod.QuicksaveMod.Quicksave;
 using Monocle;
 
@@ -57,8 +58,9 @@ internal static class GameplayInputRecorder {
         mapper.Sample(level, player, quicksaveBuffer, ghostBuffer);
     }
 
-    private static bool ShouldRecordFrame(Level level) =>
+    internal static bool ShouldRecordFrame(Level level) =>
         !IsSuspended
+        && !QuicksaveLoadFreeze.IsWaiting
         && !SpeedrunToolBridge.IsGameFrozen
         && CelesteTasImports.IsTasActive?.Invoke() != true
         && level is not { Paused: true, PauseMainMenuOpen: false };

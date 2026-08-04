@@ -131,6 +131,14 @@ internal static class GhostRecordingSession {
         level.Add(recorder = new GhostFrameRecorder());
     }
 
+    internal static void EnsureRecorder(Level level) {
+        if (!IsAnchored || recorder is { Scene: not null }) {
+            return;
+        }
+
+        AttachRecorder(level);
+    }
+
     private static void BeginSegment(string roomName) {
         int revisit = RevisitCounts.TryGetValue(roomName, out int count) ? count + 1 : 1;
         RevisitCounts[roomName] = revisit;

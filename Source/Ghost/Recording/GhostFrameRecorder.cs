@@ -1,3 +1,4 @@
+using Celeste.Mod.QuicksaveMod.Recording;
 using Microsoft.Xna.Framework;
 using Monocle;
 
@@ -5,8 +6,6 @@ namespace Celeste.Mod.QuicksaveMod.Ghost.Recording;
 
 [Tracked(false)]
 internal sealed class GhostFrameRecorder : Entity {
-    private bool updateHair = true;
-
     public GhostFrameRecorder() {
         Tag = Tags.HUD | Tags.FrozenUpdate | Tags.PauseUpdate | Tags.TransitionUpdate | Tags.Global;
         Depth = -10_000_000;
@@ -21,6 +20,10 @@ internal sealed class GhostFrameRecorder : Entity {
 
         if (!GhostRecordingSession.IsAnchored) {
             RemoveSelf();
+            return;
+        }
+
+        if (!GhostRecordingSession.IsRecordingInputs || !GameplayInputRecorder.ShouldRecordFrame(level)) {
             return;
         }
 
@@ -51,11 +54,6 @@ internal sealed class GhostFrameRecorder : Entity {
             HitboxLeft = player.Collider.Position.X,
             HitboxTop = player.Collider.Position.Y,
         });
-
-        updateHair = level.updateHair;
-        if (updateHair) {
-            player.Hair.AfterUpdate();
-        }
     }
 
     public override void Removed(Scene scene) {

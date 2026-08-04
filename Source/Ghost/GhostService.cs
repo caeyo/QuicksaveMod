@@ -1,6 +1,7 @@
 using Celeste.Mod.QuicksaveMod.Ghost.Playback;
 using Celeste.Mod.QuicksaveMod.Ghost.Storage;
 using Celeste.Mod.QuicksaveMod.Playback;
+using Celeste.Mod.QuicksaveMod.Recording;
 using Celeste.Mod.QuicksaveMod.Quicksave;
 using Monocle;
 
@@ -69,6 +70,6 @@ internal static class GhostService {
         SessionLoadHelper.WriteAnchorTasFile(tempTasPath, anchor.Inputs, appendLoadFreezeFrame: true);
 
         Engine.Scene = new LevelLoader(session);
-        QuicksavePlayback.Start(tempTasPath, anchor);
+        QuicksavePlayback.Start(tempTasPath, anchor, InputTimelineRestorer.GhostRestoreMode.None);
     }
 }

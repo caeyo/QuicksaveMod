@@ -17,7 +17,7 @@ internal static class GhostRecordingHooks {
         if (playerIntro == Player.IntroTypes.Transition) {
             GhostRecordingSession.OnRoomTransition(level);
         } else if (GhostRecordingSession.IsAnchored && isFromLoader) {
-            level.Add(new GhostFrameRecorder());
+            GhostRecordingSession.EnsureRecorder(level);
         }
     }
 

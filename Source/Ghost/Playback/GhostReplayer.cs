@@ -20,6 +20,11 @@ internal sealed class GhostReplayerEntity : Entity {
         Tag = Tags.HUD | Tags.FrozenUpdate | Tags.PauseUpdate | Tags.TransitionUpdate | Tags.Global;
         Depth = 1;
         Instance = this;
+
+        if (Engine.Scene is Level level) {
+            playerRoom = level.Session.Level;
+            playerRevisitCounts[playerRoom] = 1;
+        }
     }
 
     public override void Update() {
@@ -27,9 +32,19 @@ internal sealed class GhostReplayerEntity : Entity {
             return;
         }
 
+        if (Ghost.Done) {
+            RemoveSelf();
+            return;
+        }
+
         TrackPlayerRoom(level);
+        Ghost.Visible = true;
         Ghost.UpdateByReplayer();
-        Ghost.Visible = GhostMatchesPlayerRoom() && Ghost.Visible;
+
+        if (Ghost.ForceSync && (!Ghost.HasRooms || !GhostMatchesPlayerRoom())) {
+            Ghost.Visible = false;
+        }
+
         base.Update();
     }
 
@@ -45,11 +60,19 @@ internal sealed class GhostReplayerEntity : Entity {
     }
 
     private bool GhostMatchesPlayerRoom() {
-        if (!playerRevisitCounts.TryGetValue(Ghost.CurrentRoomName, out int revisit)) {
-            revisit = 1;
+        if (!Ghost.HasRooms) {
+            return false;
         }
 
-        return Ghost.CurrentRoomName == playerRoom && Ghost.CurrentRevisit == revisit;
+        if (!string.Equals(Ghost.CurrentRoomName, playerRoom, StringComparison.OrdinalIgnoreCase)) {
+            return false;
+        }
+
+        if (!playerRevisitCounts.TryGetValue(playerRoom, out int playerRevisit)) {
+            playerRevisit = 1;
+        }
+
+        return Ghost.CurrentRevisit == playerRevisit;
     }
 
     public override void Removed(Scene scene) {

@@ -19,9 +19,10 @@ internal sealed class Ghost : Actor {
         : base(Vector2.Zero) {
         Tag = Tags.Global;
         Active = false;
-        Depth = 1;
+        Visible = true;
         rooms = roomSegments;
         roomIndex = 0;
+        SkipEmptyRoomsForward();
 
         PlayerSpriteMode spriteMode = PlayerSpriteMode.Madeline;
         Sprite = new PlayerSprite(spriteMode);
@@ -36,14 +37,27 @@ internal sealed class Ghost : Actor {
     public PlayerHair Hair { get; }
     private readonly Microsoft.Xna.Framework.Color origHairColor;
 
-    private GhostRoomSegment CurrentRoom => rooms[roomIndex];
-    private GhostFrameData Frame => CurrentRoom.Frames[Math.Clamp(frameIndex, 0, CurrentRoom.Frames.Count - 1)];
+    public bool HasRooms => roomIndex < rooms.Count;
 
-    public string CurrentRoomName => CurrentRoom.Level;
-    public int CurrentRevisit => CurrentRoom.Revisit;
+    private GhostRoomSegment CurrentRoom => rooms[roomIndex];
+
+    private GhostFrameData Frame {
+        get {
+            IReadOnlyList<GhostFrameData> frames = CurrentRoom.Frames;
+            if (frames.Count == 0) {
+                throw new InvalidOperationException("Ghost frame requested from an empty room segment.");
+            }
+
+            return frames[Math.Clamp(frameIndex, 0, frames.Count - 1)];
+        }
+    }
+
+    public string CurrentRoomName => HasRooms ? CurrentRoom.Level : "";
+
+    public int CurrentRevisit => HasRooms ? CurrentRoom.Revisit : 1;
 
     public void UpdateByReplayer() {
-        if (Done || NotSynced || rooms.Count == 0) {
+        if (Done || NotSynced || !HasRooms) {
             return;
         }
 
@@ -54,30 +68,63 @@ internal sealed class Ghost : Actor {
 
         if (frameIndex >= CurrentRoom.Frames.Count) {
             GotoNextRoom();
-            if (Done) {
+            if (Done || !HasRooms) {
                 return;
             }
         }
 
-        Visible &= Frame.HasPlayer;
+        if (CurrentRoom.Frames.Count == 0) {
+            return;
+        }
+
+        Visible = Frame.HasPlayer;
         base.Update();
         UpdateSprite();
         UpdateHair();
+        Hair.AfterUpdate();
     }
 
     private void GotoNextRoom() {
         roomIndex++;
-        if (roomIndex < rooms.Count) {
-            frameIndex = 0;
-            NotSynced = ForceSync;
-        } else {
+        SkipEmptyRoomsForward();
+
+        if (!HasRooms) {
+            FinishPlayback();
+            return;
+        }
+
+        frameIndex = 0;
+        NotSynced = ForceSync;
+    }
+
+    private void FinishPlayback() {
+        Done = true;
+
+        if (rooms.Count == 0) {
+            Visible = false;
+            return;
+        }
+
+        GhostRoomSegment lastRoom = rooms[^1];
+        if (lastRoom.Frames.Count == 0) {
+            Visible = false;
+            return;
+        }
+
+        roomIndex = rooms.Count - 1;
+        frameIndex = lastRoom.Frames.Count - 1;
+        Visible = lastRoom.Frames[frameIndex].HasPlayer;
+        UpdateSprite();
+        UpdateHair();
+    }
+
+    private void SkipEmptyRoomsForward() {
+        while (roomIndex < rooms.Count && rooms[roomIndex].Frames.Count == 0) {
+            roomIndex++;
+        }
+
+        if (roomIndex >= rooms.Count) {
             Done = true;
-            if (frameIndex >= CurrentRoom.Frames.Count && CurrentRoom.Frames.Count > 0) {
-                frameIndex = CurrentRoom.Frames.Count - 1;
-                Visible = CurrentRoom.Frames[frameIndex].HasPlayer;
-                UpdateSprite();
-                UpdateHair();
-            }
         }
     }
 
@@ -106,6 +153,7 @@ internal sealed class Ghost : Actor {
         }
 
         Position = Frame.Position;
+        Depth = (int) Position.Y;
         Sprite.Rotation = Frame.Rotation;
         Sprite.Scale = Frame.Scale;
         Sprite.Scale.X *= Frame.Facing;
@@ -130,11 +178,25 @@ internal sealed class Ghost : Actor {
 
     public override void Added(Scene scene) {
         base.Added(scene);
-        if (CurrentRoom.Frames.Count > 0) {
+        Visible = true;
+        if (HasRooms && CurrentRoom.Frames.Count > 0) {
             Hair.Facing = (Facings) CurrentRoom.Frames[0].Facing;
         }
 
         Hair.Start();
         UpdateHair();
+    }
+
+    public override void Render() {
+        if (!Visible) {
+            return;
+        }
+
+        // GhostModForTas keeps Sprite/Hair inactive and draws them here instead of via Actor.Render().
+        foreach (Component component in Components) {
+            if (component.Visible) {
+                component.Render();
+            }
+        }
     }
 }
