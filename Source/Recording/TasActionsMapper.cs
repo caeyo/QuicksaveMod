@@ -3,7 +3,7 @@ using Monocle;
 namespace Celeste.Mod.QuicksaveMod.Recording;
 
 internal class TasActionsMapper {
-    private readonly List<char> currActions = new(16);
+    private readonly List<string> currActions = new(16);
 
     private TasPressSlot jumpSlot = TasPressSlot.None;
     private TasPressSlot dashSlot = TasPressSlot.None;
@@ -42,7 +42,7 @@ internal class TasActionsMapper {
     private static void AppendMovement(
         Level level,
         Player? player,
-        List<char> actions,
+        List<string> actions,
         ref float? featherAngle,
         ref float? featherMagnitude
     ) {
@@ -54,17 +54,17 @@ internal class TasActionsMapper {
         MovementInputSampler.AppendCardinalDirections(level, actions);
     }
 
-    private void AppendJump(List<char> actions) {
+    private void AppendJump(List<string> actions) {
         jumpSlot = TwoSlotEncoder.Update(jumpSlot, RawPressed(Input.Jump), Input.Jump.Check);
         AppendSlot(actions, jumpSlot, 'J', 'K');
     }
 
-    private void AppendDash(List<char> actions) {
+    private void AppendDash(List<string> actions) {
         dashSlot = TwoSlotEncoder.Update(dashSlot, RawPressed(Input.Dash), Input.Dash.Check);
         AppendSlot(actions, dashSlot, 'X', 'C');
     }
 
-    private void AppendCrouchDash(List<char> actions) {
+    private void AppendCrouchDash(List<string> actions) {
         crouchDashSlot = TwoSlotEncoder.Update(
             crouchDashSlot,
             RawPressed(Input.CrouchDash),
@@ -73,22 +73,22 @@ internal class TasActionsMapper {
         AppendSlot(actions, crouchDashSlot, 'Z', 'V');
     }
 
-    private void AppendGrab(List<char> actions) {
+    private void AppendGrab(List<string> actions) {
         grabSlot = TwoSlotEncoder.Update(grabSlot, RawPressed(Input.Grab), Input.GrabCheck);
         AppendSlot(actions, grabSlot, 'G', 'H');
     }
 
-    private void AppendMenuInputs(Level level, bool menu, List<char> actions) {
+    private void AppendMenuInputs(Level level, bool menu, List<string> actions) {
         if (Input.Pause.Pressed || Input.Pause.Check) {
-            actions.Add('S');
+            actions.Add("S");
         }
 
         if (Input.QuickRestart.Pressed) {
-            actions.Add('Q');
+            actions.Add("Q");
         }
 
         if (menu && Input.MenuConfirm.Pressed && ShouldRecordConfirm(level)) {
-            actions.Add('O');
+            actions.Add("O");
         }
     }
 
@@ -141,11 +141,11 @@ internal class TasActionsMapper {
     private static bool RawPressed(VirtualButton button) =>
         button.Binding.Pressed(button.GamepadIndex, button.Threshold);
 
-    private static void AppendSlot(List<char> actions, TasPressSlot slot, char slotAChar, char slotBChar) {
+    private static void AppendSlot(List<string> actions, TasPressSlot slot, char slotAChar, char slotBChar) {
         switch (slot) {
             case TasPressSlot.A:
             case TasPressSlot.B:
-                actions.Add(TwoSlotEncoder.CharFor(slot, slotAChar, slotBChar));
+                actions.Add(TwoSlotEncoder.CharFor(slot, slotAChar, slotBChar).ToString());
                 break;
             case TasPressSlot.None:
                 break;

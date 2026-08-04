@@ -10,7 +10,7 @@ internal static class TasLineFormatter {
 
     // Everything after the frame count (e.g. ",L,J" or ",F,90,1"), or empty for a neutral frame
     internal static string FormatSuffix(
-        IReadOnlyList<char> actions,
+        IReadOnlyList<string> actions,
         float? featherAngle = null,
         float? featherMagnitude = null
     ) {
@@ -59,11 +59,11 @@ internal static class TasLineFormatter {
 
     private static void AppendSuffix(
         StringBuilder builder,
-        IReadOnlyList<char> actions,
+        IReadOnlyList<string> actions,
         float? featherAngle,
         float? featherMagnitude
     ) {
-        foreach (char action in actions) {
+        foreach (string action in actions) {
             builder.Append(',').Append(action);
         }
 

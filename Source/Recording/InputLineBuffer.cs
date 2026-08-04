@@ -4,14 +4,14 @@ namespace Celeste.Mod.QuicksaveMod.Recording;
 
 internal class InputLineBuffer {
     private readonly List<CommittedEntry> lines = [];
-    private readonly List<char> pendingActions = [];
+    private readonly List<string> pendingActions = [];
     private float? pendingFeatherAngle;
     private float? pendingFeatherMagnitude;
     private int pendingFrames;
     private string? pendingSuffix;
     private bool hasPending;
 
-    public void PushFrame(List<char> actions, float? featherAngle, float? featherMagnitude) {
+    public void PushFrame(List<string> actions, float? featherAngle, float? featherMagnitude) {
         if (hasPending && MatchesPending(actions, featherAngle, featherMagnitude)) {
             pendingFrames++;
             return;
@@ -93,7 +93,7 @@ internal class InputLineBuffer {
             pendingFeatherMagnitude
         );
 
-    private bool MatchesPending(List<char> actions, float? featherAngle, float? featherMagnitude) {
+    private bool MatchesPending(List<string> actions, float? featherAngle, float? featherMagnitude) {
         if (actions.Count != pendingActions.Count) {
             return false;
         }
@@ -166,50 +166,41 @@ internal class InputLineBuffer {
             return;
         }
 
-        // suffix is like ",L,J" or ",F,90,1" or ",L,F,90"
-        int index = 0;
-        while (index < suffix.Length) {
-            if (suffix[index] != ',') {
-                break;
+        // suffix is like ",L,J", ",L,MD,X", or ",F,90,1"
+        string[] tokens = suffix.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        for (int i = 0; i < tokens.Length; i++) {
+            string token = tokens[i];
+            if (token.Length == 0) {
+                continue;
             }
 
-            index++;
-            if (index >= suffix.Length) {
-                break;
-            }
-
-            if (suffix[index] == 'F') {
-                index++;
-                if (index < suffix.Length && suffix[index] == ',') {
-                    index++;
-                }
-
-                int angleEnd = suffix.IndexOf(',', index);
-                ReadOnlySpan<char> angleSpan = angleEnd < 0
-                    ? suffix.AsSpan(index)
-                    : suffix.AsSpan(index, angleEnd - index);
-                if (int.TryParse(angleSpan, NumberStyles.Integer, CultureInfo.InvariantCulture, out int angle)) {
+            if (token[0] == 'F' && token.Length == 1) {
+                if (i + 1 < tokens.Length
+                    && int.TryParse(
+                        tokens[i + 1],
+                        NumberStyles.Integer,
+                        CultureInfo.InvariantCulture,
+                        out int angle
+                    )) {
                     pendingFeatherAngle = angle;
+                    i++;
                 }
 
-                if (angleEnd < 0) {
-                    return;
-                }
-
-                index = angleEnd + 1;
-                int magEnd = suffix.IndexOf(',', index);
-                ReadOnlySpan<char> magSpan = magEnd < 0
-                    ? suffix.AsSpan(index)
-                    : suffix.AsSpan(index, magEnd - index);
-                if (float.TryParse(magSpan, NumberStyles.Float, CultureInfo.InvariantCulture, out float magnitude)) {
+                if (i + 1 < tokens.Length
+                    && float.TryParse(
+                        tokens[i + 1],
+                        NumberStyles.Float,
+                        CultureInfo.InvariantCulture,
+                        out float magnitude
+                    )) {
                     pendingFeatherMagnitude = magnitude;
+                    i++;
                 }
 
-                return;
+                continue;
             }
 
-            pendingActions.Add(suffix[index]);
-            index++;
+            pendingActions.Add(token);
         }
     }
 
