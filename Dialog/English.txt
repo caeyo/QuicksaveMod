@@ -20,4 +20,5 @@ modoptions_quicksavemod_playbackspeed_speed350= 350
 modoptions_quicksavemod_playbackspeed_max= Max
 modoptions_quicksavemod_savestateonquicksaveload= SpeedrunTool Save State on Quicksave Load
 modoptions_quicksavemod_addtimertorace= Use SpeedrunTool Flag + Timer on Ghost Race
+modoptions_quicksavemod_resyncghostonroomtransition= Resync Ghost on Room Transition
 modoptions_quicksavemod_browseruiscale= Browser UI Scale

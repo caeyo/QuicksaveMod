@@ -19,6 +19,9 @@ public class QuicksaveModSettings : EverestModuleSettings {
     [SettingName("modoptions_quicksavemod_addtimertorace")]
     public bool AddTimerToRace { get; set; } = true;
 
+    [SettingName("modoptions_quicksavemod_resyncghostonroomtransition")]
+    public bool ResyncGhostOnRoomTransition { get; set; }
+
     [SettingName("modoptions_quicksavemod_browseruiscale")]
     public int BrowserUiScalePercent { get; set; } = 100;
 

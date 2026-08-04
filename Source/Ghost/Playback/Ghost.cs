@@ -7,6 +7,7 @@ namespace Celeste.Mod.QuicksaveMod.Ghost.Playback;
 internal sealed class Ghost : Actor {
     public bool Done { get; private set; }
     public bool ForceSync { get; init; }
+    public bool CompletedRun { get; init; }
     public bool NotSynced { get; private set; }
 
     private readonly IReadOnlyList<GhostRoomSegment> rooms;
@@ -17,7 +18,7 @@ internal sealed class Ghost : Actor {
 
     public Ghost(IReadOnlyList<GhostRoomSegment> roomSegments)
         : base(Vector2.Zero) {
-        Tag = Tags.Global;
+        Tag = Tags.Global | Tags.TransitionUpdate;
         Active = false;
         Visible = true;
         rooms = roomSegments;
@@ -96,6 +97,57 @@ internal sealed class Ghost : Actor {
         frameIndex = 0;
         NotSynced = ForceSync;
     }
+
+    internal void Sync(string roomName, int revisit) {
+        NotSynced = true;
+
+        if (IsLevelExit(roomName)) {
+            SyncLevelExit();
+            return;
+        }
+
+        if (Done) {
+            return;
+        }
+
+        int orig = roomIndex;
+        for (int i = orig; i < rooms.Count; i++) {
+            if (MatchesRoom(rooms[i], roomName, revisit)) {
+                JumpToRoom(i);
+                return;
+            }
+        }
+
+        for (int i = 0; i < orig; i++) {
+            if (MatchesRoom(rooms[i], roomName, revisit)) {
+                JumpToRoom(i);
+                return;
+            }
+        }
+    }
+
+    private void SyncLevelExit() {
+        if (!CompletedRun || Done) {
+            return;
+        }
+
+        FinishPlayback();
+        NotSynced = false;
+    }
+
+    private void JumpToRoom(int index) {
+        roomIndex = index;
+        frameIndex = -1;
+        NotSynced = false;
+        SkipEmptyRoomsForward();
+    }
+
+    private static bool IsLevelExit(string roomName) =>
+        string.Equals(roomName, "LevelExit", StringComparison.OrdinalIgnoreCase);
+
+    private static bool MatchesRoom(GhostRoomSegment segment, string roomName, int revisit) =>
+        string.Equals(segment.Level, roomName, StringComparison.OrdinalIgnoreCase)
+        && segment.Revisit == revisit;
 
     private void FinishPlayback() {
         Done = true;

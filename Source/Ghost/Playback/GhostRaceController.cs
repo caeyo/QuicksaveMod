@@ -104,7 +104,8 @@ internal static class GhostRaceController {
         }
 
         Ghost ghost = new(activeGhost.Rooms) {
-            ForceSync = false,
+            ForceSync = QuicksaveModModule.Settings.ResyncGhostOnRoomTransition,
+            CompletedRun = activeGhost.Finish != null,
             TintColor = Microsoft.Xna.Framework.Color.White * 0.45f,
         };
         level.Add(ghost);

@@ -56,7 +56,12 @@ internal sealed class GhostReplayerEntity : Entity {
 
         playerRoom = room;
         playerRevisitCounts.TryGetValue(room, out int count);
-        playerRevisitCounts[room] = count + 1;
+        int revisit = count + 1;
+        playerRevisitCounts[room] = revisit;
+
+        if (Ghost.ForceSync) {
+            Ghost.Sync(room, revisit);
+        }
     }
 
     private bool GhostMatchesPlayerRoom() {
