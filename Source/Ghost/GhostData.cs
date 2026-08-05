@@ -29,10 +29,8 @@ internal sealed class GhostData {
             Rooms = Rooms.Select(room => new GhostRoomSegment {
                 Level = room.Level,
                 Revisit = room.Revisit,
-                TargetLevel = room.TargetLevel,
                 Frames = room.Frames.Select(frame => new GhostFrameData {
                     HasPlayer = frame.HasPlayer,
-                    SessionTimeTicks = frame.SessionTimeTicks,
                     Position = frame.Position,
                     Facing = frame.Facing,
                     CurrentAnimationId = frame.CurrentAnimationId,
@@ -43,10 +41,6 @@ internal sealed class GhostData {
                     HairColor = frame.HairColor,
                     HairSimulateMotion = frame.HairSimulateMotion,
                     HairCount = frame.HairCount,
-                    HitboxWidth = frame.HitboxWidth,
-                    HitboxHeight = frame.HitboxHeight,
-                    HitboxLeft = frame.HitboxLeft,
-                    HitboxTop = frame.HitboxTop,
                 }).ToList(),
             }).ToList(),
         };

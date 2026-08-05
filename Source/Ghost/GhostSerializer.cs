@@ -1,20 +1,22 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Celeste.Mod.QuicksaveMod.Ghost.Serialization;
 using Celeste.Mod.QuicksaveMod.Serialization;
 
 namespace Celeste.Mod.QuicksaveMod.Ghost;
 
 internal static class GhostSerializer {
     private static readonly JsonSerializerOptions Options = new() {
-        WriteIndented = true,
+        WriteIndented = false,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
         Converters = { new Vector2JsonConverter() },
     };
 
     public static void Write(string path, GhostData data) {
-        data.Version = GhostData.CurrentVersion;
-        string json = JsonSerializer.Serialize(data, Options);
+        GhostFileDto file = GhostFileMapper.ToDto(data);
+        file.Version = GhostData.CurrentVersion;
+        string json = JsonSerializer.Serialize(file, Options);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         File.WriteAllText(path, json);
     }
@@ -24,12 +26,14 @@ internal static class GhostSerializer {
             throw new FileNotFoundException($"Ghost file not found: {path}");
         }
 
-        GhostData data = JsonSerializer.Deserialize<GhostData>(File.ReadAllText(path), Options)
+        GhostFileDto file = JsonSerializer.Deserialize<GhostFileDto>(File.ReadAllText(path), Options)
             ?? throw new InvalidDataException($"Failed to deserialize ghost: {path}");
 
-        if (data.Version is < 1 or > GhostData.CurrentVersion) {
-            throw new InvalidDataException($"Unsupported ghost version {data.Version} in {path}");
+        if (file.Version != GhostData.CurrentVersion) {
+            throw new InvalidDataException($"Unsupported ghost version {file.Version} in {path}");
         }
+
+        GhostData data = GhostFileMapper.FromDto(file);
 
         if (string.IsNullOrWhiteSpace(data.Anchor.Start.AreaSid)) {
             throw new InvalidDataException($"Ghost missing anchor start area SID: {path}");

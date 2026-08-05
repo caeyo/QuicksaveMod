@@ -15,6 +15,10 @@ internal static class GhostRecordingSession {
     private static GhostFrameRecorder? recorder;
     private static bool suspended;
 
+    private static long lastLiveSessionTime;
+    private static GhostFrameData? lastLiveFrame;
+    private static GhostRoomSegment? lastLiveSegment;
+
     public static bool IsAnchored => recordingStartAnchor != null;
     internal static bool IsRecordingInputs => IsAnchored && !suspended;
     public static QuicksaveData? RecordingStartAnchor => recordingStartAnchor?.Clone();
@@ -29,6 +33,7 @@ internal static class GhostRecordingSession {
         RoomSegments.Clear();
         RevisitCounts.Clear();
         currentSegment = null;
+        ClearFinishTracking();
 
         recorder?.RemoveSelf();
         recorder = null;
@@ -47,6 +52,7 @@ internal static class GhostRecordingSession {
         RoomSegments.Clear();
         RevisitCounts.Clear();
         currentSegment = null;
+        ClearFinishTracking();
         recorder?.RemoveSelf();
         recorder = null;
     }
@@ -56,16 +62,14 @@ internal static class GhostRecordingSession {
             return;
         }
 
-        currentSegment.TargetLevel = level.Session.Level;
         BeginSegment(level.Session.Level);
     }
 
     public static void OnLevelExit(Level level) {
-        if (!IsAnchored || currentSegment == null) {
+        if (!IsAnchored) {
             return;
         }
 
-        currentSegment.TargetLevel = "LevelExit";
         currentSegment = null;
     }
 
@@ -84,40 +88,27 @@ internal static class GhostRecordingSession {
 
         FlushCurrentSegment();
 
-        GhostFinishData? finish = ComputeFinish();
         return new GhostData {
             CreatedUtc = DateTime.UtcNow,
             Anchor = recordingStartAnchor.Clone(),
             Inputs = InputBuffer.Snapshot(),
-            Finish = finish,
+            Finish = ComputeFinish(),
             Rooms = RoomSegments.Select(segment => new GhostRoomSegment {
                 Level = segment.Level,
                 Revisit = segment.Revisit,
-                TargetLevel = segment.TargetLevel,
-                Frames = segment.Frames.Select(frame => new GhostFrameData {
-                    HasPlayer = frame.HasPlayer,
-                    SessionTimeTicks = frame.SessionTimeTicks,
-                    Position = frame.Position,
-                    Facing = frame.Facing,
-                    CurrentAnimationId = frame.CurrentAnimationId,
-                    CurrentAnimationFrame = frame.CurrentAnimationFrame,
-                    Rotation = frame.Rotation,
-                    Scale = frame.Scale,
-                    SpriteColor = frame.SpriteColor,
-                    HairColor = frame.HairColor,
-                    HairSimulateMotion = frame.HairSimulateMotion,
-                    HairCount = frame.HairCount,
-                    HitboxWidth = frame.HitboxWidth,
-                    HitboxHeight = frame.HitboxHeight,
-                    HitboxLeft = frame.HitboxLeft,
-                    HitboxTop = frame.HitboxTop,
-                }).ToList(),
+                Frames = [..segment.Frames],
             }).ToList(),
         };
     }
 
-    internal static void AppendFrame(GhostFrameData frame) {
+    internal static void AppendFrame(GhostFrameData frame, long sessionTimeTicks = 0) {
         currentSegment?.Frames.Add(frame);
+
+        if (frame.HasPlayer) {
+            lastLiveSessionTime = sessionTimeTicks;
+            lastLiveFrame = frame;
+            lastLiveSegment = currentSegment;
+        }
     }
 
     internal static string CurrentRoomName =>
@@ -158,30 +149,22 @@ internal static class GhostRecordingSession {
     }
 
     private static GhostFinishData? ComputeFinish() {
-        GhostFrameData? last = null;
-        GhostRoomSegment? lastSegment = null;
-
-        foreach (GhostRoomSegment segment in RoomSegments) {
-            foreach (GhostFrameData frame in segment.Frames) {
-                if (!frame.HasPlayer) {
-                    continue;
-                }
-
-                last = frame;
-                lastSegment = segment;
-            }
-        }
-
-        if (last == null || lastSegment == null) {
+        if (lastLiveFrame == null || lastLiveSegment == null) {
             return null;
         }
 
         return new GhostFinishData {
-            Room = lastSegment.Level,
-            Revisit = lastSegment.Revisit,
-            Position = last.Position,
-            SessionTimeTicks = last.SessionTimeTicks,
+            Room = lastLiveSegment.Level,
+            Revisit = lastLiveSegment.Revisit,
+            Position = lastLiveFrame.Position,
+            SessionTimeTicks = lastLiveSessionTime,
         };
+    }
+
+    private static void ClearFinishTracking() {
+        lastLiveSessionTime = 0;
+        lastLiveFrame = null;
+        lastLiveSegment = null;
     }
 
     internal static class AnchorEquality {
