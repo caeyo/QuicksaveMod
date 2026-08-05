@@ -72,8 +72,6 @@ internal sealed class BrowserHandler : ImGuiHandler {
 
         state.ApplyPendingInlineEdit();
 
-        view.HandleWindowKeyboardShortcuts();
-
         view.RenderBreadcrumbs();
         ImGui.Separator();
         view.RenderEntryList();
@@ -174,21 +172,11 @@ internal sealed class BrowserHandler : ImGuiHandler {
         ImGui.SetNextWindowPos(pos, ImGuiCond.Always, pivot);
     }
 
-    internal void OnAfterInputUpdate() {
+    internal bool TryCancelOnEscape() {
         if (!Visible) {
-            return;
+            return false;
         }
 
-        if (Input.ESC.Pressed) {
-            if (!TryCancelSubOperationOnEscape()) {
-                ModBrowserCoordinator.CloseAll();
-            }
-        }
-
-        ConsumeUnderlyingInput();
-    }
-
-    private bool TryCancelSubOperationOnEscape() {
         if (modals.TryCancelOnEscape()) {
             return true;
         }
@@ -199,17 +187,5 @@ internal sealed class BrowserHandler : ImGuiHandler {
         }
 
         return false;
-    }
-
-    private static void ConsumeUnderlyingInput() {
-        foreach (VirtualInput input in MInput.VirtualInputs) {
-            if (input is VirtualButton button) {
-                button.ConsumePress();
-                button.ConsumeBuffer();
-            }
-        }
-
-        MInput.Disabled = true;
-        MInput.Active = false;
     }
 }

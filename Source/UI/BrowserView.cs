@@ -20,30 +20,6 @@ internal sealed class BrowserView(
         pendingActivate = null;
     }
 
-    public void HandleWindowKeyboardShortcuts() {
-        if (ImGui.IsAnyItemActive()) {
-            return;
-        }
-
-        if (state.EditMode != InlineEditMode.None || state.ShowDeleteModal || state.ShowConflictModal) {
-            return;
-        }
-
-        if (ImGui.IsKeyPressed(ImGuiKey.Backspace)
-            && !BrowserNavigation.IsRootDirectory(state.CurrentDirectory)) {
-            state.NavigateUp();
-            return;
-        }
-
-        if (ImGui.IsKeyPressed(ImGuiKey.UpArrow)) {
-            state.MoveSelection(-1);
-        } else if (ImGui.IsKeyPressed(ImGuiKey.DownArrow)) {
-            state.MoveSelection(1);
-        } else if (ImGui.IsKeyPressed(ImGuiKey.Enter)) {
-            ActivateSelectedEntry();
-        }
-    }
-
     public void RenderBreadcrumbs() {
         state.EnsureBreadcrumbs();
 
@@ -161,12 +137,6 @@ internal sealed class BrowserView(
 
         pendingActivate = null;
         commands.ActivateEntry(entry);
-    }
-
-    private void ActivateSelectedEntry() {
-        if (state.SelectedEntry is { } entry) {
-            pendingActivate = entry;
-        }
     }
 
     private void RenderEmptySpaceContextMenu() {

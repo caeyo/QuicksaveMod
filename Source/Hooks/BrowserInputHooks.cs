@@ -25,8 +25,35 @@ internal static class BrowserInputHooks {
 
     private static void OnMInputUpdate(On.Monocle.MInput.orig_Update orig) {
         orig();
-        BrowserHandler.Instance?.OnAfterInputUpdate();
-        GhostBrowserHandler.Instance?.OnAfterInputUpdate();
+
+        if (!ModBrowserCoordinator.AnyVisible) {
+            return;
+        }
+
+        if (Input.ESC.Pressed) {
+            if (!TryCancelBrowserSubOperation()) {
+                ModBrowserCoordinator.CloseAll();
+            }
+        }
+
+        ConsumeUnderlyingInput();
+    }
+
+    private static bool TryCancelBrowserSubOperation() {
+        return BrowserHandler.Instance?.TryCancelOnEscape() == true
+            || GhostBrowserHandler.Instance?.TryCancelOnEscape() == true;
+    }
+
+    private static void ConsumeUnderlyingInput() {
+        foreach (VirtualInput input in MInput.VirtualInputs) {
+            if (input is VirtualButton button) {
+                button.ConsumePress();
+                button.ConsumeBuffer();
+            }
+        }
+
+        MInput.Disabled = true;
+        MInput.Active = false;
     }
 
     private static void OnScreenWipeUpdate(On.Celeste.ScreenWipe.orig_Update orig, ScreenWipe self, Scene scene) {

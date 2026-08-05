@@ -67,7 +67,6 @@ internal sealed class GhostBrowserHandler : ImGuiHandler {
         }
 
         state.ApplyPendingInlineEdit();
-        view.HandleWindowKeyboardShortcuts();
         view.RenderBreadcrumbs();
         ImGui.Separator();
         view.RenderEntryList();
@@ -133,25 +132,11 @@ internal sealed class GhostBrowserHandler : ImGuiHandler {
         }
     }
 
-    internal void OnAfterInputUpdate() {
+    internal bool TryCancelOnEscape() {
         if (!Visible) {
-            return;
+            return false;
         }
 
-        if (Input.ESC.Pressed) {
-            if (!TryCancelSubOperationOnEscape()) {
-                ModBrowserCoordinator.CloseAll();
-            }
-        }
-
-        ConsumeUnderlyingInput();
-    }
-
-    internal void SetNextWindowPos(System.Numerics.Vector2 pos, System.Numerics.Vector2 pivot) {
-        ImGui.SetNextWindowPos(pos, ImGuiCond.Always, pivot);
-    }
-
-    private bool TryCancelSubOperationOnEscape() {
         if (modals.TryCancelOnEscape()) {
             return true;
         }
@@ -162,6 +147,10 @@ internal sealed class GhostBrowserHandler : ImGuiHandler {
         }
 
         return false;
+    }
+
+    internal void SetNextWindowPos(System.Numerics.Vector2 pos, System.Numerics.Vector2 pivot) {
+        ImGui.SetNextWindowPos(pos, ImGuiCond.Always, pivot);
     }
 
     private void ApplyUiScale(float uiScale) {
@@ -187,18 +176,6 @@ internal sealed class GhostBrowserHandler : ImGuiHandler {
         float user = Math.Clamp(QuicksaveModModule.Settings.BrowserUiScalePercent / 100f, 1f, 2f);
         return Math.Clamp(auto * user, 1f, 2.5f);
     }
-
-    private static void ConsumeUnderlyingInput() {
-        foreach (VirtualInput input in MInput.VirtualInputs) {
-            if (input is VirtualButton button) {
-                button.ConsumePress();
-                button.ConsumeBuffer();
-            }
-        }
-
-        MInput.Disabled = true;
-        MInput.Active = false;
-    }
 }
 
 internal sealed class GhostBrowserView(GhostBrowserState state, GhostBrowserCommands commands) {
@@ -209,26 +186,6 @@ internal sealed class GhostBrowserView(GhostBrowserState state, GhostBrowserComm
     public void ResetTransient() {
         dragSourcePath = null;
         pendingActivate = null;
-    }
-
-    public void HandleWindowKeyboardShortcuts() {
-        if (ImGui.IsAnyItemActive()
-            || state.EditMode != InlineEditMode.None
-            || state.ShowDeleteModal
-            || state.ShowConflictModal) {
-            return;
-        }
-
-        if (ImGui.IsKeyPressed(ImGuiKey.Backspace)
-            && !GhostBrowserNavigation.IsRootDirectory(state.CurrentDirectory)) {
-            state.NavigateUp();
-        } else if (ImGui.IsKeyPressed(ImGuiKey.UpArrow)) {
-            state.MoveSelection(-1);
-        } else if (ImGui.IsKeyPressed(ImGuiKey.DownArrow)) {
-            state.MoveSelection(1);
-        } else if (ImGui.IsKeyPressed(ImGuiKey.Enter) && state.SelectedEntry is { } entry) {
-            pendingActivate = entry;
-        }
     }
 
     public void RenderBreadcrumbs() {

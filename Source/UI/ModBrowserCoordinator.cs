@@ -43,9 +43,4 @@ internal sealed class ModBrowserCoordinator {
         BrowserHandler.Instance?.Close();
         GhostBrowserHandler.Instance?.Close();
     }
-
-    internal void OnAfterInputUpdate() {
-        quicksaveBrowser.OnAfterInputUpdate();
-        ghostBrowser.OnAfterInputUpdate();
-    }
 }
