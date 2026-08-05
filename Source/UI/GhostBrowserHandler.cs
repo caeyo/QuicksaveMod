@@ -287,7 +287,10 @@ internal sealed class GhostBrowserView(GhostBrowserState state, GhostBrowserComm
         pendingActivate = null;
         if (entry.Kind == BrowserEntryKind.Folder) {
             state.NavigateTo(entry.FullPath);
+            return;
         }
+
+        commands.RaceEntry(entry);
     }
 
     private void RenderEmptySpaceContextMenu() {
