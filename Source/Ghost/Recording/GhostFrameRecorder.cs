@@ -14,7 +14,7 @@ internal sealed class GhostFrameRecorder : Entity {
     public override void Update() {
         base.Update();
 
-        if (Engine.Scene is not Level level || level.Session is not Session session) {
+        if (Engine.Scene is not Level level) {
             return;
         }
 
@@ -29,7 +29,7 @@ internal sealed class GhostFrameRecorder : Entity {
 
         Player? player = level.Tracker.GetEntity<Player>();
         if (player is not { Dead: false }) {
-            GhostRecordingSession.AppendFrame(new GhostFrameData { HasPlayer = false }, session.Time);
+            GhostRecordingSession.AppendFrame(new GhostFrameData { HasPlayer = false });
             return;
         }
 
@@ -45,7 +45,7 @@ internal sealed class GhostFrameRecorder : Entity {
             HairColor = player.Hair.Color,
             HairSimulateMotion = player.Hair.SimulateMotion,
             HairCount = player.Sprite.HairCount,
-        }, session.Time);
+        });
     }
 
     public override void Removed(Scene scene) {

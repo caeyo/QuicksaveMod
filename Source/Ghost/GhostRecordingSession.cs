@@ -15,9 +15,12 @@ internal static class GhostRecordingSession {
     private static GhostFrameRecorder? recorder;
     private static bool suspended;
 
-    private static long lastLiveSessionTime;
+    private static long finishElapsedTicks;
     private static GhostFrameData? lastLiveFrame;
     private static GhostRoomSegment? lastLiveSegment;
+
+    // Celeste's gameplay timer advances by a fixed 0.017s per frame.
+    private const long TicksPerGameplayFrame = 170_000;
 
     public static bool IsAnchored => recordingStartAnchor != null;
     internal static bool IsRecordingInputs => IsAnchored && !suspended;
@@ -101,11 +104,11 @@ internal static class GhostRecordingSession {
         };
     }
 
-    internal static void AppendFrame(GhostFrameData frame, long sessionTimeTicks = 0) {
+    internal static void AppendFrame(GhostFrameData frame) {
         currentSegment?.Frames.Add(frame);
+        finishElapsedTicks += TicksPerGameplayFrame;
 
         if (frame.HasPlayer) {
-            lastLiveSessionTime = sessionTimeTicks;
             lastLiveFrame = frame;
             lastLiveSegment = currentSegment;
         }
@@ -157,12 +160,12 @@ internal static class GhostRecordingSession {
             Room = lastLiveSegment.Level,
             Revisit = lastLiveSegment.Revisit,
             Position = lastLiveFrame.Position,
-            SessionTimeTicks = lastLiveSessionTime,
+            SessionTimeTicks = finishElapsedTicks,
         };
     }
 
     private static void ClearFinishTracking() {
-        lastLiveSessionTime = 0;
+        finishElapsedTicks = 0;
         lastLiveFrame = null;
         lastLiveSegment = null;
     }
