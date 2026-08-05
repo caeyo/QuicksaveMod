@@ -101,6 +101,8 @@ internal static class GhostBrowserNavigation {
 
 internal sealed class GhostBrowserState {
     public string CurrentDirectory { get; private set; } = GhostBrowserNavigation.RootPath;
+
+    internal readonly BrowserDirectoryRecall DirectoryRecall = new();
     public List<BrowserEntry> Entries { get; } = [];
     public List<string> EntrySelectableIds { get; } = [];
     public List<string> EntryPopupIds { get; } = [];

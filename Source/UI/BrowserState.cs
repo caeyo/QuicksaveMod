@@ -18,6 +18,8 @@ internal readonly record struct PendingInlineEditRequest(
 internal sealed class BrowserState {
     public string CurrentDirectory { get; private set; } = BrowserNavigation.RootPath;
 
+    internal readonly BrowserDirectoryRecall DirectoryRecall = new();
+
     public List<BrowserEntry> Entries { get; } = [];
 
     public List<string> EntrySelectableIds { get; } = [];

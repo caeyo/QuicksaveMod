@@ -79,7 +79,7 @@ internal sealed class GhostBrowserHandler : ImGuiHandler {
 
     public void Open(bool focusWindow) {
         GhostBrowserNavigation.EnsureRootExists();
-        state.NavigateTo(GhostBrowserNavigation.RootPath);
+        state.NavigateTo(state.DirectoryRecall.ResolveOpenDirectory(GhostBrowserNavigation.RootPath));
         state.ResetTransient();
         state.FocusWindow = focusWindow;
 
@@ -109,6 +109,7 @@ internal sealed class GhostBrowserHandler : ImGuiHandler {
             return;
         }
 
+        state.DirectoryRecall.Remember(state.CurrentDirectory);
         Visible = false;
         state.ResetTransient();
         view.ResetTransient();
