@@ -30,7 +30,7 @@ internal static class SpeedrunToolRaceTimer {
     private static MethodInfo? switchRoomTimer;
     private static MethodInfo? resetTimer;
     private static Action? clearEndPoints;
-    private static Action? enableEndPointCollision;
+    private static MethodInfo? endPointReadyForTime;
     private static ConstructorInfo? endPointCtor;
     private static FieldInfo? endPointRoomNameField;
     private static Func<Entity, bool>? isEndPointActivated;
@@ -182,12 +182,20 @@ internal static class SpeedrunToolRaceTimer {
     }
 
     private static void TryEnableEndPointCollision(Level level) {
-        if (!endPointSpawned || endPointCollidable || !IsInFinishRoom(level)) {
+        if (!endPointSpawned || endPointCollidable || !IsInFinishRoom(level) || raceEndPoint == null) {
             return;
         }
 
-        enableEndPointCollision?.Invoke();
-        endPointCollidable = true;
+        if (endPointReadyForTime == null) {
+            return;
+        }
+
+        try {
+            endPointReadyForTime.Invoke(raceEndPoint, null);
+            endPointCollidable = true;
+        } catch (Exception e) {
+            Logger.Warn(GhostConstants.LogTag, $"Failed to enable SRT EndPoint collision: {e.Message}");
+        }
     }
 
     private static bool IsInFinishRoom(Level level) {
@@ -289,11 +297,10 @@ internal static class SpeedrunToolRaceTimer {
                 isEndPointActivated = CompileActivatedGetter(activatedProperty, endPointType);
             }
 
-            MethodInfo? readyAll = endPointType.GetMethod(
-                "AllReadyForTime",
-                BindingFlags.Public | BindingFlags.Static
+            endPointReadyForTime = endPointType.GetMethod(
+                "ReadyForTime",
+                BindingFlags.Public | BindingFlags.Instance
             );
-            enableEndPointCollision = readyAll?.CreateDelegate<Action>();
 
             if (roomTimerDataType == null) {
                 return;
