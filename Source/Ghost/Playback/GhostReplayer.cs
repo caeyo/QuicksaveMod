@@ -33,6 +33,7 @@ internal sealed class GhostReplayerEntity : Entity {
             return;
         }
 
+        EnsureGhostInScene(level);
         SpeedrunToolRaceTimer.TryBeginScheduled(level);
 
         if (Ghost.Done) {
@@ -69,6 +70,14 @@ internal sealed class GhostReplayerEntity : Entity {
         base.Update();
     }
 
+    private void EnsureGhostInScene(Level level) {
+        if (Ghost.Done || Ghost.Scene != null) {
+            return;
+        }
+
+        level.Add(Ghost);
+    }
+
     private void TrackPlayerRoom(Level level) {
         string room = level.Session.Level;
         if (room == playerRoom) {
@@ -76,6 +85,7 @@ internal sealed class GhostReplayerEntity : Entity {
         }
 
         playerRoom = room;
+        EnsureGhostInScene(level);
         playerRevisitCounts.TryGetValue(room, out int count);
         int revisit = count + 1;
         playerRevisitCounts[room] = revisit;

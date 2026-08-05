@@ -18,7 +18,8 @@ internal sealed class Ghost : Actor {
 
     public Ghost(IReadOnlyList<GhostRoomSegment> roomSegments)
         : base(Vector2.Zero) {
-        Tag = Tags.Global | Tags.TransitionUpdate;
+        // Room-local entity; GhostReplayerEntity re-adds us after transitions so render order matches the player.
+        Tag = Tags.TransitionUpdate;
         Active = false;
         Visible = true;
         rooms = roomSegments;
@@ -205,7 +206,8 @@ internal sealed class Ghost : Actor {
         }
 
         Position = Frame.Position;
-        Depth = (int) Position.Y;
+        // Y-based depth keeps the ghost in the gameplay layer; +1 keeps it behind Madeline (depth 0).
+        Depth = Math.Max((int) Position.Y, 1);
         Sprite.Rotation = Frame.Rotation;
         Sprite.Scale = Frame.Scale;
         Sprite.Scale.X *= Frame.Facing;
