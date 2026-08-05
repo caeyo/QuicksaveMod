@@ -99,6 +99,8 @@ internal static class GhostRaceController {
         started = true;
         armed = false;
 
+        SpeedrunToolRaceTimer.ClearEndPoints();
+
         int frameCount = activeGhost.Rooms.Sum(room => room.Frames.Count);
         if (frameCount == 0) {
             Logger.Warn(GhostConstants.LogTag, "Ghost race started but ghost has no recorded frames.");

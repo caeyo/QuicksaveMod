@@ -110,18 +110,27 @@ internal static class SpeedrunToolRaceTimer {
 
     public static void End() {
         scheduledFinish = null;
+        ClearEndPoints();
 
         if (!IsActive) {
             return;
         }
 
+        ClearSession();
+    }
+
+    public static void ClearEndPoints() {
+        if (!SpeedrunToolBridge.IsLoaded) {
+            return;
+        }
+
+        Resolve();
+
         try {
             clearEndPoints?.Invoke();
         } catch (Exception e) {
-            Logger.Warn(GhostConstants.LogTag, $"Failed to end SRT race timer: {e.Message}");
+            Logger.Warn(GhostConstants.LogTag, $"Failed to clear SRT EndPoints: {e.Message}");
         }
-
-        ClearSession();
     }
 
     public static void OnRoomChanged(Level level) {
