@@ -87,17 +87,13 @@ internal static class GhostFrameCodec {
             entry.SpriteColor = PackColor(frame.SpriteColor);
         }
 
-        if (!ColorsEqual(frame.HairColor, Player.NormalHairColor)) {
-            entry.HairColor = PackColor(frame.HairColor);
-        }
+        entry.HairColor = PackColor(frame.HairColor);
 
         if (!frame.HairSimulateMotion) {
             entry.HairSimulateMotion = false;
         }
 
-        if (frame.HairCount != 0) {
-            entry.HairCount = frame.HairCount;
-        }
+        entry.HairCount = frame.HairCount;
 
         return entry;
     }
@@ -192,6 +188,10 @@ internal static class GhostFrameCodec {
 
         public void Apply(GhostFrameEntry entry) {
             if (entry.HasPlayer is { } hasPlayer) {
+                if (!hasPlayer) {
+                    ResetVisualDefaults();
+                }
+
                 HasPlayer = hasPlayer;
             }
 
@@ -238,6 +238,13 @@ internal static class GhostFrameCodec {
             if (entry.HairCount is { } hairCount) {
                 HairCount = hairCount;
             }
+        }
+
+        private void ResetVisualDefaults() {
+            SpriteColor = Color.White;
+            HairColor = Player.NormalHairColor;
+            HairSimulateMotion = true;
+            HairCount = 0;
         }
 
         public GhostFrameData ToFrame() {
