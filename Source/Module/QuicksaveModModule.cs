@@ -53,6 +53,7 @@ public class QuicksaveModModule : EverestModule {
         PlaybackHooks.Apply();
         LoadFreezeHooks.Apply();
         SpeedrunToolSaveLoadImports.Apply();
+        SpeedrunToolRaceTimer.WarmUp();
         GhostRecordingHooks.Apply();
         GhostPlaybackHooks.Apply();
 

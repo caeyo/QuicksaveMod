@@ -1,5 +1,6 @@
 // Adapted from GhostModForTas (MIT) — https://github.com/LozenChen/GhostModForTas
 using Celeste.Mod.QuicksaveMod.Ghost;
+using Celeste.Mod.QuicksaveMod.Interop;
 using Microsoft.Xna.Framework;
 using Monocle;
 
@@ -32,12 +33,32 @@ internal sealed class GhostReplayerEntity : Entity {
             return;
         }
 
+        SpeedrunToolRaceTimer.TryBeginScheduled(level);
+
         if (Ghost.Done) {
+            if (Ghost.Scene != null) {
+                Ghost.RemoveSelf();
+            }
+
+            if (SpeedrunToolRaceTimer.NeedsReplayerSupport) {
+                TrackPlayerRoom(level);
+                if (SpeedrunToolRaceTimer.IsWatchingFlagTouch) {
+                    SpeedrunToolRaceTimer.WatchFlagTouch();
+                }
+
+                base.Update();
+                return;
+            }
+
             RemoveSelf();
             return;
         }
 
         TrackPlayerRoom(level);
+        if (SpeedrunToolRaceTimer.IsWatchingFlagTouch) {
+            SpeedrunToolRaceTimer.WatchFlagTouch();
+        }
+
         Ghost.Visible = true;
         Ghost.UpdateByReplayer();
 
@@ -58,6 +79,8 @@ internal sealed class GhostReplayerEntity : Entity {
         playerRevisitCounts.TryGetValue(room, out int count);
         int revisit = count + 1;
         playerRevisitCounts[room] = revisit;
+
+        SpeedrunToolRaceTimer.OnRoomChanged(level);
 
         if (Ghost.ForceSync) {
             Ghost.Sync(room, revisit);
@@ -82,7 +105,10 @@ internal sealed class GhostReplayerEntity : Entity {
 
     public override void Removed(Scene scene) {
         base.Removed(scene);
-        Ghost.RemoveSelf();
+        if (Ghost.Scene != null) {
+            Ghost.RemoveSelf();
+        }
+
         if (Instance == this) {
             Instance = null;
         }

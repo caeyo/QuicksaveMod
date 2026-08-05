@@ -33,6 +33,7 @@ internal static class GhostRaceController {
         anchorPlaybackComplete = false;
         started = false;
         GhostReplayerEntity.Instance?.RemoveSelf();
+        SpeedrunToolRaceTimer.End();
     }
 
     public static void OnAnchorPlaybackComplete() {
@@ -111,8 +112,8 @@ internal static class GhostRaceController {
         level.Add(ghost);
         level.Add(new GhostReplayerEntity(ghost));
 
-        if (ShouldConfigureRaceTimer()) {
-            SpeedrunToolBridge.ConfigureRaceTimer(activeGhost.Finish);
+        if (ShouldConfigureRaceTimer() && activeGhost.Finish != null) {
+            SpeedrunToolRaceTimer.ScheduleBegin(activeGhost.Finish);
         }
 
         Logger.Info(

@@ -80,6 +80,10 @@ public static class SpeedrunToolSaveLoadImports {
             InputTimelineRestorer.GhostRestoreMode.MatchRecordingStartOrRaceAnchor
         );
 
+        if (SpeedrunToolRaceTimer.IsActive) {
+            SpeedrunToolRaceTimer.RefreshAfterLoad();
+        }
+
         Logger.Info(
             QuicksaveConstants.LogTag,
             $"Restored input timeline on SRT load ({timeline.Inputs.Count} lines)."
