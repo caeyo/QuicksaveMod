@@ -16,8 +16,14 @@ internal sealed class GhostBrowserHandler : ImGuiHandler {
         Visible = false;
 
         state = new BrowserState(profile);
-        GhostBrowserCommands commands = new(profile, state, ModBrowserCoordinator.CloseAll);
-        BrowserView view = new(profile, state, commands);
+        BrowserView view = null!;
+        GhostBrowserCommands commands = new(
+            profile,
+            state,
+            ModBrowserCoordinator.CloseAll,
+            (entry, activation) => view.QueueActivate(entry, activation)
+        );
+        view = new BrowserView(profile, state, commands);
         BrowserModals modals = new(profile, state, commands);
         chrome = new BrowserWindowChrome(profile, state, view, modals);
     }

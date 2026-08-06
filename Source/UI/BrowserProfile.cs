@@ -13,10 +13,7 @@ internal sealed record BrowserProfile(
     string ListChildId,
     string InlineEditChildId,
     string InlineEditFieldId,
-    string EmptyContextMenuId,
-    int ListFooterRowCount,
-    bool ScrollSelectionIntoView,
-    bool InlineEditUsesChildPanel
+    string EmptyContextMenuId
 ) {
     public EntityPath Path { get; } = new(Store);
 
@@ -31,10 +28,7 @@ internal sealed record BrowserProfile(
         ListChildId: "QuicksaveEntryList",
         InlineEditChildId: "QuicksaveInlineEdit",
         InlineEditFieldId: "##inline_edit",
-        EmptyContextMenuId: "empty_ctx",
-        ListFooterRowCount: 1,
-        ScrollSelectionIntoView: true,
-        InlineEditUsesChildPanel: true
+        EmptyContextMenuId: "empty_ctx"
     );
 
     public static BrowserProfile Ghost { get; } = new(
@@ -48,9 +42,6 @@ internal sealed record BrowserProfile(
         ListChildId: "GhostEntryList",
         InlineEditChildId: "GhostInlineEdit",
         InlineEditFieldId: "##ghost_inline_edit",
-        EmptyContextMenuId: "ghost_empty_ctx",
-        ListFooterRowCount: 1,
-        ScrollSelectionIntoView: true,
-        InlineEditUsesChildPanel: true
+        EmptyContextMenuId: "ghost_empty_ctx"
     );
 }

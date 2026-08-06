@@ -1,4 +1,3 @@
-using Celeste.Mod.QuicksaveMod.Quicksave;
 using TAS;
 
 namespace Celeste.Mod.QuicksaveMod.Playback;
@@ -15,7 +14,8 @@ internal static class TasFilePlayback {
         string tasFilePath,
         string? orphanedTempPath,
         bool autoStart,
-        Func<string, bool>? isTempPlaybackPath = null
+        Func<string, bool> isTempPlaybackPath,
+        string logTag
     ) {
         string fullPath = Path.GetFullPath(tasFilePath);
         state.TempTasPath = fullPath;
@@ -38,9 +38,18 @@ internal static class TasFilePlayback {
 
             if (orphanedTempPath != null
                 && !string.Equals(orphanedTempPath, fullPath, StringComparison.OrdinalIgnoreCase)) {
-                TryDeleteTempFile(orphanedTempPath, isTempPlaybackPath ?? (_ => true), QuicksaveConstants.LogTag);
+                TryDeleteTempFile(orphanedTempPath, isTempPlaybackPath, logTag);
             }
         });
+    }
+
+    public static void Cleanup(
+        TasPlaybackFileState state,
+        Func<string, bool> isTempPlaybackPath,
+        string logTag
+    ) {
+        RestoreFilePath(state);
+        DeleteTempFile(state, isTempPlaybackPath, logTag);
     }
 
     public static void RestoreFilePath(TasPlaybackFileState state) {
@@ -61,6 +70,16 @@ internal static class TasFilePlayback {
         }
 
         Manager.Controller.FilePath = previous;
+    }
+
+    public static void DeleteTempFile(
+        TasPlaybackFileState state,
+        Func<string, bool> isTempPlaybackPath,
+        string logTag
+    ) {
+        string? path = state.TempTasPath;
+        state.TempTasPath = null;
+        TryDeleteTempFile(path, isTempPlaybackPath, logTag);
     }
 
     public static void TryDeleteTempFile(

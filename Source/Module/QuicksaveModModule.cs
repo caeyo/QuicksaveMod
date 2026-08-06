@@ -1,7 +1,5 @@
 ﻿using Celeste.Mod.ImGuiHelper;
 using Celeste.Mod.QuicksaveMod.Ghost;
-using Celeste.Mod.QuicksaveMod.Ghost.Playback;
-using Celeste.Mod.QuicksaveMod.Ghost.Recording;
 using Celeste.Mod.QuicksaveMod.Hooks;
 using Celeste.Mod.QuicksaveMod.Interop;
 using Celeste.Mod.QuicksaveMod.Playback;

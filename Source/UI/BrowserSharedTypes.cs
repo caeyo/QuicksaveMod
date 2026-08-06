@@ -25,6 +25,11 @@ internal enum InlineEditMode {
     CreatingFolder,
 }
 
+internal enum BrowserFileActivation {
+    Primary,
+    Spectate,
+}
+
 internal readonly record struct PendingInlineEditRequest(
     InlineEditMode Mode,
     string DefaultText,

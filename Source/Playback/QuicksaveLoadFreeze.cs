@@ -1,3 +1,4 @@
+using Celeste.Mod.QuicksaveMod.Hooks;
 using Celeste.Mod.QuicksaveMod.Quicksave;
 using Monocle;
 
@@ -52,7 +53,7 @@ internal static class QuicksaveLoadFreeze {
         foreach (VirtualInput t in UnfreezeInputs) {
             if (IsActive(t)) {
                 Cancel();
-                Ghost.Playback.GhostPlaybackHooks.OnLoadFreezeEnded();
+                GhostPlaybackHooks.OnLoadFreezeEnded();
                 Logger.Info(QuicksaveConstants.LogTag, "Resumed after input.");
                 return;
             }

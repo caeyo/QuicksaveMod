@@ -19,8 +19,7 @@ internal static class QuicksavePlayback {
     public static bool IsWatching => watching;
 
     public static void Reset() {
-        RestorePreviousFilePath();
-        DeleteTempTasFile();
+        TasFilePlayback.Cleanup(FileState, QuicksavePath.IsTempPlaybackPath, QuicksaveConstants.LogTag);
         watching = false;
         playbackStarted = false;
         loadedQuicksave = null;
@@ -47,7 +46,8 @@ internal static class QuicksavePlayback {
             tasFilePath,
             orphanedTemp,
             autoStart: true,
-            QuicksavePath.IsTempPlaybackPath
+            QuicksavePath.IsTempPlaybackPath,
+            QuicksaveConstants.LogTag
         );
     }
 
@@ -81,8 +81,7 @@ internal static class QuicksavePlayback {
             Manager.DisableRun();
         }
 
-        RestorePreviousFilePath();
-        DeleteTempTasFile();
+        TasFilePlayback.Cleanup(FileState, QuicksavePath.IsTempPlaybackPath, QuicksaveConstants.LogTag);
         RaiseSeedNeeded();
 
         if (GhostRaceController.IsArmed) {
@@ -134,11 +133,4 @@ internal static class QuicksavePlayback {
             && SpeedrunToolBridge.IsEnabled;
     }
 
-    private static void RestorePreviousFilePath() => TasFilePlayback.RestoreFilePath(FileState);
-
-    private static void DeleteTempTasFile() {
-        string? path = FileState.TempTasPath;
-        FileState.TempTasPath = null;
-        TasFilePlayback.TryDeleteTempFile(path, QuicksavePath.IsTempPlaybackPath, QuicksaveConstants.LogTag);
-    }
 }

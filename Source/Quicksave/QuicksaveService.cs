@@ -1,7 +1,6 @@
 using Celeste.Mod.QuicksaveMod.Module;
 using Celeste.Mod.QuicksaveMod.Playback;
 using Celeste.Mod.QuicksaveMod.Quicksave.Storage;
-using Celeste.Mod.QuicksaveMod.Recording;
 using Monocle;
 
 namespace Celeste.Mod.QuicksaveMod.Quicksave;
@@ -9,11 +8,6 @@ namespace Celeste.Mod.QuicksaveMod.Quicksave;
 internal static class QuicksaveService {
     public static QuicksaveData? Current => QuicksaveTracker.Current;
     public static bool IsTracking => QuicksaveTracker.IsTracking;
-    public static bool IsTrackingSuspended => GameplayInputRecorder.IsSuspended;
-
-    public static void SuspendTracking() => GameplayInputRecorder.Suspend();
-
-    public static void ResumeTracking() => GameplayInputRecorder.Resume();
 
     public static void SaveQuicksave(string? fileName = null, string? subdirectory = null) {
         QuicksaveData data = QuicksaveTracker.Current

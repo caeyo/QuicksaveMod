@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 
 namespace Celeste.Mod.QuicksaveMod.Quicksave;
 
-internal class QuicksaveStartPoint {
+internal sealed class QuicksaveStartPoint {
     public string AreaSid { get; init; } = "";
 
     [JsonPropertyName("areaMode")]

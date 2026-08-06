@@ -46,7 +46,7 @@ internal static class GameplayInputRecorder {
             }
         }
 
-        InputLineBuffer? quicksaveBuffer = trackQuicksave ? QuicksaveTracker.Buffer : null;
+        InputLineBuffer? quicksaveBuffer = trackQuicksave ? QuicksaveTracker.InputBuffer : null;
         InputLineBuffer? ghostBuffer = trackGhost ? GhostRecordingSession.InputBuffer : null;
         if (quicksaveBuffer == null) {
             mapper.Sample(level, player, ghostBuffer!);

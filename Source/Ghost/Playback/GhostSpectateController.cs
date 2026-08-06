@@ -26,13 +26,13 @@ internal static class GhostSpectateController {
             tasFilePath,
             orphanedTempPath: null,
             autoStart: true,
-            GhostPath.IsTempPlaybackPath
+            GhostPath.IsTempPlaybackPath,
+            GhostConstants.LogTag
         );
     }
 
     public static void Reset() {
-        RestorePreviousFilePath();
-        DeleteTempTasFile();
+        TasFilePlayback.Cleanup(FileState, GhostPath.IsTempPlaybackPath, GhostConstants.LogTag);
         watching = false;
         playbackStarted = false;
         hintShown = false;
@@ -77,17 +77,9 @@ internal static class GhostSpectateController {
             Manager.DisableRun();
         }
 
-        RestorePreviousFilePath();
-        DeleteTempTasFile();
+        TasFilePlayback.Cleanup(FileState, GhostPath.IsTempPlaybackPath, GhostConstants.LogTag);
         Logger.Info(GhostConstants.LogTag, "Ghost spectate finished.");
         PlaybackCoordinator.Clear(ActivePlayback.GhostSpectate);
     }
 
-    private static void RestorePreviousFilePath() => TasFilePlayback.RestoreFilePath(FileState);
-
-    private static void DeleteTempTasFile() {
-        string? path = FileState.TempTasPath;
-        FileState.TempTasPath = null;
-        TasFilePlayback.TryDeleteTempFile(path, GhostPath.IsTempPlaybackPath, GhostConstants.LogTag);
-    }
 }

@@ -9,6 +9,7 @@ internal sealed class BrowserView(
 ) {
     private string? dragSourcePath;
     private BrowserEntry? pendingActivate;
+    private BrowserFileActivation pendingActivation = BrowserFileActivation.Primary;
 
     private static float InlineEditAreaHeight =>
         ImGui.GetFrameHeightWithSpacing() + ImGui.GetStyle().ItemSpacing.Y;
@@ -16,6 +17,7 @@ internal sealed class BrowserView(
     public void ResetTransient() {
         dragSourcePath = null;
         pendingActivate = null;
+        pendingActivation = BrowserFileActivation.Primary;
     }
 
     public void RenderBreadcrumbs() {
@@ -38,7 +40,7 @@ internal sealed class BrowserView(
     }
 
     public void RenderEntryList() {
-        float listHeight = -(InlineEditAreaHeight * profile.ListFooterRowCount + ImGui.GetStyle().ItemSpacing.Y);
+        float listHeight = -(InlineEditAreaHeight + ImGui.GetStyle().ItemSpacing.Y);
 
         if (!ImGui.BeginChild(profile.ListChildId, new System.Numerics.Vector2(0, listHeight))) {
             return;
@@ -77,8 +79,7 @@ internal sealed class BrowserView(
                 RenderDirectoryDropTarget(entry.FullPath);
             }
 
-            if (profile.ScrollSelectionIntoView
-                && selected
+            if (selected
                 && state.SelectedIndex == i
                 && ImGui.IsWindowFocused()) {
                 ImGui.SetScrollHereY(0.5f);
@@ -90,27 +91,18 @@ internal sealed class BrowserView(
     }
 
     public void RenderInlineEditArea() {
-        if (profile.InlineEditUsesChildPanel) {
-            ImGui.BeginChild(
-                profile.InlineEditChildId,
-                new System.Numerics.Vector2(0, InlineEditAreaHeight),
-                ImGuiChildFlags.None,
-                ImGuiWindowFlags.NoScrollbar
-            );
+        ImGui.BeginChild(
+            profile.InlineEditChildId,
+            new System.Numerics.Vector2(0, InlineEditAreaHeight),
+            ImGuiChildFlags.None,
+            ImGuiWindowFlags.NoScrollbar
+        );
 
-            if (state.EditMode != InlineEditMode.None) {
-                RenderInlineEditFields();
-            }
-
-            ImGui.EndChild();
-            return;
+        if (state.EditMode != InlineEditMode.None) {
+            RenderInlineEditFields();
         }
 
-        if (state.EditMode == InlineEditMode.None) {
-            return;
-        }
-
-        RenderInlineEditFields();
+        ImGui.EndChild();
     }
 
     private void RenderInlineEditFields() {
@@ -123,9 +115,7 @@ internal sealed class BrowserView(
             _ => "Name:",
         };
 
-        if (profile.InlineEditUsesChildPanel) {
-            ImGui.AlignTextToFramePadding();
-        }
+        ImGui.AlignTextToFramePadding();
 
         ImGui.TextUnformatted(prompt);
         ImGui.SameLine();
@@ -155,10 +145,14 @@ internal sealed class BrowserView(
         }
 
         pendingActivate = null;
-        host.ActivateEntry(entry);
+        host.ActivateEntry(entry, pendingActivation);
+        pendingActivation = BrowserFileActivation.Primary;
     }
 
-    public void QueueActivate(BrowserEntry entry) => pendingActivate = entry;
+    public void QueueActivate(BrowserEntry entry, BrowserFileActivation activation = BrowserFileActivation.Primary) {
+        pendingActivate = entry;
+        pendingActivation = activation;
+    }
 
     private void RenderEmptySpaceContextMenu() {
         if (!ImGui.BeginPopupContextWindow(

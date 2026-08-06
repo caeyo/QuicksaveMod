@@ -3,7 +3,7 @@ using Celeste.Mod.QuicksaveMod.Recording;
 namespace Celeste.Mod.QuicksaveMod.Quicksave;
 
 internal static class QuicksaveTracker {
-    internal static InputLineBuffer Buffer { get; } = new();
+    internal static InputLineBuffer InputBuffer { get; } = new();
     private static QuicksaveStartPoint? startPoint;
     private static string? startSessionXml;
     private static Dictionary<string, string>? startModSessions;
@@ -18,7 +18,7 @@ internal static class QuicksaveTracker {
 
             return new QuicksaveData {
                 Start = startPoint.Clone(),
-                Inputs = Buffer.Snapshot(),
+                Inputs = InputBuffer.Snapshot(),
                 // Session at input-buffer start — must match what playback begins from.
                 SessionXml = startSessionXml,
                 ModSessions = startModSessions == null
@@ -32,7 +32,7 @@ internal static class QuicksaveTracker {
         startPoint = QuicksaveStartPoint.FromSession(session);
         startSessionXml = SessionSnapshot.CaptureSessionXml(session);
         startModSessions = SessionSnapshot.CaptureModSessions();
-        Buffer.Clear();
+        InputBuffer.Clear();
     }
 
     // After load, keep the quicksave's start + inputs as the base of the next tracking session.
@@ -48,6 +48,6 @@ internal static class QuicksaveTracker {
         startModSessions = data.ModSessions == null
             ? null
             : new Dictionary<string, string>(data.ModSessions, StringComparer.OrdinalIgnoreCase);
-        Buffer.Seed(data.Inputs);
+        InputBuffer.Seed(data.Inputs);
     }
 }

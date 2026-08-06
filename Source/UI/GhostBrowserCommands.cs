@@ -7,7 +7,8 @@ namespace Celeste.Mod.QuicksaveMod.UI;
 internal sealed class GhostBrowserCommands(
     BrowserProfile profile,
     BrowserState state,
-    Action closeBrowser
+    Action closeBrowser,
+    Action<BrowserEntry, BrowserFileActivation> queueActivate
 ) : IBrowserViewHost {
     public void TryMoveFile(string sourcePath, string targetDirectory) {
         try {
@@ -28,23 +29,21 @@ internal sealed class GhostBrowserCommands(
         }
     }
 
-    public void ActivateEntry(BrowserEntry entry) {
+    public void ActivateEntry(BrowserEntry entry, BrowserFileActivation activation = BrowserFileActivation.Primary) {
         if (entry.Kind == BrowserEntryKind.Folder) {
             state.NavigateTo(entry.FullPath);
             return;
         }
 
-        RaceEntry(entry);
-    }
-
-    public void RaceEntry(BrowserEntry entry) {
         closeBrowser();
-        GhostService.LoadGhostForRace(entry.FullPath);
-    }
-
-    public void SpectateEntry(BrowserEntry entry) {
-        closeBrowser();
-        GhostService.LoadGhostForSpectate(entry.FullPath);
+        switch (activation) {
+            case BrowserFileActivation.Spectate:
+                GhostService.LoadGhostForSpectate(entry.FullPath);
+                break;
+            default:
+                GhostService.LoadGhostForRace(entry.FullPath);
+                break;
+        }
     }
 
     public void ConfirmInlineEdit() {
@@ -112,11 +111,11 @@ internal sealed class GhostBrowserCommands(
 
     public void RenderFileContextMenu(BrowserEntry entry) {
         if (ImGui.MenuItem("Race")) {
-            RaceEntry(entry);
+            queueActivate(entry, BrowserFileActivation.Primary);
         }
 
         if (ImGui.MenuItem("Spectate")) {
-            SpectateEntry(entry);
+            queueActivate(entry, BrowserFileActivation.Spectate);
         }
 
         if (ImGui.MenuItem("Rename")) {

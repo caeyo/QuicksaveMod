@@ -31,7 +31,7 @@ internal sealed class QuicksaveBrowserCommands(
         }
     }
 
-    public void ActivateEntry(BrowserEntry entry) {
+    public void ActivateEntry(BrowserEntry entry, BrowserFileActivation activation = BrowserFileActivation.Primary) {
         if (entry.Kind == BrowserEntryKind.Folder) {
             state.NavigateTo(entry.FullPath);
             return;

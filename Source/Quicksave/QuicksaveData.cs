@@ -1,6 +1,6 @@
 namespace Celeste.Mod.QuicksaveMod.Quicksave;
 
-internal class QuicksaveData {
+internal sealed class QuicksaveData {
     public const int CurrentVersion = 3;
 
     public int Version { get; set; } = CurrentVersion;
