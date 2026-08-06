@@ -1,6 +1,5 @@
 using Celeste.Mod.QuicksaveMod.Ghost.Storage;
 using Celeste.Mod.QuicksaveMod.Playback;
-using Monocle;
 using TAS;
 
 namespace Celeste.Mod.QuicksaveMod.Ghost.Playback;
@@ -13,7 +12,7 @@ internal static class GhostSpectateController {
 
     public static bool IsActive => watching;
 
-    public static void Start(GhostData ghost) {
+    public static void Start() {
         Reset();
         PlaybackCoordinator.Begin(ActivePlayback.GhostSpectate);
         watching = true;
@@ -37,6 +36,7 @@ internal static class GhostSpectateController {
         watching = false;
         playbackStarted = false;
         hintShown = false;
+        SpectateHintHud.Hide();
         PlaybackCoordinator.Clear(ActivePlayback.GhostSpectate);
     }
 
@@ -45,10 +45,9 @@ internal static class GhostSpectateController {
             return;
         }
 
-        TryShowHint();
-
         if (Manager.Running) {
             playbackStarted = true;
+            TryShowHintAtBreakpoint();
             return;
         }
 
@@ -59,19 +58,20 @@ internal static class GhostSpectateController {
         Finish();
     }
 
-    private static void TryShowHint() {
-        if (hintShown || Engine.Scene is not Level level) {
+    private static void TryShowHintAtBreakpoint() {
+        if (hintShown || !Manager.Controller.Break) {
             return;
         }
 
         hintShown = true;
-        level.Add(new SpectateHintHud());
+        SpectateHintHud.Show();
     }
 
     private static void Finish() {
         watching = false;
         playbackStarted = false;
         hintShown = false;
+        SpectateHintHud.Hide();
 
         if (Manager.Running) {
             Manager.DisableRun();

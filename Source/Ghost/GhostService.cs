@@ -47,7 +47,7 @@ internal static class GhostService {
         string fullPath = GhostPath.ResolveGhostFilePath(filePath, mustExist: true);
         GhostData ghost = GhostSerializer.Read(fullPath);
         QuicksaveLoadFreeze.Cancel();
-        GhostSpectateController.Start(ghost);
+        GhostSpectateController.Start();
 
         Session session = SessionLoadHelper.PrepareSession(ghost.Anchor);
         string tempTasPath = SessionLoadHelper.CreateTempTasPath(

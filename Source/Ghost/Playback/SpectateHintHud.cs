@@ -1,54 +1,77 @@
-using System.Collections;
+using Celeste;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Monocle;
 
 namespace Celeste.Mod.QuicksaveMod.Ghost.Playback;
 
-[Tracked(false)]
-internal sealed class SpectateHintHud : Entity {
+internal static class SpectateHintHud {
     private const int Padding = 25;
     private const float VisibleDuration = 2f;
 
-    private readonly string text = "Spectating - use CelesteTAS binds for playback control";
-    private float alpha;
-    private float unEasedAlpha;
+    private const string Text = "Use CelesteTAS binds for playback control - press Resume to start";
 
-    public SpectateHintHud() {
-        Tag = Tags.HUD | Tags.Global | Tags.FrozenUpdate | Tags.PauseUpdate | Tags.TransitionUpdate;
-        Depth = -100;
+    private static bool active;
+    private static float fade;
+    private static float timeout;
 
-        Vector2 messageSize = ActiveFont.Measure(text);
-        Position = new Vector2(Padding, Engine.Height - messageSize.Y - Padding / 2f);
-        Add(new Coroutine(Show()));
+    public static void Show() {
+        active = true;
+        fade = 0f;
+        timeout = VisibleDuration;
     }
 
-    private IEnumerator Show() {
-        while (alpha < 1f) {
-            unEasedAlpha = Calc.Approach(unEasedAlpha, 1f, Engine.RawDeltaTime * 5f);
-            alpha = Ease.SineOut(unEasedAlpha);
-            yield return null;
-        }
-
-        yield return VisibleDuration;
-
-        while (alpha > 0f) {
-            unEasedAlpha = Calc.Approach(unEasedAlpha, 0f, Engine.RawDeltaTime * 5f);
-            alpha = Ease.SineIn(unEasedAlpha);
-            yield return null;
-        }
-
-        RemoveSelf();
+    public static void Hide() {
+        active = false;
+        fade = 0f;
+        timeout = 0f;
     }
 
-    public override void Render() {
+    public static void OnPostRender() {
+        if (!active || Engine.Scene is not Level) {
+            return;
+        }
+
+        if (ActiveFont.Font == null) {
+            return;
+        }
+
+        float deltaTime = Engine.RawDeltaTime;
+        float target = timeout > 0f ? 1f : 0f;
+        fade = Calc.Approach(fade, target, deltaTime * 5f);
+
+        Draw.SpriteBatch.Begin(
+            SpriteSortMode.Deferred,
+            BlendState.AlphaBlend,
+            SamplerState.LinearClamp,
+            DepthStencilState.Default,
+            RasterizerState.CullNone,
+            null,
+            Engine.ScreenMatrix
+        );
+
+        Vector2 messageSize = ActiveFont.Measure(Text);
+        float y = Engine.Height - messageSize.Y - Padding / 2f;
+        float alpha = timeout > 0f ? Ease.SineIn(fade) : Ease.SineOut(fade);
+
         ActiveFont.DrawOutline(
-            text,
-            Position,
+            Text,
+            new Vector2(Padding, y),
             Vector2.Zero,
             Vector2.One,
             Color.White * alpha,
             2f,
-            Color.Black * alpha * alpha * alpha
+            Color.Black * (alpha * alpha * alpha)
         );
+
+        Draw.SpriteBatch.End();
+
+        if (fade >= 1f) {
+            timeout -= deltaTime;
+        }
+
+        if (timeout <= 0f && fade <= 0f) {
+            active = false;
+        }
     }
 }
