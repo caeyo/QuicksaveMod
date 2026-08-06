@@ -1,4 +1,3 @@
-using Celeste.Mod.QuickTools.Module;
 using Celeste.Mod.QuickTools.Playback;
 using Celeste.Mod.QuickTools.Quicksave.Storage;
 using Monocle;

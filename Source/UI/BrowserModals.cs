@@ -79,11 +79,11 @@ internal sealed class BrowserModals(
 
     private void RenderDeleteModal() {
         if (!BrowserModalSupport.TryBeginModal(
-            profile.DeleteModalId,
-            state.ShowDeleteModal,
-            ref deletePopupOpened,
-            state.CancelDelete
-        )) {
+                profile.DeleteModalId,
+                state.ShowDeleteModal,
+                ref deletePopupOpened,
+                state.CancelDelete
+            )) {
             return;
         }
 
@@ -107,11 +107,11 @@ internal sealed class BrowserModals(
 
     private void RenderConflictModal() {
         if (!BrowserModalSupport.TryBeginModal(
-            profile.ConflictModalId,
-            state.ShowConflictModal,
-            ref conflictPopupOpened,
-            state.ClearConflict
-        )) {
+                profile.ConflictModalId,
+                state.ShowConflictModal,
+                ref conflictPopupOpened,
+                state.ClearConflict
+            )) {
             return;
         }
 

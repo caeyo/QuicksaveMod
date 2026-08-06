@@ -1,18 +1,18 @@
 namespace Celeste.Mod.QuickTools.Recording;
 
 internal static class TasActionTokens {
-    internal static readonly string Pause = "S";
-    internal static readonly string QuickRestart = "Q";
-    internal static readonly string MenuConfirm = "O";
+    internal const string Pause = "S";
+    internal const string QuickRestart = "Q";
+    internal const string MenuConfirm = "O";
 
-    internal static readonly string JumpA = "J";
-    internal static readonly string JumpB = "K";
-    internal static readonly string DashA = "X";
-    internal static readonly string DashB = "C";
-    internal static readonly string CrouchDashA = "Z";
-    internal static readonly string CrouchDashB = "V";
-    internal static readonly string GrabA = "G";
-    internal static readonly string GrabB = "H";
+    private const string JumpA = "J";
+    private const string JumpB = "K";
+    private const string DashA = "X";
+    private const string DashB = "C";
+    private const string CrouchDashA = "Z";
+    private const string CrouchDashB = "V";
+    private const string GrabA = "G";
+    private const string GrabB = "H";
 
     private static readonly string[] PlainByIndex = ["L", "R", "U", "D"];
     private static readonly string[] MoveByIndex = ["ML", "MR", "MU", "MD"];

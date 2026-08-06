@@ -1,19 +1,13 @@
 using Celeste.Mod.QuickTools.Module;
 using ImGuiNET;
 using Microsoft.Xna.Framework;
-using Monocle;
 
 namespace Celeste.Mod.QuickTools.UI;
 
-internal sealed class ModBrowserCoordinator {
-    private readonly QuicksaveBrowserHandler quicksaveBrowser;
-    private readonly GhostBrowserHandler ghostBrowser;
-
-    public ModBrowserCoordinator(QuicksaveBrowserHandler quicksaveBrowser, GhostBrowserHandler ghostBrowser) {
-        this.quicksaveBrowser = quicksaveBrowser;
-        this.ghostBrowser = ghostBrowser;
-    }
-
+internal sealed class ModBrowserCoordinator(
+    QuicksaveBrowserHandler quicksaveBrowser,
+    GhostBrowserHandler ghostBrowser
+) {
     public static bool AnyVisible =>
         QuicksaveBrowserHandler.Instance?.Visible == true || GhostBrowserHandler.Instance?.Visible == true;
 
@@ -31,7 +25,7 @@ internal sealed class ModBrowserCoordinator {
         OpenBoth();
     }
 
-    public void OpenBoth() {
+    private void OpenBoth() {
         float halfWidth = ImGui.GetIO().DisplaySize.X * 0.5f;
         quicksaveBrowser.SetNextWindowPos(new System.Numerics.Vector2(0, 0), System.Numerics.Vector2.Zero);
         ghostBrowser.SetNextWindowPos(new System.Numerics.Vector2(halfWidth, 0), System.Numerics.Vector2.Zero);

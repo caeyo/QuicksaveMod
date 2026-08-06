@@ -1,14 +1,9 @@
 namespace Celeste.Mod.QuickTools.Storage;
 
-internal sealed class EntityRepository {
-    private readonly EntityStoreProfile profile;
-    private readonly EntityPath path;
-
-    public EntityRepository(EntityStoreProfile profile, EntityPath path) {
-        this.profile = profile;
-        this.path = path;
-    }
-
+internal sealed class EntityRepository(
+    EntityStoreProfile profile,
+    EntityPath path
+) {
     public void Move(string sourcePath, string targetDirectory) {
         string source = path.ResolveEntityFilePath(sourcePath, mustExist: true);
         string targetDir = path.ResolveSaveDirectory(targetDirectory);

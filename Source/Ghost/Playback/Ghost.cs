@@ -1,4 +1,3 @@
-using Celeste.Mod.QuickTools.Ghost;
 using Microsoft.Xna.Framework;
 using Monocle;
 
@@ -22,7 +21,7 @@ internal sealed class Ghost : Actor {
     private Color lastHairSource;
     private Color lastAppliedTint = Color.White;
 
-    public Microsoft.Xna.Framework.Color TintColor = Microsoft.Xna.Framework.Color.White;
+    public Color TintColor = Color.White;
 
     public Ghost(IReadOnlyList<GhostRoomSegment> roomSegments)
         : base(Vector2.Zero) {
@@ -39,13 +38,12 @@ internal sealed class Ghost : Actor {
         Add(Hair = new PlayerHair(Sprite));
         Add(Sprite);
         Sprite.Active = false;
-        origHairColor = Player.NormalHairColor;
-        Hair.Color = origHairColor;
+        Color origHairColor1 = Player.NormalHairColor;
+        Hair.Color = origHairColor1;
     }
 
     public PlayerSprite Sprite { get; }
     public PlayerHair Hair { get; }
-    private readonly Microsoft.Xna.Framework.Color origHairColor;
 
     public bool HasRooms => roomIndex < rooms.Count;
 

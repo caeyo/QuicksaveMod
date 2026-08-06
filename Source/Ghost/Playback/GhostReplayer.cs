@@ -1,12 +1,12 @@
 // Adapted from GhostModForTas (MIT) — https://github.com/LozenChen/GhostModForTas
-using Celeste.Mod.QuickTools.Ghost;
+
 using Celeste.Mod.QuickTools.Interop;
 using Microsoft.Xna.Framework;
 using Monocle;
 
 namespace Celeste.Mod.QuickTools.Ghost.Playback;
 
-[Tracked(false)]
+[Tracked]
 internal sealed class GhostReplayerEntity : Entity {
     public static GhostReplayerEntity? Instance { get; private set; }
 
@@ -106,9 +106,7 @@ internal sealed class GhostReplayerEntity : Entity {
             return false;
         }
 
-        if (!playerRevisitCounts.TryGetValue(playerRoom, out int playerRevisit)) {
-            playerRevisit = 1;
-        }
+        int playerRevisit = playerRevisitCounts.GetValueOrDefault(playerRoom, 1);
 
         return Ghost.CurrentRevisit == playerRevisit;
     }

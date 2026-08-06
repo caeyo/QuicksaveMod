@@ -132,5 +132,4 @@ internal static class QuicksavePlayback {
             && SpeedrunToolBridge.IsLoaded
             && SpeedrunToolBridge.IsEnabled;
     }
-
 }

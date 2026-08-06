@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using Celeste.Mod.QuickTools.Ghost;
 using Celeste.Mod.QuickTools.Quicksave;
 
 namespace Celeste.Mod.QuickTools.Ghost.Serialization;

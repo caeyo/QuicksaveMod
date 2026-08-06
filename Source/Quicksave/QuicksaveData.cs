@@ -35,7 +35,7 @@ internal sealed class QuicksaveData {
             CreatedUtc = CreatedUtc,
             SaveUid = SaveUid,
             Start = Start.Clone(),
-            Inputs = [..Inputs],
+            Inputs = [.. Inputs],
             SessionXml = SessionXml,
             ModSessions = ModSessions == null
                 ? null

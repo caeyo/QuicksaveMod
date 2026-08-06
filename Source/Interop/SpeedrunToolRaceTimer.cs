@@ -65,7 +65,7 @@ internal static class SpeedrunToolRaceTimer {
         Begin(level, finish);
     }
 
-    public static void Begin(Level level, GhostFinishData finish) {
+    private static void Begin(Level level, GhostFinishData finish) {
         if (!SpeedrunToolBridge.IsLoaded || !SpeedrunToolBridge.IsEnabled) {
             return;
         }
@@ -174,7 +174,8 @@ internal static class SpeedrunToolRaceTimer {
             raceEndPoint = (Entity) endPointCtor.Invoke([player]);
             endPointRoomNameField?.SetValue(raceEndPoint, finishRoom);
             level.Add(raceEndPoint);
-        } finally {
+        }
+        finally {
             player.Position = saved;
         }
 

@@ -6,33 +6,21 @@ using Monocle;
 
 namespace Celeste.Mod.QuickTools.UI;
 
-internal sealed class BrowserWindowChrome {
+internal sealed class BrowserWindowChrome(
+    BrowserProfile profile,
+    BrowserState state,
+    BrowserView view,
+    BrowserModals modals
+) {
     private const float BaseWindowWidth = 520f;
     private const float BaseWindowHeight = 420f;
     private const float DesignDisplayHeight = 1080f;
-
-    private readonly BrowserProfile profile;
-    private readonly BrowserState state;
-    private readonly BrowserView view;
-    private readonly BrowserModals modals;
 
     private bool savedMouseVisible;
     private bool appliedFreeze;
     private float savedFontGlobalScale = 1f;
     private float appliedUiScale = 1f;
     private bool forceWindowSize;
-
-    public BrowserWindowChrome(
-        BrowserProfile profile,
-        BrowserState state,
-        BrowserView view,
-        BrowserModals modals
-    ) {
-        this.profile = profile;
-        this.state = state;
-        this.view = view;
-        this.modals = modals;
-    }
 
     public void Render() {
         float uiScale = ComputeUiScale();
@@ -83,7 +71,7 @@ internal sealed class BrowserWindowChrome {
         Engine.Instance.IsMouseVisible = true;
 
         appliedFreeze = false;
-        if (Engine.Scene is Level level && level is { Paused: false, Frozen: false }) {
+        if (Engine.Scene is Level { Paused: false, Frozen: false } level) {
             level.Frozen = true;
             appliedFreeze = true;
         }

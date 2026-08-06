@@ -45,7 +45,12 @@ internal static class MovementInputSampler {
             return;
         }
 
-        ResolveAimCardinals(SnapHeldAim(Input.Aim.Value), out bool aimLeft, out bool aimRight, out bool aimUp, out bool aimDown);
+        ResolveAimCardinals(
+            SnapHeldAim(Input.Aim.Value),
+            out bool aimLeft,
+            out bool aimRight,
+            out bool aimUp,
+            out bool aimDown);
 
         int moveX = Input.MoveX.Value;
         int moveY = Input.MoveY.Value;

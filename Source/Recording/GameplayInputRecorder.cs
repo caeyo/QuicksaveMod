@@ -62,7 +62,7 @@ internal static class GameplayInputRecorder {
         }
     }
 
-    internal static bool ShouldRecordFrame(Level level) =>
+    private static bool ShouldRecordFrame(Level level) =>
         !IsSuspended
         && !QuicksaveLoadFreeze.IsWaiting
         && !SpeedrunToolBridge.IsGameFrozen

@@ -7,18 +7,19 @@ internal static class GhostFileMapper {
     public static GhostFileDto ToDto(GhostData data) {
         var rooms = new List<GhostRoomDto>(data.Rooms.Count);
         foreach (GhostRoomSegment room in data.Rooms) {
-            rooms.Add(new GhostRoomDto {
-                Level = room.Level,
-                Revisit = room.Revisit,
-                Frames = GhostFrameCodec.Encode(room.Frames),
-            });
+            rooms.Add(
+                new GhostRoomDto {
+                    Level = room.Level,
+                    Revisit = room.Revisit,
+                    Frames = GhostFrameCodec.Encode(room.Frames),
+                });
         }
 
         return new GhostFileDto {
             Version = GhostData.CurrentVersion,
             CreatedUtc = data.CreatedUtc,
             Anchor = data.Anchor,
-            Inputs = [..data.Inputs],
+            Inputs = [.. data.Inputs],
             Finish = data.Finish == null
                 ? null
                 : new GhostFinishDto {
@@ -34,18 +35,19 @@ internal static class GhostFileMapper {
     public static GhostData FromDto(GhostFileDto file) {
         var rooms = new List<GhostRoomSegment>(file.Rooms.Count);
         foreach (GhostRoomDto room in file.Rooms) {
-            rooms.Add(new GhostRoomSegment {
-                Level = room.Level,
-                Revisit = room.Revisit,
-                Frames = GhostFrameCodec.Decode(room.Frames),
-            });
+            rooms.Add(
+                new GhostRoomSegment {
+                    Level = room.Level,
+                    Revisit = room.Revisit,
+                    Frames = GhostFrameCodec.Decode(room.Frames),
+                });
         }
 
         return new GhostData {
             Version = file.Version,
             CreatedUtc = file.CreatedUtc,
             Anchor = file.Anchor,
-            Inputs = [..file.Inputs],
+            Inputs = [.. file.Inputs],
             Finish = file.Finish == null
                 ? null
                 : new GhostFinishData {

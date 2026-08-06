@@ -81,5 +81,4 @@ internal static class GhostSpectateController {
         Logger.Info(GhostConstants.LogTag, "Ghost spectate finished.");
         PlaybackCoordinator.Clear(ActivePlayback.GhostSpectate);
     }
-
 }

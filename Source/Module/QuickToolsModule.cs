@@ -2,9 +2,7 @@ using Celeste.Mod.ImGuiHelper;
 using Celeste.Mod.QuickTools.Ghost;
 using Celeste.Mod.QuickTools.Hooks;
 using Celeste.Mod.QuickTools.Interop;
-using Celeste.Mod.QuickTools.Playback;
 using Celeste.Mod.QuickTools.Quicksave;
-using Celeste.Mod.QuickTools.Recording;
 using Celeste.Mod.QuickTools.UI;
 using MonoMod.ModInterop;
 

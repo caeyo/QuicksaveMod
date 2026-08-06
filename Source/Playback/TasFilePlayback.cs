@@ -52,7 +52,7 @@ internal static class TasFilePlayback {
         DeleteTempFile(state, isTempPlaybackPath, logTag);
     }
 
-    public static void RestoreFilePath(TasPlaybackFileState state) {
+    private static void RestoreFilePath(TasPlaybackFileState state) {
         if (!state.FilePathOverridden) {
             return;
         }
@@ -72,7 +72,7 @@ internal static class TasFilePlayback {
         Manager.Controller.FilePath = previous;
     }
 
-    public static void DeleteTempFile(
+    private static void DeleteTempFile(
         TasPlaybackFileState state,
         Func<string, bool> isTempPlaybackPath,
         string logTag
@@ -82,7 +82,7 @@ internal static class TasFilePlayback {
         TryDeleteTempFile(path, isTempPlaybackPath, logTag);
     }
 
-    public static void TryDeleteTempFile(
+    private static void TryDeleteTempFile(
         string? path,
         Func<string, bool> isTempPlaybackPath,
         string logTag

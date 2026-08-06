@@ -156,9 +156,9 @@ internal sealed class BrowserView(
 
     private void RenderEmptySpaceContextMenu() {
         if (!ImGui.BeginPopupContextWindow(
-            profile.EmptyContextMenuId,
-            ImGuiPopupFlags.NoOpenOverItems | ImGuiPopupFlags.MouseButtonRight
-        )) {
+                profile.EmptyContextMenuId,
+                ImGuiPopupFlags.NoOpenOverItems | ImGuiPopupFlags.MouseButtonRight
+            )) {
             return;
         }
 

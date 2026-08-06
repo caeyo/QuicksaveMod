@@ -1,14 +1,9 @@
 namespace Celeste.Mod.QuickTools.UI;
 
-internal sealed class BrowserState {
-    private readonly BrowserProfile profile;
-
-    public BrowserState(BrowserProfile profile) {
-        this.profile = profile;
-        CurrentDirectory = BrowserNavigation.RootPath(profile);
-    }
-
-    public string CurrentDirectory { get; private set; }
+internal sealed class BrowserState(
+    BrowserProfile profile
+) {
+    public string CurrentDirectory { get; private set; } = BrowserNavigation.RootPath(profile);
 
     internal readonly BrowserDirectoryRecall DirectoryRecall = new();
 

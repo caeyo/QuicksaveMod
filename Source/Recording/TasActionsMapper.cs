@@ -21,15 +21,11 @@ internal class TasActionsMapper {
         grabSlot = TasPressSlot.None;
     }
 
-    public void Sample(Level level, Player? player, InputLineBuffer buffer) {
-        Sample(level, player, buffer, null);
-    }
-
     public void Sample(
         Level level,
         Player? player,
         InputLineBuffer primary,
-        InputLineBuffer? secondary
+        InputLineBuffer? secondary = null
     ) {
         currActions.Clear();
         float? featherAngle = null;

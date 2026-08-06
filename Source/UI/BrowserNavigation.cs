@@ -1,5 +1,3 @@
-using Celeste.Mod.QuickTools.Storage;
-
 namespace Celeste.Mod.QuickTools.UI;
 
 internal static class BrowserNavigation {

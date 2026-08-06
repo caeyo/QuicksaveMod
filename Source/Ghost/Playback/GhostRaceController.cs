@@ -1,4 +1,3 @@
-using Celeste.Mod.QuickTools.Ghost;
 using Celeste.Mod.QuickTools.Interop;
 using Celeste.Mod.QuickTools.Module;
 using Celeste.Mod.QuickTools.Playback;

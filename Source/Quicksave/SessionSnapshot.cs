@@ -1,7 +1,6 @@
 using System.Text;
 using System.Xml.Serialization;
 using Microsoft.Xna.Framework;
-using Monocle;
 
 namespace Celeste.Mod.QuickTools.Quicksave;
 
@@ -21,7 +20,7 @@ internal static class SessionSnapshot {
 
         Session session;
         try {
-            session = (Session)SessionXmlSerializer.Deserialize(stream)!;
+            session = (Session) SessionXmlSerializer.Deserialize(stream)!;
         } catch (Exception e) {
             throw new InvalidDataException("Failed to deserialize quicksave session snapshot.", e);
         }
@@ -115,7 +114,7 @@ internal static class SessionSnapshot {
     }
 
     private static void ApplyStartPoint(Session session, QuicksaveStartPoint start) {
-        if (start.RespawnX is { } x && start.RespawnY is { } y) {
+        if (start is { RespawnX: { } x, RespawnY: { } y }) {
             Vector2 respawn = new(x, y);
             LevelData? levelData = session.MapData.GetAt(respawn);
             if (levelData != null) {

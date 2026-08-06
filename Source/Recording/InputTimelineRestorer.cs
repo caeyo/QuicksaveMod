@@ -24,7 +24,7 @@ internal static class InputTimelineRestorer {
                 if (GhostRecordingSession.TimelineMatchesRecordingStart(timeline)) {
                     GhostRecordingSession.AnchorFrom(timeline);
                 } else if (GhostRaceController.RaceAnchor is { } raceAnchor
-                    && GhostRecordingSession.AnchorEquality.Equals(timeline, raceAnchor)) {
+                           && GhostRecordingSession.AnchorEquality.Equals(timeline, raceAnchor)) {
                     GhostRaceController.OnSrtLoadBackToAnchor();
                 }
 

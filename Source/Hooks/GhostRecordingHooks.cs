@@ -1,5 +1,4 @@
 using Celeste.Mod.QuickTools.Ghost;
-using Monocle;
 
 namespace Celeste.Mod.QuickTools.Hooks;
 

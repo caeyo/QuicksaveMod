@@ -15,18 +15,19 @@ internal sealed class GhostData {
     public GhostData Clone() {
         var rooms = new List<GhostRoomSegment>(Rooms.Count);
         foreach (GhostRoomSegment room in Rooms) {
-            rooms.Add(new GhostRoomSegment {
-                Level = room.Level,
-                Revisit = room.Revisit,
-                Frames = new List<GhostFrameData>(room.Frames),
-            });
+            rooms.Add(
+                new GhostRoomSegment {
+                    Level = room.Level,
+                    Revisit = room.Revisit,
+                    Frames = new List<GhostFrameData>(room.Frames),
+                });
         }
 
         return new GhostData {
             Version = Version,
             CreatedUtc = CreatedUtc,
             Anchor = Anchor.Clone(),
-            Inputs = [..Inputs],
+            Inputs = [.. Inputs],
             Finish = Finish == null
                 ? null
                 : new GhostFinishData {

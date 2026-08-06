@@ -24,7 +24,7 @@ internal static class SessionLoadHelper {
         return session;
     }
 
-    public static Session BuildSession(QuicksaveData data) {
+    private static Session BuildSession(QuicksaveData data) {
         if (!string.IsNullOrWhiteSpace(data.SessionXml)) {
             return SessionSnapshot.RestoreSession(data.SessionXml, data.Start);
         }
@@ -37,7 +37,7 @@ internal static class SessionLoadHelper {
         return Path.Combine(tempDirectory, $"{tempPrefix}{Guid.NewGuid():N}.tas");
     }
 
-    public static string GetPlaybackBreakpointLine() {
+    private static string GetPlaybackBreakpointLine() {
         PlaybackSpeed speed = QuickToolsModule.Settings.PlaybackSpeed;
         return speed == PlaybackSpeed.Max ? "***" : $"***{(int) speed}";
     }

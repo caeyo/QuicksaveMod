@@ -1,18 +1,13 @@
 namespace Celeste.Mod.QuickTools.Storage;
 
-internal sealed class EntityPath {
-    private readonly EntityStoreProfile profile;
-    private string? cachedRootFullPath;
-
-    public EntityPath(EntityStoreProfile profile) {
-        this.profile = profile;
-    }
-
+internal sealed class EntityPath(
+    EntityStoreProfile profile
+) {
     public string Root =>
         Path.Combine(Everest.PathGame, profile.RootFolderName);
 
     public string RootFullPath =>
-        cachedRootFullPath ??= Path.GetFullPath(Root)
+        field ??= Path.GetFullPath(Root)
             .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
     public string TempDirectory =>
@@ -109,7 +104,7 @@ internal sealed class EntityPath {
             && fileName.EndsWith(".tas", StringComparison.OrdinalIgnoreCase);
     }
 
-    public static string NormalizeRelativePath(string path) =>
+    private static string NormalizeRelativePath(string path) =>
         path.Replace('\\', Path.DirectorySeparatorChar)
             .Replace('/', Path.DirectorySeparatorChar)
             .Trim(Path.DirectorySeparatorChar);

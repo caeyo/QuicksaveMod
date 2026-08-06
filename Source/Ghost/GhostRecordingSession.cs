@@ -85,11 +85,12 @@ internal static class GhostRecordingSession {
 
         var rooms = new List<GhostRoomSegment>(RoomSegments.Count);
         foreach (GhostRoomSegment segment in RoomSegments) {
-            rooms.Add(new GhostRoomSegment {
-                Level = segment.Level,
-                Revisit = segment.Revisit,
-                Frames = new List<GhostFrameData>(segment.Frames),
-            });
+            rooms.Add(
+                new GhostRoomSegment {
+                    Level = segment.Level,
+                    Revisit = segment.Revisit,
+                    Frames = new List<GhostFrameData>(segment.Frames),
+                });
         }
 
         return new GhostData {
@@ -112,7 +113,7 @@ internal static class GhostRecordingSession {
         AppendFrame(frame);
     }
 
-    internal static void AppendFrame(GhostFrameData frame) {
+    private static void AppendFrame(GhostFrameData frame) {
         currentSegment?.Frames.Add(frame);
         finishElapsedTicks += TicksPerGameplayFrame;
 
@@ -140,7 +141,7 @@ internal static class GhostRecordingSession {
     }
 
     private static void FlushCurrentSegment() {
-        if (currentSegment != null && currentSegment.Frames.Count == 0) {
+        if (currentSegment is { Frames.Count: 0 }) {
             RoomSegments.Remove(currentSegment);
             currentSegment = null;
         }

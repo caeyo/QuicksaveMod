@@ -9,7 +9,6 @@ internal sealed class QuicksaveBrowserHandler : ImGuiHandler {
     internal static void ClearInstance() => Instance = null;
 
     private readonly BrowserProfile profile = BrowserProfile.Quicksave;
-    private readonly BrowserState state;
     private readonly BrowserWindowChrome chrome;
 
     private ModBrowserCoordinator? coordinator;
@@ -18,17 +17,17 @@ internal sealed class QuicksaveBrowserHandler : ImGuiHandler {
         Instance = this;
         Visible = false;
 
-        state = new BrowserState(profile);
+        BrowserState state1 = new(profile);
         BrowserView view = null!;
         QuicksaveBrowserCommands commands = new(
             profile,
-            state,
+            state1,
             ModBrowserCoordinator.CloseAll,
             entry => view.QueueActivate(entry)
         );
-        view = new BrowserView(profile, state, commands);
-        BrowserModals modals = new(profile, state, commands);
-        chrome = new BrowserWindowChrome(profile, state, view, modals);
+        view = new BrowserView(profile, state1, commands);
+        BrowserModals modals = new(profile, state1, commands);
+        chrome = new BrowserWindowChrome(profile, state1, view, modals);
     }
 
     public override void Update(GameTime gameTime) {
