@@ -1,14 +1,12 @@
-using Celeste.Mod.QuicksaveMod.Quicksave;
 using ImGuiNET;
 
 namespace Celeste.Mod.QuicksaveMod.UI;
 
 internal sealed class BrowserView(
+    BrowserProfile profile,
     BrowserState state,
-    BrowserCommands commands
+    IBrowserViewHost host
 ) {
-    private const string DragPayloadType = "QS_FILE";
-
     private string? dragSourcePath;
     private BrowserEntry? pendingActivate;
 
@@ -40,86 +38,107 @@ internal sealed class BrowserView(
     }
 
     public void RenderEntryList() {
-        float listHeight = -(InlineEditAreaHeight + ImGui.GetStyle().ItemSpacing.Y);
+        float listHeight = -(InlineEditAreaHeight * profile.ListFooterRowCount + ImGui.GetStyle().ItemSpacing.Y);
 
-        if (ImGui.BeginChild("QuicksaveEntryList", new System.Numerics.Vector2(0, listHeight))) {
-            if (state.Entries.Count == 0) {
-                ImGui.TextUnformatted("(empty)");
-            }
-
-            for (int i = 0; i < state.Entries.Count; i++) {
-                BrowserEntry entry = state.Entries[i];
-                bool selected = i == state.SelectedIndex;
-
-                if (ImGui.Selectable(state.EntrySelectableIds[i], selected, ImGuiSelectableFlags.AllowDoubleClick)) {
-                    state.SelectedIndex = i;
-
-                    if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) {
-                        // Defer: ActivateEntry may NavigateTo/Close and invalidate cached ids mid-loop.
-                        pendingActivate = entry;
-                    }
-                }
-
-                if (ImGui.IsItemClicked(ImGuiMouseButton.Right)) {
-                    state.SelectedIndex = i;
-                }
-
-                string popupId = state.EntryPopupIds[i];
-                ImGui.OpenPopupOnItemClick(popupId, ImGuiPopupFlags.MouseButtonRight);
-                RenderEntryContextMenu(entry, popupId);
-
-                if (entry.Kind == BrowserEntryKind.File) {
-                    RenderFileDragSource(entry);
-                }
-
-                if (entry.Kind == BrowserEntryKind.Folder) {
-                    RenderDirectoryDropTarget(entry.FullPath);
-                }
-
-                if (selected && state.SelectedIndex == i && ImGui.IsWindowFocused()) {
-                    ImGui.SetScrollHereY(0.5f);
-                }
-            }
-
-            RenderEmptySpaceContextMenu();
-            ImGui.EndChild();
+        if (!ImGui.BeginChild(profile.ListChildId, new System.Numerics.Vector2(0, listHeight))) {
+            return;
         }
+
+        if (state.Entries.Count == 0) {
+            ImGui.TextUnformatted("(empty)");
+        }
+
+        for (int i = 0; i < state.Entries.Count; i++) {
+            BrowserEntry entry = state.Entries[i];
+            bool selected = i == state.SelectedIndex;
+
+            if (ImGui.Selectable(state.EntrySelectableIds[i], selected, ImGuiSelectableFlags.AllowDoubleClick)) {
+                state.SelectedIndex = i;
+
+                if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) {
+                    // Defer: activation may NavigateTo/Close and invalidate cached ids mid-loop.
+                    pendingActivate = entry;
+                }
+            }
+
+            if (ImGui.IsItemClicked(ImGuiMouseButton.Right)) {
+                state.SelectedIndex = i;
+            }
+
+            string popupId = state.EntryPopupIds[i];
+            ImGui.OpenPopupOnItemClick(popupId, ImGuiPopupFlags.MouseButtonRight);
+            RenderEntryContextMenu(entry, popupId);
+
+            if (entry.Kind == BrowserEntryKind.File) {
+                RenderFileDragSource(entry);
+            }
+
+            if (entry.Kind == BrowserEntryKind.Folder) {
+                RenderDirectoryDropTarget(entry.FullPath);
+            }
+
+            if (profile.ScrollSelectionIntoView
+                && selected
+                && state.SelectedIndex == i
+                && ImGui.IsWindowFocused()) {
+                ImGui.SetScrollHereY(0.5f);
+            }
+        }
+
+        RenderEmptySpaceContextMenu();
+        ImGui.EndChild();
     }
 
     public void RenderInlineEditArea() {
-        ImGui.BeginChild(
-            "QuicksaveInlineEdit",
-            new System.Numerics.Vector2(0, InlineEditAreaHeight),
-            ImGuiChildFlags.None,
-            ImGuiWindowFlags.NoScrollbar
-        );
+        if (profile.InlineEditUsesChildPanel) {
+            ImGui.BeginChild(
+                profile.InlineEditChildId,
+                new System.Numerics.Vector2(0, InlineEditAreaHeight),
+                ImGuiChildFlags.None,
+                ImGuiWindowFlags.NoScrollbar
+            );
 
-        if (state.EditMode != InlineEditMode.None) {
-            string prompt = state.EditMode switch {
-                InlineEditMode.Saving => "Save as:",
-                InlineEditMode.SavingTo => "Save to folder as:",
-                InlineEditMode.RenamingFile => "Rename file:",
-                InlineEditMode.RenamingFolder => "Rename folder:",
-                InlineEditMode.CreatingFolder => "New folder:",
-                _ => "Name:",
-            };
-
-            ImGui.AlignTextToFramePadding();
-            ImGui.TextUnformatted(prompt);
-            ImGui.SameLine();
-
-            if (state.FocusEditField) {
-                ImGui.SetKeyboardFocusHere();
-                state.FocusEditField = false;
+            if (state.EditMode != InlineEditMode.None) {
+                RenderInlineEditFields();
             }
 
-            ImGui.SetNextItemWidth(-1);
-            if (ImGui.InputText("##inline_edit", ref state.EditBuffer, 256, ImGuiInputTextFlags.EnterReturnsTrue)) {
-                commands.ConfirmInlineEdit();
-            }
+            ImGui.EndChild();
+            return;
         }
 
-        ImGui.EndChild();
+        if (state.EditMode == InlineEditMode.None) {
+            return;
+        }
+
+        RenderInlineEditFields();
+    }
+
+    private void RenderInlineEditFields() {
+        string prompt = state.EditMode switch {
+            InlineEditMode.Saving => "Save as:",
+            InlineEditMode.SavingTo => "Save to folder as:",
+            InlineEditMode.RenamingFile => "Rename file:",
+            InlineEditMode.RenamingFolder => "Rename folder:",
+            InlineEditMode.CreatingFolder => "New folder:",
+            _ => "Name:",
+        };
+
+        if (profile.InlineEditUsesChildPanel) {
+            ImGui.AlignTextToFramePadding();
+        }
+
+        ImGui.TextUnformatted(prompt);
+        ImGui.SameLine();
+
+        if (state.FocusEditField) {
+            ImGui.SetKeyboardFocusHere();
+            state.FocusEditField = false;
+        }
+
+        ImGui.SetNextItemWidth(-1);
+        if (ImGui.InputText(profile.InlineEditFieldId, ref state.EditBuffer, 256, ImGuiInputTextFlags.EnterReturnsTrue)) {
+            host.ConfirmInlineEdit();
+        }
     }
 
     public void ClearCancelledDragSource() {
@@ -136,22 +155,20 @@ internal sealed class BrowserView(
         }
 
         pendingActivate = null;
-        commands.ActivateEntry(entry);
+        host.ActivateEntry(entry);
     }
 
+    public void QueueActivate(BrowserEntry entry) => pendingActivate = entry;
+
     private void RenderEmptySpaceContextMenu() {
-        if (!ImGui.BeginPopupContextWindow("empty_ctx", ImGuiPopupFlags.NoOpenOverItems | ImGuiPopupFlags.MouseButtonRight)) {
+        if (!ImGui.BeginPopupContextWindow(
+            profile.EmptyContextMenuId,
+            ImGuiPopupFlags.NoOpenOverItems | ImGuiPopupFlags.MouseButtonRight
+        )) {
             return;
         }
 
-        if (QuicksaveService.IsTracking && ImGui.MenuItem("Save")) {
-            state.RequestInlineEdit(InlineEditMode.Saving, BrowserNavigation.DefaultSaveName());
-        }
-
-        if (ImGui.MenuItem("New Folder")) {
-            state.RequestInlineEdit(InlineEditMode.CreatingFolder, "New Folder");
-        }
-
+        host.RenderEmptySpaceContextMenu();
         ImGui.EndPopup();
     }
 
@@ -161,41 +178,9 @@ internal sealed class BrowserView(
         }
 
         if (entry.Kind == BrowserEntryKind.File) {
-            if (ImGui.MenuItem("Load")) {
-                pendingActivate = entry;
-            }
-
-            if (ImGui.MenuItem("Rename")) {
-                state.RequestInlineEdit(
-                    InlineEditMode.RenamingFile,
-                    BrowserNavigation.RenameDefaultText(entry),
-                    entry.FullPath
-                );
-            }
-
-            if (ImGui.MenuItem("Delete")) {
-                state.BeginDelete(entry.FullPath, BrowserNavigation.GetDisplayName(entry));
-            }
+            host.RenderFileContextMenu(entry);
         } else {
-            if (QuicksaveService.IsTracking && ImGui.MenuItem("Save To")) {
-                state.RequestInlineEdit(
-                    InlineEditMode.SavingTo,
-                    BrowserNavigation.DefaultSaveName(),
-                    entry.FullPath
-                );
-            }
-
-            if (ImGui.MenuItem("Rename")) {
-                state.RequestInlineEdit(
-                    InlineEditMode.RenamingFolder,
-                    BrowserNavigation.RenameDefaultText(entry),
-                    entry.FullPath
-                );
-            }
-
-            if (ImGui.MenuItem("Delete")) {
-                state.BeginDelete(entry.FullPath, BrowserNavigation.GetDisplayName(entry));
-            }
+            host.RenderFolderContextMenu(entry);
         }
 
         ImGui.EndPopup();
@@ -207,7 +192,7 @@ internal sealed class BrowserView(
         }
 
         dragSourcePath = entry.FullPath;
-        ImGui.SetDragDropPayload(DragPayloadType, IntPtr.Zero, 0);
+        ImGui.SetDragDropPayload(profile.DragPayloadType, IntPtr.Zero, 0);
         ImGui.TextUnformatted($"Move {BrowserNavigation.GetDisplayName(entry)}");
         ImGui.EndDragDropSource();
     }
@@ -217,10 +202,10 @@ internal sealed class BrowserView(
             return;
         }
 
-        ImGui.AcceptDragDropPayload(DragPayloadType);
+        ImGui.AcceptDragDropPayload(profile.DragPayloadType);
 
         if (dragSourcePath != null && ImGui.IsMouseReleased(ImGuiMouseButton.Left)) {
-            commands.TryMoveFile(dragSourcePath, targetDirectory);
+            host.TryMoveFile(dragSourcePath, targetDirectory);
             dragSourcePath = null;
         }
 

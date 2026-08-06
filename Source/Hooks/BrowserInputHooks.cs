@@ -40,7 +40,7 @@ internal static class BrowserInputHooks {
     }
 
     private static bool TryCancelBrowserSubOperation() {
-        return BrowserHandler.Instance?.TryCancelOnEscape() == true
+        return QuicksaveBrowserHandler.Instance?.TryCancelOnEscape() == true
             || GhostBrowserHandler.Instance?.TryCancelOnEscape() == true;
     }
 

@@ -23,7 +23,7 @@ public class QuicksaveModModule : EverestModule {
     public override Type SaveDataType => typeof(QuicksaveModSaveData);
     public static QuicksaveModSaveData SaveData => (QuicksaveModSaveData) Instance._SaveData;
 
-    private BrowserHandler? browserHandler;
+    private QuicksaveBrowserHandler? quicksaveBrowserHandler;
     private GhostBrowserHandler? ghostBrowserHandler;
     private ModBrowserCoordinator? browserCoordinator;
 
@@ -57,13 +57,13 @@ public class QuicksaveModModule : EverestModule {
         GhostRecordingHooks.Apply();
         GhostPlaybackHooks.Apply();
 
-        browserHandler = new BrowserHandler();
+        quicksaveBrowserHandler = new QuicksaveBrowserHandler();
         ghostBrowserHandler = new GhostBrowserHandler();
-        browserCoordinator = new ModBrowserCoordinator(browserHandler, ghostBrowserHandler);
-        browserHandler.SetCoordinator(browserCoordinator);
+        browserCoordinator = new ModBrowserCoordinator(quicksaveBrowserHandler, ghostBrowserHandler);
+        quicksaveBrowserHandler.SetCoordinator(browserCoordinator);
 
-        if (!ImGuiManager.Handlers.OfType<BrowserHandler>().Any()) {
-            ImGuiManager.Handlers.Add(browserHandler);
+        if (!ImGuiManager.Handlers.OfType<QuicksaveBrowserHandler>().Any()) {
+            ImGuiManager.Handlers.Add(quicksaveBrowserHandler);
         }
 
         if (!ImGuiManager.Handlers.OfType<GhostBrowserHandler>().Any()) {
@@ -72,11 +72,11 @@ public class QuicksaveModModule : EverestModule {
     }
 
     public override void Unload() {
-        if (browserHandler != null) {
-            browserHandler.Close();
-            ImGuiManager.Handlers.Remove(browserHandler);
-            BrowserHandler.ClearInstance();
-            browserHandler = null;
+        if (quicksaveBrowserHandler != null) {
+            quicksaveBrowserHandler.Close();
+            ImGuiManager.Handlers.Remove(quicksaveBrowserHandler);
+            QuicksaveBrowserHandler.ClearInstance();
+            quicksaveBrowserHandler = null;
         }
 
         if (ghostBrowserHandler != null) {

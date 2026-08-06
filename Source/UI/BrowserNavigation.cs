@@ -1,35 +1,18 @@
-using Celeste.Mod.QuicksaveMod.Quicksave;
-using Celeste.Mod.QuicksaveMod.Quicksave.Storage;
+using Celeste.Mod.QuicksaveMod.Storage;
 
 namespace Celeste.Mod.QuicksaveMod.UI;
 
-internal enum BrowserEntryKind {
-    Folder,
-    File,
-}
-
-internal readonly record struct BrowserEntry(
-    string Name,
-    string FullPath,
-    BrowserEntryKind Kind
-);
-
-internal readonly record struct BrowserBreadcrumb(
-    string Label,
-    string AbsolutePath
-);
-
 internal static class BrowserNavigation {
-    public static string RootPath => QuicksavePath.QuicksavesRootFullPath;
+    public static string RootPath(BrowserProfile profile) => profile.Path.RootFullPath;
 
-    public static void EnsureRootExists() {
-        Directory.CreateDirectory(QuicksavePath.QuicksavesRoot);
+    public static void EnsureRootExists(BrowserProfile profile) {
+        Directory.CreateDirectory(profile.Path.Root);
     }
 
-    public static List<BrowserEntry> ListDirectory(string absolutePath) {
+    public static List<BrowserEntry> ListDirectory(BrowserProfile profile, string absolutePath) {
         absolutePath = Path.GetFullPath(absolutePath);
 
-        List<BrowserEntry> entries = new();
+        List<BrowserEntry> entries = [];
 
         foreach (string directory in Directory.GetDirectories(absolutePath)) {
             string name = Path.GetFileName(directory);
@@ -40,7 +23,7 @@ internal static class BrowserNavigation {
             entries.Add(new BrowserEntry(name, directory, BrowserEntryKind.Folder));
         }
 
-        foreach (string file in Directory.GetFiles(absolutePath, $"*{QuicksaveConstants.Extension}")) {
+        foreach (string file in Directory.GetFiles(absolutePath, $"*{profile.Store.Extension}")) {
             string name = Path.GetFileName(file);
             entries.Add(new BrowserEntry(name, file, BrowserEntryKind.File));
         }
@@ -55,13 +38,11 @@ internal static class BrowserNavigation {
         return entries;
     }
 
-    public static List<BrowserBreadcrumb> GetBreadcrumbs(string currentPath) {
+    public static List<BrowserBreadcrumb> GetBreadcrumbs(BrowserProfile profile, string currentPath) {
         currentPath = Path.GetFullPath(currentPath);
-        string root = RootPath;
+        string root = RootPath(profile);
 
-        List<BrowserBreadcrumb> breadcrumbs = [
-            new("Quicksaves", root),
-        ];
+        List<BrowserBreadcrumb> breadcrumbs = [new(profile.RootLabel, root)];
 
         if (currentPath.Equals(root, StringComparison.OrdinalIgnoreCase)) {
             return breadcrumbs;
@@ -82,9 +63,9 @@ internal static class BrowserNavigation {
         return breadcrumbs;
     }
 
-    public static bool TryGetParentDirectory(string currentPath, out string parentPath) {
+    public static bool TryGetParentDirectory(BrowserProfile profile, string currentPath, out string parentPath) {
         currentPath = Path.GetFullPath(currentPath);
-        string root = RootPath;
+        string root = RootPath(profile);
 
         if (currentPath.Equals(root, StringComparison.OrdinalIgnoreCase)) {
             parentPath = root;
@@ -95,11 +76,11 @@ internal static class BrowserNavigation {
         return true;
     }
 
-    public static bool IsRootDirectory(string currentPath) =>
-        Path.GetFullPath(currentPath).Equals(RootPath, StringComparison.OrdinalIgnoreCase);
+    public static bool IsRootDirectory(BrowserProfile profile, string currentPath) =>
+        Path.GetFullPath(currentPath).Equals(RootPath(profile), StringComparison.OrdinalIgnoreCase);
 
-    public static string? GetRelativeSubdirectory(string absolutePath) {
-        return QuicksavePath.TryGetRelativeSubdirectory(absolutePath, out string? subdirectory)
+    public static string? GetRelativeSubdirectory(BrowserProfile profile, string absolutePath) {
+        return profile.Path.TryGetRelativeSubdirectory(absolutePath, out string? subdirectory)
             ? subdirectory
             : null;
     }
@@ -117,32 +98,4 @@ internal static class BrowserNavigation {
     }
 
     public static string RenameDefaultText(BrowserEntry entry) => GetDisplayName(entry);
-}
-
-internal sealed class BrowserDirectoryRecall {
-    private string? remembered;
-
-    public void Remember(string currentDirectory) {
-        remembered = currentDirectory;
-    }
-
-    public string ResolveOpenDirectory(string rootPath) {
-        string root = Path.GetFullPath(rootPath);
-
-        if (string.IsNullOrEmpty(remembered) || !Directory.Exists(remembered)) {
-            return root;
-        }
-
-        string full = Path.GetFullPath(remembered);
-        if (full.Equals(root, StringComparison.OrdinalIgnoreCase)) {
-            return root;
-        }
-
-        string relative = Path.GetRelativePath(root, full);
-        if (relative.StartsWith("..", StringComparison.Ordinal) || Path.IsPathRooted(relative)) {
-            return root;
-        }
-
-        return full;
-    }
 }

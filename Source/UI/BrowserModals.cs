@@ -2,44 +2,15 @@ using ImGuiNET;
 
 namespace Celeste.Mod.QuicksaveMod.UI;
 
-internal sealed class BrowserModals(
-    BrowserState state,
-    BrowserCommands commands
-) {
-    private const string DeleteModalId = "Quicksave Confirm Delete";
-    private const string ConflictModalId = "Quicksave Conflict";
+internal static class BrowserModalSupport {
     private const float ModalButtonWidth = 120f;
 
-    private bool deletePopupOpened;
-    private bool conflictPopupOpened;
-
-    public void Render() {
-        RenderDeleteModal();
-        RenderConflictModal();
-    }
-
-    public void ResetTransient() {
-        deletePopupOpened = false;
-        conflictPopupOpened = false;
-    }
-
-    public bool TryCancelOnEscape() {
-        if (state.ShowDeleteModal) {
-            state.CancelDelete();
-            deletePopupOpened = false;
-            return true;
-        }
-
-        if (state.ShowConflictModal) {
-            state.ClearConflict();
-            conflictPopupOpened = false;
-            return true;
-        }
-
-        return false;
-    }
-
-    private bool TryBeginModal(string popupId, bool shouldShow, ref bool popupOpened, Action onDismiss) {
+    internal static bool TryBeginModal(
+        string popupId,
+        bool shouldShow,
+        ref bool popupOpened,
+        Action onDismiss
+    ) {
         if (!shouldShow) {
             popupOpened = false;
             return false;
@@ -69,22 +40,64 @@ internal sealed class BrowserModals(
         return true;
     }
 
+    internal static float ButtonWidth => ModalButtonWidth;
+}
+
+internal sealed class BrowserModals(
+    BrowserProfile profile,
+    BrowserState state,
+    IBrowserCommands commands
+) {
+    private bool deletePopupOpened;
+    private bool conflictPopupOpened;
+
+    public void Render() {
+        RenderDeleteModal();
+        RenderConflictModal();
+    }
+
+    public void ResetTransient() {
+        deletePopupOpened = false;
+        conflictPopupOpened = false;
+    }
+
+    public bool TryCancelOnEscape() {
+        if (state.ShowDeleteModal) {
+            state.CancelDelete();
+            deletePopupOpened = false;
+            return true;
+        }
+
+        if (state.ShowConflictModal) {
+            state.ClearConflict();
+            conflictPopupOpened = false;
+            return true;
+        }
+
+        return false;
+    }
+
     private void RenderDeleteModal() {
-        if (!TryBeginModal(DeleteModalId, state.ShowDeleteModal, ref deletePopupOpened, state.CancelDelete)) {
+        if (!BrowserModalSupport.TryBeginModal(
+            profile.DeleteModalId,
+            state.ShowDeleteModal,
+            ref deletePopupOpened,
+            state.CancelDelete
+        )) {
             return;
         }
 
         ImGui.TextUnformatted($"Delete \"{state.PendingDeleteLabel}\"?");
         ImGui.Separator();
 
-        if (ImGui.Button("Yes", new System.Numerics.Vector2(ModalButtonWidth, 0))) {
+        if (ImGui.Button("Yes", new System.Numerics.Vector2(BrowserModalSupport.ButtonWidth, 0))) {
             commands.ConfirmDelete();
             ImGui.CloseCurrentPopup();
         }
 
         ImGui.SameLine();
 
-        if (ImGui.Button("No", new System.Numerics.Vector2(ModalButtonWidth, 0))) {
+        if (ImGui.Button("No", new System.Numerics.Vector2(BrowserModalSupport.ButtonWidth, 0))) {
             state.CancelDelete();
             ImGui.CloseCurrentPopup();
         }
@@ -93,14 +106,19 @@ internal sealed class BrowserModals(
     }
 
     private void RenderConflictModal() {
-        if (!TryBeginModal(ConflictModalId, state.ShowConflictModal, ref conflictPopupOpened, state.ClearConflict)) {
+        if (!BrowserModalSupport.TryBeginModal(
+            profile.ConflictModalId,
+            state.ShowConflictModal,
+            ref conflictPopupOpened,
+            state.ClearConflict
+        )) {
             return;
         }
 
         ImGui.TextUnformatted(state.ConflictMessage ?? "A file or folder with that name already exists.");
         ImGui.Separator();
 
-        if (ImGui.Button("OK", new System.Numerics.Vector2(ModalButtonWidth, 0))) {
+        if (ImGui.Button("OK", new System.Numerics.Vector2(BrowserModalSupport.ButtonWidth, 0))) {
             state.ClearConflict();
             ImGui.CloseCurrentPopup();
         }

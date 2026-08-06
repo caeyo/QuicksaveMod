@@ -1,25 +1,38 @@
 using Celeste.Mod.ImGuiHelper;
+using Microsoft.Xna.Framework;
 
 namespace Celeste.Mod.QuicksaveMod.UI;
 
-internal sealed class GhostBrowserHandler : ImGuiHandler {
-    internal static GhostBrowserHandler? Instance { get; private set; }
+internal sealed class QuicksaveBrowserHandler : ImGuiHandler {
+    internal static QuicksaveBrowserHandler? Instance { get; private set; }
 
     internal static void ClearInstance() => Instance = null;
 
-    private readonly BrowserProfile profile = BrowserProfile.Ghost;
+    private readonly BrowserProfile profile = BrowserProfile.Quicksave;
     private readonly BrowserState state;
     private readonly BrowserWindowChrome chrome;
 
-    public GhostBrowserHandler() {
+    private ModBrowserCoordinator? coordinator;
+
+    public QuicksaveBrowserHandler() {
         Instance = this;
         Visible = false;
 
         state = new BrowserState(profile);
-        GhostBrowserCommands commands = new(profile, state, ModBrowserCoordinator.CloseAll);
-        BrowserView view = new(profile, state, commands);
+        BrowserView view = null!;
+        QuicksaveBrowserCommands commands = new(
+            profile,
+            state,
+            ModBrowserCoordinator.CloseAll,
+            entry => view.QueueActivate(entry)
+        );
+        view = new BrowserView(profile, state, commands);
         BrowserModals modals = new(profile, state, commands);
         chrome = new BrowserWindowChrome(profile, state, view, modals);
+    }
+
+    public override void Update(GameTime gameTime) {
+        coordinator?.Update(gameTime);
     }
 
     public override void Render() {
@@ -30,7 +43,9 @@ internal sealed class GhostBrowserHandler : ImGuiHandler {
         chrome.Render();
     }
 
-    public void Open(bool focusWindow) {
+    internal void SetCoordinator(ModBrowserCoordinator value) => coordinator = value;
+
+    public void Open(bool focusWindow = true) {
         BrowserNavigation.EnsureRootExists(profile);
 
         bool openingFirst = !ModBrowserCoordinator.AnyVisible;

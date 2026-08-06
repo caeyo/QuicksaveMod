@@ -1,22 +1,14 @@
 namespace Celeste.Mod.QuicksaveMod.UI;
 
-internal enum InlineEditMode {
-    None,
-    Saving,
-    SavingTo,
-    RenamingFile,
-    RenamingFolder,
-    CreatingFolder,
-}
-
-internal readonly record struct PendingInlineEditRequest(
-    InlineEditMode Mode,
-    string DefaultText,
-    string? TargetPath
-);
-
 internal sealed class BrowserState {
-    public string CurrentDirectory { get; private set; } = BrowserNavigation.RootPath;
+    private readonly BrowserProfile profile;
+
+    public BrowserState(BrowserProfile profile) {
+        this.profile = profile;
+        CurrentDirectory = BrowserNavigation.RootPath(profile);
+    }
+
+    public string CurrentDirectory { get; private set; }
 
     internal readonly BrowserDirectoryRecall DirectoryRecall = new();
 
@@ -55,7 +47,7 @@ internal sealed class BrowserState {
 
     public void RefreshEntries() {
         Entries.Clear();
-        Entries.AddRange(BrowserNavigation.ListDirectory(CurrentDirectory));
+        Entries.AddRange(BrowserNavigation.ListDirectory(profile, CurrentDirectory));
         RebuildEntryIds();
         ClampSelection();
     }
@@ -69,7 +61,7 @@ internal sealed class BrowserState {
     }
 
     public void NavigateUp() {
-        if (!BrowserNavigation.TryGetParentDirectory(CurrentDirectory, out string parentPath)) {
+        if (!BrowserNavigation.TryGetParentDirectory(profile, CurrentDirectory, out string parentPath)) {
             return;
         }
 
@@ -98,13 +90,6 @@ internal sealed class BrowserState {
 
         SelectedIndex = NormalizeSelection(SelectedIndex + delta);
     }
-
-    private void ClampSelection() {
-        SelectedIndex = NormalizeSelection(SelectedIndex);
-    }
-
-    private int NormalizeSelection(int index) =>
-        Entries.Count == 0 ? -1 : Math.Clamp(index, 0, Entries.Count - 1);
 
     public void RequestInlineEdit(InlineEditMode mode, string defaultText, string? targetPath = null) {
         PendingInlineEdit = new PendingInlineEditRequest(mode, defaultText, targetPath);
@@ -168,26 +153,38 @@ internal sealed class BrowserState {
     private void RebuildBreadcrumbs() {
         Breadcrumbs.Clear();
         BreadcrumbButtonIds.Clear();
-        Breadcrumbs.AddRange(BrowserNavigation.GetBreadcrumbs(CurrentDirectory));
+        Breadcrumbs.AddRange(BrowserNavigation.GetBreadcrumbs(profile, CurrentDirectory));
+        string crumbPrefix = profile.IdPrefix.Length == 0 ? "crumb" : $"{profile.IdPrefix}crumb";
         for (int i = 0; i < Breadcrumbs.Count; i++) {
-            BreadcrumbButtonIds.Add($"{Breadcrumbs[i].Label}##crumb{i}");
+            BreadcrumbButtonIds.Add($"{Breadcrumbs[i].Label}##{crumbPrefix}{i}");
         }
     }
 
     private void RebuildEntryIds() {
         EntrySelectableIds.Clear();
         EntryPopupIds.Clear();
+        string entryPrefix = profile.IdPrefix.Length == 0 ? "entry" : $"{profile.IdPrefix}entry";
+        string folderCtxPrefix = profile.IdPrefix.Length == 0 ? "folder_ctx" : $"{profile.IdPrefix}folder_ctx";
+        string fileCtxPrefix = profile.IdPrefix.Length == 0 ? "file_ctx" : $"{profile.IdPrefix}file_ctx";
+
         for (int i = 0; i < Entries.Count; i++) {
             BrowserEntry entry = Entries[i];
             string label = entry.Kind == BrowserEntryKind.Folder
                 ? $"{entry.Name}/"
                 : BrowserNavigation.GetDisplayName(entry);
-            EntrySelectableIds.Add($"{label}##entry{i}");
+            EntrySelectableIds.Add($"{label}##{entryPrefix}{i}");
             EntryPopupIds.Add(
                 entry.Kind == BrowserEntryKind.Folder
-                    ? $"folder_ctx_{i}"
-                    : $"file_ctx_{i}"
+                    ? $"{folderCtxPrefix}_{i}"
+                    : $"{fileCtxPrefix}_{i}"
             );
         }
     }
+
+    private void ClampSelection() {
+        SelectedIndex = NormalizeSelection(SelectedIndex);
+    }
+
+    private int NormalizeSelection(int index) =>
+        Entries.Count == 0 ? -1 : Math.Clamp(index, 0, Entries.Count - 1);
 }

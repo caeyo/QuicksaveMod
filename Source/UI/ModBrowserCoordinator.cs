@@ -6,16 +6,16 @@ using Monocle;
 namespace Celeste.Mod.QuicksaveMod.UI;
 
 internal sealed class ModBrowserCoordinator {
-    private readonly BrowserHandler quicksaveBrowser;
+    private readonly QuicksaveBrowserHandler quicksaveBrowser;
     private readonly GhostBrowserHandler ghostBrowser;
 
-    public ModBrowserCoordinator(BrowserHandler quicksaveBrowser, GhostBrowserHandler ghostBrowser) {
+    public ModBrowserCoordinator(QuicksaveBrowserHandler quicksaveBrowser, GhostBrowserHandler ghostBrowser) {
         this.quicksaveBrowser = quicksaveBrowser;
         this.ghostBrowser = ghostBrowser;
     }
 
     public static bool AnyVisible =>
-        BrowserHandler.Instance?.Visible == true || GhostBrowserHandler.Instance?.Visible == true;
+        QuicksaveBrowserHandler.Instance?.Visible == true || GhostBrowserHandler.Instance?.Visible == true;
 
     public void Update(GameTime gameTime) {
         if (AnyVisible) {
@@ -40,7 +40,7 @@ internal sealed class ModBrowserCoordinator {
     }
 
     public static void CloseAll() {
-        BrowserHandler.Instance?.Close();
+        QuicksaveBrowserHandler.Instance?.Close();
         GhostBrowserHandler.Instance?.Close();
     }
 }
