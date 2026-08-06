@@ -24,13 +24,17 @@ internal static class GameplayInputRecorder {
     }
 
     public static void OnAfterInputUpdate() {
-        if (mapper == null || Engine.Scene is not Level level || !ShouldRecordFrame(level)) {
+        if (mapper == null || Engine.Scene is not Level level) {
             return;
         }
 
         bool trackQuicksave = QuicksaveTracker.IsTracking;
         bool trackGhost = GhostRecordingSession.IsRecordingInputs;
         if (!trackQuicksave && !trackGhost) {
+            return;
+        }
+
+        if (!ShouldRecordFrame(level)) {
             return;
         }
 
@@ -46,16 +50,16 @@ internal static class GameplayInputRecorder {
         InputLineBuffer? ghostBuffer = trackGhost ? GhostRecordingSession.InputBuffer : null;
         if (quicksaveBuffer == null) {
             mapper.Sample(level, player, ghostBuffer!);
-            return;
-        }
-
-        if (ghostBuffer == null) {
+        } else if (ghostBuffer == null) {
             mapper.Sample(level, player, quicksaveBuffer);
-            return;
+        } else {
+            // One Sample per frame — TwoSlotEncoder state must not advance twice (breaks J/K, X/C, etc.).
+            mapper.Sample(level, player, quicksaveBuffer, ghostBuffer);
         }
 
-        // One Sample per frame — TwoSlotEncoder state must not advance twice (breaks J/K, X/C, etc.).
-        mapper.Sample(level, player, quicksaveBuffer, ghostBuffer);
+        if (trackGhost) {
+            GhostRecordingSession.CaptureFrame(player);
+        }
     }
 
     internal static bool ShouldRecordFrame(Level level) =>

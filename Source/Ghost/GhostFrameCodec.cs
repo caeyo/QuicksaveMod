@@ -247,25 +247,22 @@ internal static class GhostFrameCodec {
             HairCount = 0;
         }
 
-        public GhostFrameData ToFrame() {
-            if (!HasPlayer) {
-                return new GhostFrameData { HasPlayer = false };
-            }
-
-            return new GhostFrameData {
-                HasPlayer = true,
-                Position = Position,
-                Facing = Facing,
-                CurrentAnimationId = CurrentAnimationId,
-                CurrentAnimationFrame = CurrentAnimationFrame,
-                Rotation = Rotation,
-                Scale = Scale,
-                SpriteColor = SpriteColor,
-                HairColor = HairColor,
-                HairSimulateMotion = HairSimulateMotion,
-                HairCount = HairCount,
-            };
-        }
+        public GhostFrameData ToFrame() =>
+            HasPlayer
+                ? new GhostFrameData {
+                    HasPlayer = true,
+                    Position = Position,
+                    Facing = Facing,
+                    CurrentAnimationId = CurrentAnimationId,
+                    CurrentAnimationFrame = CurrentAnimationFrame,
+                    Rotation = Rotation,
+                    Scale = Scale,
+                    SpriteColor = SpriteColor,
+                    HairColor = HairColor,
+                    HairSimulateMotion = HairSimulateMotion,
+                    HairCount = HairCount,
+                }
+                : GhostFrameData.WithoutPlayer;
 
         private static Color UnpackColor(byte[] rgba) => new(rgba[0], rgba[1], rgba[2], rgba[3]);
     }

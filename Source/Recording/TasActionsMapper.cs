@@ -90,15 +90,15 @@ internal class TasActionsMapper {
 
     private void AppendMenuInputs(Level level, bool menu, List<string> actions) {
         if (Input.Pause.Pressed || Input.Pause.Check) {
-            actions.Add("S");
+            actions.Add(TasActionTokens.Pause);
         }
 
         if (Input.QuickRestart.Pressed) {
-            actions.Add("Q");
+            actions.Add(TasActionTokens.QuickRestart);
         }
 
         if (menu && Input.MenuConfirm.Pressed && ShouldRecordConfirm(level)) {
-            actions.Add("O");
+            actions.Add(TasActionTokens.MenuConfirm);
         }
     }
 
@@ -155,7 +155,7 @@ internal class TasActionsMapper {
         switch (slot) {
             case TasPressSlot.A:
             case TasPressSlot.B:
-                actions.Add(TwoSlotEncoder.CharFor(slot, slotAChar, slotBChar).ToString());
+                actions.Add(TasActionTokens.ForSlot(slot, slotAChar, slotBChar));
                 break;
             case TasPressSlot.None:
                 break;

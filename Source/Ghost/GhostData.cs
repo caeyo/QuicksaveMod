@@ -13,6 +13,15 @@ internal sealed class GhostData {
     public List<GhostRoomSegment> Rooms { get; init; } = [];
 
     public GhostData Clone() {
+        var rooms = new List<GhostRoomSegment>(Rooms.Count);
+        foreach (GhostRoomSegment room in Rooms) {
+            rooms.Add(new GhostRoomSegment {
+                Level = room.Level,
+                Revisit = room.Revisit,
+                Frames = new List<GhostFrameData>(room.Frames),
+            });
+        }
+
         return new GhostData {
             Version = Version,
             CreatedUtc = CreatedUtc,
@@ -26,23 +35,7 @@ internal sealed class GhostData {
                     Position = Finish.Position,
                     SessionTimeTicks = Finish.SessionTimeTicks,
                 },
-            Rooms = Rooms.Select(room => new GhostRoomSegment {
-                Level = room.Level,
-                Revisit = room.Revisit,
-                Frames = room.Frames.Select(frame => new GhostFrameData {
-                    HasPlayer = frame.HasPlayer,
-                    Position = frame.Position,
-                    Facing = frame.Facing,
-                    CurrentAnimationId = frame.CurrentAnimationId,
-                    CurrentAnimationFrame = frame.CurrentAnimationFrame,
-                    Rotation = frame.Rotation,
-                    Scale = frame.Scale,
-                    SpriteColor = frame.SpriteColor,
-                    HairColor = frame.HairColor,
-                    HairSimulateMotion = frame.HairSimulateMotion,
-                    HairCount = frame.HairCount,
-                }).ToList(),
-            }).ToList(),
+            Rooms = rooms,
         };
     }
 }

@@ -27,19 +27,19 @@ internal static class MovementInputSampler {
     internal static void AppendCardinalDirections(Level level, List<string> actions) {
         if (level.Paused) {
             if (Input.MenuLeft.Check) {
-                actions.Add("L");
+                actions.Add(TasActionTokens.Plain('L'));
             }
 
             if (Input.MenuRight.Check) {
-                actions.Add("R");
+                actions.Add(TasActionTokens.Plain('R'));
             }
 
             if (Input.MenuUp.Check) {
-                actions.Add("U");
+                actions.Add(TasActionTokens.Plain('U'));
             }
 
             if (Input.MenuDown.Check) {
-                actions.Add("D");
+                actions.Add(TasActionTokens.Plain('D'));
             }
 
             return;
@@ -99,11 +99,11 @@ internal static class MovementInputSampler {
 
     private static void AppendDirection(List<string> actions, bool move, bool aim, char plain) {
         if (move && aim) {
-            actions.Add(plain.ToString());
+            actions.Add(TasActionTokens.Plain(plain));
         } else if (move) {
-            actions.Add($"M{plain}");
+            actions.Add(TasActionTokens.Move(plain));
         } else if (aim) {
-            actions.Add($"A{plain}");
+            actions.Add(TasActionTokens.Aim(plain));
         }
     }
 

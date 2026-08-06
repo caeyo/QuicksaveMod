@@ -14,17 +14,23 @@ internal static class SpectateHintHud {
     private static bool active;
     private static float fade;
     private static float timeout;
+    private static Vector2 cachedMessageSize;
+    private static bool hasCachedMessageSize;
+
+    public static bool IsActive => active;
 
     public static void Show() {
         active = true;
         fade = 0f;
         timeout = VisibleDuration;
+        hasCachedMessageSize = false;
     }
 
     public static void Hide() {
         active = false;
         fade = 0f;
         timeout = 0f;
+        hasCachedMessageSize = false;
     }
 
     public static void OnPostRender() {
@@ -34,6 +40,11 @@ internal static class SpectateHintHud {
 
         if (ActiveFont.Font == null) {
             return;
+        }
+
+        if (!hasCachedMessageSize) {
+            cachedMessageSize = ActiveFont.Measure(Text);
+            hasCachedMessageSize = true;
         }
 
         float deltaTime = Engine.RawDeltaTime;
@@ -50,8 +61,7 @@ internal static class SpectateHintHud {
             Engine.ScreenMatrix
         );
 
-        Vector2 messageSize = ActiveFont.Measure(Text);
-        float y = Engine.Height - messageSize.Y - Padding / 2f;
+        float y = Engine.Height - cachedMessageSize.Y - Padding / 2f;
         float alpha = timeout > 0f ? Ease.SineIn(fade) : Ease.SineOut(fade);
 
         ActiveFont.DrawOutline(

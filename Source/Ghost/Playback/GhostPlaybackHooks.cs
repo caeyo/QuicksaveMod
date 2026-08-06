@@ -17,6 +17,10 @@ internal static class GhostPlaybackHooks {
 
     private static void OnRenderCore(On.Monocle.Engine.orig_RenderCore orig, Engine self) {
         orig(self);
+        if (!SpectateHintHud.IsActive) {
+            return;
+        }
+
         SpectateHintHud.OnPostRender();
     }
 

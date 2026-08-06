@@ -1,4 +1,3 @@
-using Celeste.Mod.QuicksaveMod.Ghost.Recording;
 using Celeste.Mod.QuicksaveMod.Quicksave;
 using Celeste.Mod.QuicksaveMod.Recording;
 using Monocle;
@@ -12,7 +11,6 @@ internal static class GhostRecordingSession {
 
     private static QuicksaveData? recordingStartAnchor;
     private static GhostRoomSegment? currentSegment;
-    private static GhostFrameRecorder? recorder;
     private static bool suspended;
 
     private static long finishElapsedTicks;
@@ -38,11 +36,7 @@ internal static class GhostRecordingSession {
         currentSegment = null;
         ClearFinishTracking();
 
-        recorder?.RemoveSelf();
-        recorder = null;
-
         if (Engine.Scene is Level level) {
-            AttachRecorder(level);
             BeginSegment(level.Session.Level);
         }
 
@@ -56,8 +50,6 @@ internal static class GhostRecordingSession {
         RevisitCounts.Clear();
         currentSegment = null;
         ClearFinishTracking();
-        recorder?.RemoveSelf();
-        recorder = null;
     }
 
     public static void OnRoomTransition(Level level) {
@@ -91,17 +83,33 @@ internal static class GhostRecordingSession {
 
         FlushCurrentSegment();
 
+        var rooms = new List<GhostRoomSegment>(RoomSegments.Count);
+        foreach (GhostRoomSegment segment in RoomSegments) {
+            rooms.Add(new GhostRoomSegment {
+                Level = segment.Level,
+                Revisit = segment.Revisit,
+                Frames = new List<GhostFrameData>(segment.Frames),
+            });
+        }
+
         return new GhostData {
             CreatedUtc = DateTime.UtcNow,
             Anchor = recordingStartAnchor.Clone(),
             Inputs = InputBuffer.Snapshot(),
             Finish = ComputeFinish(),
-            Rooms = RoomSegments.Select(segment => new GhostRoomSegment {
-                Level = segment.Level,
-                Revisit = segment.Revisit,
-                Frames = [..segment.Frames],
-            }).ToList(),
+            Rooms = rooms,
         };
+    }
+
+    internal static void CaptureFrame(Player? player) {
+        if (!IsAnchored || currentSegment == null) {
+            return;
+        }
+
+        GhostFrameData frame = player is { Dead: false }
+            ? GhostFrameData.FromPlayer(player)
+            : GhostFrameData.WithoutPlayer;
+        AppendFrame(frame);
     }
 
     internal static void AppendFrame(GhostFrameData frame) {
@@ -119,19 +127,6 @@ internal static class GhostRecordingSession {
 
     internal static int CurrentRevisit =>
         currentSegment?.Revisit ?? 1;
-
-    private static void AttachRecorder(Level level) {
-        recorder?.RemoveSelf();
-        level.Add(recorder = new GhostFrameRecorder());
-    }
-
-    internal static void EnsureRecorder(Level level) {
-        if (!IsAnchored || recorder is { Scene: not null }) {
-            return;
-        }
-
-        AttachRecorder(level);
-    }
 
     private static void BeginSegment(string roomName) {
         int revisit = RevisitCounts.TryGetValue(roomName, out int count) ? count + 1 : 1;
@@ -156,10 +151,11 @@ internal static class GhostRecordingSession {
             return null;
         }
 
+        GhostFrameData frame = lastLiveFrame.Value;
         return new GhostFinishData {
             Room = lastLiveSegment.Level,
             Revisit = lastLiveSegment.Revisit,
-            Position = lastLiveFrame.Position,
+            Position = frame.Position,
             SessionTimeTicks = finishElapsedTicks,
         };
     }

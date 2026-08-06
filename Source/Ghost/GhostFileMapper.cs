@@ -5,6 +5,15 @@ namespace Celeste.Mod.QuicksaveMod.Ghost;
 
 internal static class GhostFileMapper {
     public static GhostFileDto ToDto(GhostData data) {
+        var rooms = new List<GhostRoomDto>(data.Rooms.Count);
+        foreach (GhostRoomSegment room in data.Rooms) {
+            rooms.Add(new GhostRoomDto {
+                Level = room.Level,
+                Revisit = room.Revisit,
+                Frames = GhostFrameCodec.Encode(room.Frames),
+            });
+        }
+
         return new GhostFileDto {
             Version = GhostData.CurrentVersion,
             CreatedUtc = data.CreatedUtc,
@@ -18,15 +27,20 @@ internal static class GhostFileMapper {
                     Position = [data.Finish.Position.X, data.Finish.Position.Y],
                     SessionTimeTicks = data.Finish.SessionTimeTicks,
                 },
-            Rooms = data.Rooms.Select(room => new GhostRoomDto {
-                Level = room.Level,
-                Revisit = room.Revisit,
-                Frames = GhostFrameCodec.Encode(room.Frames),
-            }).ToList(),
+            Rooms = rooms,
         };
     }
 
     public static GhostData FromDto(GhostFileDto file) {
+        var rooms = new List<GhostRoomSegment>(file.Rooms.Count);
+        foreach (GhostRoomDto room in file.Rooms) {
+            rooms.Add(new GhostRoomSegment {
+                Level = room.Level,
+                Revisit = room.Revisit,
+                Frames = GhostFrameCodec.Decode(room.Frames),
+            });
+        }
+
         return new GhostData {
             Version = file.Version,
             CreatedUtc = file.CreatedUtc,
@@ -42,11 +56,7 @@ internal static class GhostFileMapper {
                         : Vector2.Zero,
                     SessionTimeTicks = file.Finish.SessionTimeTicks,
                 },
-            Rooms = file.Rooms.Select(room => new GhostRoomSegment {
-                Level = room.Level,
-                Revisit = room.Revisit,
-                Frames = GhostFrameCodec.Decode(room.Frames),
-            }).ToList(),
+            Rooms = rooms,
         };
     }
 }

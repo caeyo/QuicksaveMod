@@ -13,6 +13,14 @@ internal sealed class Ghost : Actor {
     private readonly IReadOnlyList<GhostRoomSegment> rooms;
     private int roomIndex;
     private int frameIndex = -1;
+    private GhostFrameData currentFrame;
+    private bool hasCurrentFrame;
+
+    private Color tintedSpriteColor;
+    private Color tintedHairColor;
+    private Color lastSpriteSource;
+    private Color lastHairSource;
+    private Color lastAppliedTint = Color.White;
 
     public Microsoft.Xna.Framework.Color TintColor = Microsoft.Xna.Framework.Color.White;
 
@@ -43,17 +51,6 @@ internal sealed class Ghost : Actor {
 
     private GhostRoomSegment CurrentRoom => rooms[roomIndex];
 
-    private GhostFrameData Frame {
-        get {
-            IReadOnlyList<GhostFrameData> frames = CurrentRoom.Frames;
-            if (frames.Count == 0) {
-                throw new InvalidOperationException("Ghost frame requested from an empty room segment.");
-            }
-
-            return frames[Math.Clamp(frameIndex, 0, frames.Count - 1)];
-        }
-    }
-
     public string CurrentRoomName => HasRooms ? CurrentRoom.Level : "";
 
     public int CurrentRevisit => HasRooms ? CurrentRoom.Revisit : 1;
@@ -79,7 +76,8 @@ internal sealed class Ghost : Actor {
             return;
         }
 
-        Visible = Frame.HasPlayer;
+        RefreshCurrentFrame();
+        Visible = currentFrame.HasPlayer;
         base.Update();
         UpdateSprite();
         UpdateHair();
@@ -97,6 +95,7 @@ internal sealed class Ghost : Actor {
 
         frameIndex = 0;
         NotSynced = ForceSync;
+        hasCurrentFrame = false;
     }
 
     internal void Sync(string roomName, int revisit) {
@@ -140,6 +139,7 @@ internal sealed class Ghost : Actor {
         roomIndex = index;
         frameIndex = -1;
         NotSynced = false;
+        hasCurrentFrame = false;
         SkipEmptyRoomsForward();
     }
 
@@ -166,7 +166,8 @@ internal sealed class Ghost : Actor {
 
         roomIndex = rooms.Count - 1;
         frameIndex = lastRoom.Frames.Count - 1;
-        Visible = lastRoom.Frames[frameIndex].HasPlayer;
+        RefreshCurrentFrame();
+        Visible = currentFrame.HasPlayer;
         UpdateSprite();
         UpdateHair();
     }
@@ -185,49 +186,81 @@ internal sealed class Ghost : Actor {
         // Driven by GhostReplayerEntity
     }
 
-    private void UpdateHair() {
-        if (!Frame.HasPlayer) {
+    private void RefreshCurrentFrame() {
+        IReadOnlyList<GhostFrameData> frames = CurrentRoom.Frames;
+        if (frames.Count == 0) {
+            hasCurrentFrame = false;
             return;
         }
 
-        Hair.Facing = (Facings) Frame.Facing;
-        Hair.SimulateMotion = Frame.HairSimulateMotion;
-        Hair.Color = new Color(
-            Frame.HairColor.R * TintColor.R / 255,
-            Frame.HairColor.G * TintColor.G / 255,
-            Frame.HairColor.B * TintColor.B / 255,
-            Frame.HairColor.A * TintColor.A / 255
-        );
+        int index = Math.Clamp(frameIndex, 0, frames.Count - 1);
+        currentFrame = frames[index];
+        hasCurrentFrame = true;
+    }
+
+    private void UpdateHair() {
+        if (!hasCurrentFrame || !currentFrame.HasPlayer) {
+            return;
+        }
+
+        Hair.Facing = (Facings) currentFrame.Facing;
+        Hair.SimulateMotion = currentFrame.HairSimulateMotion;
+        ApplyTintedHairColor(currentFrame.HairColor);
     }
 
     private void UpdateSprite() {
-        if (!Frame.HasPlayer) {
+        if (!hasCurrentFrame || !currentFrame.HasPlayer) {
             return;
         }
 
-        Position = Frame.Position;
+        Position = currentFrame.Position;
         // Y-based depth keeps the ghost in the gameplay layer; +1 keeps it behind Madeline (depth 0).
         Depth = Math.Max((int) Position.Y, 1);
-        Sprite.Rotation = Frame.Rotation;
-        Sprite.Scale = Frame.Scale;
-        Sprite.Scale.X *= Frame.Facing;
-        Sprite.Color = new Color(
-            Frame.SpriteColor.R * TintColor.R / 255,
-            Frame.SpriteColor.G * TintColor.G / 255,
-            Frame.SpriteColor.B * TintColor.B / 255,
-            Frame.SpriteColor.A * TintColor.A / 255
-        );
-        Sprite.HairCount = Frame.HairCount;
+        Sprite.Rotation = currentFrame.Rotation;
+        Sprite.Scale = currentFrame.Scale;
+        Sprite.Scale.X *= currentFrame.Facing;
+        ApplyTintedSpriteColor(currentFrame.SpriteColor);
+        Sprite.HairCount = currentFrame.HairCount;
 
         try {
-            if (Sprite.CurrentAnimationID != Frame.CurrentAnimationId) {
-                Sprite.Play(Frame.CurrentAnimationId);
+            if (Sprite.CurrentAnimationID != currentFrame.CurrentAnimationId) {
+                Sprite.Play(currentFrame.CurrentAnimationId);
             }
 
-            Sprite.SetAnimationFrame(Frame.CurrentAnimationFrame);
+            Sprite.SetAnimationFrame(currentFrame.CurrentAnimationFrame);
         } catch {
             // Missing animation IDs are ignored.
         }
+    }
+
+    private void ApplyTintedSpriteColor(Color source) {
+        if (source == lastSpriteSource && TintColor == lastAppliedTint) {
+            Sprite.Color = tintedSpriteColor;
+            return;
+        }
+
+        tintedSpriteColor.R = (byte) (source.R * TintColor.R / 255);
+        tintedSpriteColor.G = (byte) (source.G * TintColor.G / 255);
+        tintedSpriteColor.B = (byte) (source.B * TintColor.B / 255);
+        tintedSpriteColor.A = (byte) (source.A * TintColor.A / 255);
+        Sprite.Color = tintedSpriteColor;
+        lastSpriteSource = source;
+        lastAppliedTint = TintColor;
+    }
+
+    private void ApplyTintedHairColor(Color source) {
+        if (source == lastHairSource && TintColor == lastAppliedTint) {
+            Hair.Color = tintedHairColor;
+            return;
+        }
+
+        tintedHairColor.R = (byte) (source.R * TintColor.R / 255);
+        tintedHairColor.G = (byte) (source.G * TintColor.G / 255);
+        tintedHairColor.B = (byte) (source.B * TintColor.B / 255);
+        tintedHairColor.A = (byte) (source.A * TintColor.A / 255);
+        Hair.Color = tintedHairColor;
+        lastHairSource = source;
+        lastAppliedTint = TintColor;
     }
 
     public override void Added(Scene scene) {
@@ -238,6 +271,7 @@ internal sealed class Ghost : Actor {
         }
 
         Hair.Start();
+        RefreshCurrentFrame();
         UpdateHair();
     }
 
