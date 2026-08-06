@@ -1,9 +1,9 @@
-using Celeste.Mod.QuicksaveMod.Module;
-using Celeste.Mod.QuicksaveMod.Playback;
-using Celeste.Mod.QuicksaveMod.Quicksave.Storage;
+using Celeste.Mod.QuickTools.Module;
+using Celeste.Mod.QuickTools.Playback;
+using Celeste.Mod.QuickTools.Quicksave.Storage;
 using Monocle;
 
-namespace Celeste.Mod.QuicksaveMod.Quicksave;
+namespace Celeste.Mod.QuickTools.Quicksave;
 
 internal static class QuicksaveService {
     public static QuicksaveData? Current => QuicksaveTracker.Current;

@@ -1,6 +1,6 @@
-using Celeste.Mod.QuicksaveMod.Recording;
+using Celeste.Mod.QuickTools.Recording;
 
-namespace Celeste.Mod.QuicksaveMod.Quicksave;
+namespace Celeste.Mod.QuickTools.Quicksave;
 
 internal static class QuicksaveTracker {
     internal static InputLineBuffer InputBuffer { get; } = new();

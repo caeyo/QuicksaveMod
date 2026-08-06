@@ -1,8 +1,8 @@
-using Celeste.Mod.QuicksaveMod.Ghost;
+using Celeste.Mod.QuickTools.Ghost;
 using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.QuicksaveMod.Ghost.Playback;
+namespace Celeste.Mod.QuickTools.Ghost.Playback;
 
 internal sealed class Ghost : Actor {
     public bool Done { get; private set; }

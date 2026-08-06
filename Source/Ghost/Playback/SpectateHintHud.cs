@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Monocle;
 
-namespace Celeste.Mod.QuicksaveMod.Ghost.Playback;
+namespace Celeste.Mod.QuickTools.Ghost.Playback;
 
 internal static class SpectateHintHud {
     private const int Padding = 25;

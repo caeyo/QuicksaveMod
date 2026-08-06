@@ -1,6 +1,6 @@
 using Monocle;
 
-namespace Celeste.Mod.QuicksaveMod.Recording;
+namespace Celeste.Mod.QuickTools.Recording;
 
 internal class TasActionsMapper {
     private readonly List<string> currActions = new(16);

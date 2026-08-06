@@ -1,9 +1,9 @@
 using System.Text;
-using Celeste.Mod.QuicksaveMod.Module;
-using Celeste.Mod.QuicksaveMod.Quicksave;
-using Celeste.Mod.QuicksaveMod.Recording;
+using Celeste.Mod.QuickTools.Module;
+using Celeste.Mod.QuickTools.Quicksave;
+using Celeste.Mod.QuickTools.Recording;
 
-namespace Celeste.Mod.QuicksaveMod.Playback;
+namespace Celeste.Mod.QuickTools.Playback;
 
 internal static class SessionLoadHelper {
     private static readonly UTF8Encoding TasFileEncoding = new(encoderShouldEmitUTF8Identifier: false);
@@ -38,7 +38,7 @@ internal static class SessionLoadHelper {
     }
 
     public static string GetPlaybackBreakpointLine() {
-        PlaybackSpeed speed = QuicksaveModModule.Settings.PlaybackSpeed;
+        PlaybackSpeed speed = QuickToolsModule.Settings.PlaybackSpeed;
         return speed == PlaybackSpeed.Max ? "***" : $"***{(int) speed}";
     }
 

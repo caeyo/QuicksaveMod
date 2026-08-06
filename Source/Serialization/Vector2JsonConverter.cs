@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Xna.Framework;
 
-namespace Celeste.Mod.QuicksaveMod.Serialization;
+namespace Celeste.Mod.QuickTools.Serialization;
 
 internal sealed class Vector2JsonConverter : JsonConverter<Vector2> {
     public override Vector2 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {

@@ -1,7 +1,7 @@
 using Celeste.Mod.ImGuiHelper;
 using Microsoft.Xna.Framework;
 
-namespace Celeste.Mod.QuicksaveMod.UI;
+namespace Celeste.Mod.QuickTools.UI;
 
 internal sealed class QuicksaveBrowserHandler : ImGuiHandler {
     internal static QuicksaveBrowserHandler? Instance { get; private set; }

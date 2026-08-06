@@ -1,7 +1,7 @@
-using Celeste.Mod.QuicksaveMod.Ghost.Playback;
+using Celeste.Mod.QuickTools.Ghost.Playback;
 using Monocle;
 
-namespace Celeste.Mod.QuicksaveMod.Hooks;
+namespace Celeste.Mod.QuickTools.Hooks;
 
 internal static class GhostPlaybackHooks {
     public static void Apply() {

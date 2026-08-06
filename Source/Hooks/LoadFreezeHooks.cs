@@ -1,7 +1,7 @@
-using Celeste.Mod.QuicksaveMod.Ghost.Playback;
-using Celeste.Mod.QuicksaveMod.Playback;
+using Celeste.Mod.QuickTools.Ghost.Playback;
+using Celeste.Mod.QuickTools.Playback;
 
-namespace Celeste.Mod.QuicksaveMod.Hooks;
+namespace Celeste.Mod.QuickTools.Hooks;
 
 internal static class LoadFreezeHooks {
     public static void Apply() {

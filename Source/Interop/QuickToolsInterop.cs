@@ -1,11 +1,11 @@
 using MonoMod.ModInterop;
 
-namespace Celeste.Mod.QuicksaveMod.Interop;
+namespace Celeste.Mod.QuickTools.Interop;
 
 // Lets other mods register player states that consume analog locomotion (Input.Aim)
 // instead of cardinal MoveX/MoveY, so quicksave recording emits F lines correctly.
-[ModExportName("QuicksaveMod")]
-public static class QuicksaveModInterop {
+[ModExportName("QuickTools")]
+public static class QuickToolsInterop {
     public static Action<Func<Player, bool>>? RegisterAnalogCheck;
     public static Action? ClearAnalogChecks;
 

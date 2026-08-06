@@ -1,6 +1,6 @@
 using TAS;
 
-namespace Celeste.Mod.QuicksaveMod.Playback;
+namespace Celeste.Mod.QuickTools.Playback;
 
 internal sealed class TasPlaybackFileState {
     public string? PreviousFilePath;

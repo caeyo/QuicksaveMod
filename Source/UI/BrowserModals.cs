@@ -1,6 +1,6 @@
 using ImGuiNET;
 
-namespace Celeste.Mod.QuicksaveMod.UI;
+namespace Celeste.Mod.QuickTools.UI;
 
 internal static class BrowserModalSupport {
     private const float ModalButtonWidth = 120f;

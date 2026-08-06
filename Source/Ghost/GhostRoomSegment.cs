@@ -1,4 +1,4 @@
-namespace Celeste.Mod.QuicksaveMod.Ghost;
+namespace Celeste.Mod.QuickTools.Ghost;
 
 internal sealed class GhostRoomSegment {
     public string Level { get; set; } = "";

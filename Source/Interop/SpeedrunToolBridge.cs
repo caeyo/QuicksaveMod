@@ -1,8 +1,8 @@
-using Celeste.Mod.QuicksaveMod.Quicksave;
+using Celeste.Mod.QuickTools.Quicksave;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Celeste.Mod.QuicksaveMod.Interop;
+namespace Celeste.Mod.QuickTools.Interop;
 
 public static class SpeedrunToolBridge {
     private static readonly EverestModuleMetadata Meta = new() {

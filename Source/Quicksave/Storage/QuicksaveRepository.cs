@@ -1,6 +1,6 @@
-using Celeste.Mod.QuicksaveMod.Storage;
+using Celeste.Mod.QuickTools.Storage;
 
-namespace Celeste.Mod.QuicksaveMod.Quicksave.Storage;
+namespace Celeste.Mod.QuickTools.Quicksave.Storage;
 
 internal static class QuicksaveRepository {
     private static readonly EntityRepository Repository = new(

@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.QuicksaveMod.Quicksave;
+namespace Celeste.Mod.QuickTools.Quicksave;
 
 internal static class SessionSnapshot {
     private const string BinaryModSessionPrefix = "base64:";

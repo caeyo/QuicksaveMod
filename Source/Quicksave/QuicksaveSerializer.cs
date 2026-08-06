@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Celeste.Mod.QuicksaveMod.Quicksave;
+namespace Celeste.Mod.QuickTools.Quicksave;
 
 internal static class QuicksaveSerializer {
     private static readonly JsonSerializerOptions Options = new() {

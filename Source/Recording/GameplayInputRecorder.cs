@@ -1,10 +1,10 @@
-using Celeste.Mod.QuicksaveMod.Ghost;
-using Celeste.Mod.QuicksaveMod.Interop;
-using Celeste.Mod.QuicksaveMod.Playback;
-using Celeste.Mod.QuicksaveMod.Quicksave;
+using Celeste.Mod.QuickTools.Ghost;
+using Celeste.Mod.QuickTools.Interop;
+using Celeste.Mod.QuickTools.Playback;
+using Celeste.Mod.QuickTools.Quicksave;
 using Monocle;
 
-namespace Celeste.Mod.QuicksaveMod.Recording;
+namespace Celeste.Mod.QuickTools.Recording;
 
 internal static class GameplayInputRecorder {
     private static TasActionsMapper? mapper;

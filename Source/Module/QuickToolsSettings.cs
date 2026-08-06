@@ -1,35 +1,35 @@
-using Celeste.Mod.QuicksaveMod.Playback;
+using Celeste.Mod.QuickTools.Playback;
 using Microsoft.Xna.Framework.Input;
 
-namespace Celeste.Mod.QuicksaveMod.Module;
+namespace Celeste.Mod.QuickTools.Module;
 
-public class QuicksaveModSettings : EverestModuleSettings {
-    [SettingName("modoptions_quicksavemod_openbrowser")]
+public class QuickToolsSettings : EverestModuleSettings {
+    [SettingName("modoptions_quicktools_openbrowser")]
     [DefaultButtonBinding(buttons: [], keys: [Keys.Q])]
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     public ButtonBinding OpenBrowser { get; set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-    [SettingName("modoptions_quicksavemod_playbackspeed")]
+    [SettingName("modoptions_quicktools_playbackspeed")]
     public PlaybackSpeed PlaybackSpeed { get; set; } = PlaybackSpeed.Max;
 
-    [SettingName("modoptions_quicksavemod_savestateonquicksaveload")]
+    [SettingName("modoptions_quicktools_savestateonquicksaveload")]
     public bool SavestateOnQuicksaveLoad { get; set; } = true;
 
-    [SettingName("modoptions_quicksavemod_addtimertorace")]
+    [SettingName("modoptions_quicktools_addtimertorace")]
     public bool AddTimerToRace { get; set; } = true;
 
-    [SettingName("modoptions_quicksavemod_resyncghostonroomtransition")]
+    [SettingName("modoptions_quicktools_resyncghostonroomtransition")]
     public bool ResyncGhostOnRoomTransition { get; set; }
 
-    [SettingName("modoptions_quicksavemod_browseruiscale")]
+    [SettingName("modoptions_quicktools_browseruiscale")]
     public int BrowserUiScalePercent { get; set; } = 100;
 
     public void CreateBrowserUiScalePercentEntry(TextMenu menu, bool inGame) {
         int index = Math.Clamp((BrowserUiScalePercent - 100) / 10, 0, 10);
         menu.Add(
             new TextMenu.Slider(
-                Dialog.Clean("modoptions_quicksavemod_browseruiscale"),
+                Dialog.Clean("modoptions_quicktools_browseruiscale"),
                 i => $"{100 + i * 10}%",
                 0,
                 10,
@@ -45,7 +45,7 @@ public class QuicksaveModSettings : EverestModuleSettings {
 
         menu.Add(
             new TextMenu.OnOff(
-                Dialog.Clean("modoptions_quicksavemod_savestateonquicksaveload"),
+                Dialog.Clean("modoptions_quicktools_savestateonquicksaveload"),
                 SavestateOnQuicksaveLoad
             ).Change(value => SavestateOnQuicksaveLoad = value)
         );
@@ -58,7 +58,7 @@ public class QuicksaveModSettings : EverestModuleSettings {
 
         menu.Add(
             new TextMenu.OnOff(
-                Dialog.Clean("modoptions_quicksavemod_addtimertorace"),
+                Dialog.Clean("modoptions_quicktools_addtimertorace"),
                 AddTimerToRace
             ).Change(value => AddTimerToRace = value)
         );

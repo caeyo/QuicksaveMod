@@ -1,6 +1,6 @@
-using Celeste.Mod.QuicksaveMod.Ghost;
+using Celeste.Mod.QuickTools.Ghost;
 
-namespace Celeste.Mod.QuicksaveMod.Recording;
+namespace Celeste.Mod.QuickTools.Recording;
 
 internal static class RecordingSessionControls {
     public static void SuspendAll() {

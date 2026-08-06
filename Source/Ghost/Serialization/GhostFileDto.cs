@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
-using Celeste.Mod.QuicksaveMod.Ghost;
-using Celeste.Mod.QuicksaveMod.Quicksave;
+using Celeste.Mod.QuickTools.Ghost;
+using Celeste.Mod.QuickTools.Quicksave;
 
-namespace Celeste.Mod.QuicksaveMod.Ghost.Serialization;
+namespace Celeste.Mod.QuickTools.Ghost.Serialization;
 
 internal sealed class GhostFileDto {
     [JsonPropertyName("v")]

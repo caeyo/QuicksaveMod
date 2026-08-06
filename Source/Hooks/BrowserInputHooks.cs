@@ -1,7 +1,7 @@
-using Celeste.Mod.QuicksaveMod.UI;
+using Celeste.Mod.QuickTools.UI;
 using Monocle;
 
-namespace Celeste.Mod.QuicksaveMod.Hooks;
+namespace Celeste.Mod.QuickTools.Hooks;
 
 internal static class BrowserInputHooks {
     private static readonly BrowserHotkeyBlocker HotkeyBlocker = new();

@@ -1,9 +1,9 @@
-using Celeste.Mod.QuicksaveMod.Module;
-using Celeste.Mod.QuicksaveMod.Quicksave;
-using Celeste.Mod.QuicksaveMod.Recording;
+using Celeste.Mod.QuickTools.Module;
+using Celeste.Mod.QuickTools.Quicksave;
+using Celeste.Mod.QuickTools.Recording;
 using MonoMod.ModInterop;
 
-namespace Celeste.Mod.QuicksaveMod.Interop;
+namespace Celeste.Mod.QuickTools.Interop;
 
 [ModImportName("SpeedrunTool.SaveLoad")]
 public static class SpeedrunToolSaveLoadImports {
@@ -53,8 +53,8 @@ public static class SpeedrunToolSaveLoadImports {
             return;
         }
 
-        if (!savedValues.TryGetValue(typeof(QuicksaveModModule), out Dictionary<string, object>? modValues)) {
-            savedValues[typeof(QuicksaveModModule)] = modValues = [];
+        if (!savedValues.TryGetValue(typeof(QuickToolsModule), out Dictionary<string, object>? modValues)) {
+            savedValues[typeof(QuickToolsModule)] = modValues = [];
         }
 
         modValues[TimelineKey] = timeline.Clone();
@@ -65,12 +65,12 @@ public static class SpeedrunToolSaveLoadImports {
     }
 
     private static void OnLoadState(Dictionary<Type, Dictionary<string, object>> savedValues, Level level) {
-        if (!savedValues.TryGetValue(typeof(QuicksaveModModule), out Dictionary<string, object>? modValues)
+        if (!savedValues.TryGetValue(typeof(QuickToolsModule), out Dictionary<string, object>? modValues)
             || !modValues.TryGetValue(TimelineKey, out object? value)
             || value is not QuicksaveData timeline) {
             Logger.Warn(
                 QuicksaveConstants.LogTag,
-                "SRT load did not contain a QuicksaveMod input timeline; buffer was not rolled back."
+                "SRT load did not contain a QuickTools input timeline; buffer was not rolled back."
             );
             return;
         }

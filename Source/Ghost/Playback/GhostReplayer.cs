@@ -1,10 +1,10 @@
 // Adapted from GhostModForTas (MIT) — https://github.com/LozenChen/GhostModForTas
-using Celeste.Mod.QuicksaveMod.Ghost;
-using Celeste.Mod.QuicksaveMod.Interop;
+using Celeste.Mod.QuickTools.Ghost;
+using Celeste.Mod.QuickTools.Interop;
 using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.QuicksaveMod.Ghost.Playback;
+namespace Celeste.Mod.QuickTools.Ghost.Playback;
 
 [Tracked(false)]
 internal sealed class GhostReplayerEntity : Entity {

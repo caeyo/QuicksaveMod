@@ -1,6 +1,6 @@
 using MonoMod.ModInterop;
 
-namespace Celeste.Mod.QuicksaveMod.Interop;
+namespace Celeste.Mod.QuickTools.Interop;
 
 [ModImportName("CelesteTAS")]
 public static class CelesteTasImports {

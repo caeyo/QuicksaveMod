@@ -1,8 +1,8 @@
-using Celeste.Mod.QuicksaveMod.Ghost;
-using Celeste.Mod.QuicksaveMod.Ghost.Playback;
-using Celeste.Mod.QuicksaveMod.Quicksave;
+using Celeste.Mod.QuickTools.Ghost;
+using Celeste.Mod.QuickTools.Ghost.Playback;
+using Celeste.Mod.QuickTools.Quicksave;
 
-namespace Celeste.Mod.QuicksaveMod.Recording;
+namespace Celeste.Mod.QuickTools.Recording;
 
 internal static class InputTimelineRestorer {
     internal enum GhostRestoreMode {

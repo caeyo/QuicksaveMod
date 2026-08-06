@@ -1,7 +1,7 @@
-using Celeste.Mod.QuicksaveMod.Ghost.Serialization;
+using Celeste.Mod.QuickTools.Ghost.Serialization;
 using Microsoft.Xna.Framework;
 
-namespace Celeste.Mod.QuicksaveMod.Ghost;
+namespace Celeste.Mod.QuickTools.Ghost;
 
 internal static class GhostFileMapper {
     public static GhostFileDto ToDto(GhostData data) {

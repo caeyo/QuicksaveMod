@@ -1,8 +1,8 @@
-using Celeste.Mod.QuicksaveMod.Interop;
+using Celeste.Mod.QuickTools.Interop;
 using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.QuicksaveMod.Recording;
+namespace Celeste.Mod.QuickTools.Recording;
 
 internal static class MovementInputSampler {
     private const float AimComponentEpsilon = 1e-4f;
@@ -21,7 +21,7 @@ internal static class MovementInputSampler {
             return true;
         }
 
-        return QuicksaveModInterop.UsesAnalogLocomotion(player);
+        return QuickToolsInterop.UsesAnalogLocomotion(player);
     }
 
     internal static void AppendCardinalDirections(Level level, List<string> actions) {

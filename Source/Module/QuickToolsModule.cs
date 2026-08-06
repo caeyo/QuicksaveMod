@@ -1,31 +1,31 @@
-﻿using Celeste.Mod.ImGuiHelper;
-using Celeste.Mod.QuicksaveMod.Ghost;
-using Celeste.Mod.QuicksaveMod.Hooks;
-using Celeste.Mod.QuicksaveMod.Interop;
-using Celeste.Mod.QuicksaveMod.Playback;
-using Celeste.Mod.QuicksaveMod.Quicksave;
-using Celeste.Mod.QuicksaveMod.Recording;
-using Celeste.Mod.QuicksaveMod.UI;
+using Celeste.Mod.ImGuiHelper;
+using Celeste.Mod.QuickTools.Ghost;
+using Celeste.Mod.QuickTools.Hooks;
+using Celeste.Mod.QuickTools.Interop;
+using Celeste.Mod.QuickTools.Playback;
+using Celeste.Mod.QuickTools.Quicksave;
+using Celeste.Mod.QuickTools.Recording;
+using Celeste.Mod.QuickTools.UI;
 using MonoMod.ModInterop;
 
-namespace Celeste.Mod.QuicksaveMod.Module;
+namespace Celeste.Mod.QuickTools.Module;
 
-public class QuicksaveModModule : EverestModule {
+public class QuickToolsModule : EverestModule {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-    public static QuicksaveModModule Instance { get; private set; }
+    public static QuickToolsModule Instance { get; private set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-    public override Type SettingsType => typeof(QuicksaveModSettings);
-    public static QuicksaveModSettings Settings => (QuicksaveModSettings) Instance._Settings;
+    public override Type SettingsType => typeof(QuickToolsSettings);
+    public static QuickToolsSettings Settings => (QuickToolsSettings) Instance._Settings;
 
-    public override Type SaveDataType => typeof(QuicksaveModSaveData);
-    public static QuicksaveModSaveData SaveData => (QuicksaveModSaveData) Instance._SaveData;
+    public override Type SaveDataType => typeof(QuickToolsSaveData);
+    public static QuickToolsSaveData SaveData => (QuickToolsSaveData) Instance._SaveData;
 
     private QuicksaveBrowserHandler? quicksaveBrowserHandler;
     private GhostBrowserHandler? ghostBrowserHandler;
     private ModBrowserCoordinator? browserCoordinator;
 
-    public QuicksaveModModule() {
+    public QuickToolsModule() {
         Instance = this;
 #if DEBUG
         Logger.SetLogLevel(QuicksaveConstants.LogTag, LogLevel.Verbose);
@@ -38,8 +38,8 @@ public class QuicksaveModModule : EverestModule {
 
     public override void Initialize() {
         typeof(CelesteTasImports).ModInterop();
-        typeof(QuicksaveModInterop).ModInterop();
-        QuicksaveModInterop.InitExports();
+        typeof(QuickToolsInterop).ModInterop();
+        QuickToolsInterop.InitExports();
     }
 
     public override void Load() {

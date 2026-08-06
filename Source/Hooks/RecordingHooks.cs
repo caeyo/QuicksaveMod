@@ -1,7 +1,7 @@
-using Celeste.Mod.QuicksaveMod.Playback;
-using Celeste.Mod.QuicksaveMod.Recording;
+using Celeste.Mod.QuickTools.Playback;
+using Celeste.Mod.QuickTools.Recording;
 
-namespace Celeste.Mod.QuicksaveMod.Hooks;
+namespace Celeste.Mod.QuickTools.Hooks;
 
 internal static class RecordingHooks {
     public static void Apply() {

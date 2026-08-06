@@ -1,4 +1,4 @@
-namespace Celeste.Mod.QuicksaveMod.Storage;
+namespace Celeste.Mod.QuickTools.Storage;
 
 internal sealed class EntityRepository {
     private readonly EntityStoreProfile profile;

@@ -1,6 +1,6 @@
-using Celeste.Mod.QuicksaveMod.Storage;
+using Celeste.Mod.QuickTools.Storage;
 
-namespace Celeste.Mod.QuicksaveMod.UI;
+namespace Celeste.Mod.QuickTools.UI;
 
 internal static class BrowserNavigation {
     public static string RootPath(BrowserProfile profile) => profile.Path.RootFullPath;

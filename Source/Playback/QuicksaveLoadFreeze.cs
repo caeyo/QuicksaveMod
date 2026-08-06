@@ -1,8 +1,8 @@
-using Celeste.Mod.QuicksaveMod.Hooks;
-using Celeste.Mod.QuicksaveMod.Quicksave;
+using Celeste.Mod.QuickTools.Hooks;
+using Celeste.Mod.QuickTools.Quicksave;
 using Monocle;
 
-namespace Celeste.Mod.QuicksaveMod.Playback;
+namespace Celeste.Mod.QuickTools.Playback;
 
 internal static class QuicksaveLoadFreeze {
     private static readonly VirtualInput[] UnfreezeInputs = [

@@ -1,6 +1,6 @@
-using Celeste.Mod.QuicksaveMod.Ghost.Playback;
+using Celeste.Mod.QuickTools.Ghost.Playback;
 
-namespace Celeste.Mod.QuicksaveMod.Playback;
+namespace Celeste.Mod.QuickTools.Playback;
 
 internal enum ActivePlayback {
     None,

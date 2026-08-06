@@ -1,11 +1,11 @@
-using Celeste.Mod.QuicksaveMod.Ghost.Playback;
-using Celeste.Mod.QuicksaveMod.Ghost.Storage;
-using Celeste.Mod.QuicksaveMod.Playback;
-using Celeste.Mod.QuicksaveMod.Recording;
-using Celeste.Mod.QuicksaveMod.Quicksave;
+using Celeste.Mod.QuickTools.Ghost.Playback;
+using Celeste.Mod.QuickTools.Ghost.Storage;
+using Celeste.Mod.QuickTools.Playback;
+using Celeste.Mod.QuickTools.Recording;
+using Celeste.Mod.QuickTools.Quicksave;
 using Monocle;
 
-namespace Celeste.Mod.QuicksaveMod.Ghost;
+namespace Celeste.Mod.QuickTools.Ghost;
 
 internal static class GhostService {
     public static void SaveGhost(string? fileName = null, string? subdirectory = null) {

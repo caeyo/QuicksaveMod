@@ -1,4 +1,4 @@
-namespace Celeste.Mod.QuicksaveMod.Recording;
+namespace Celeste.Mod.QuickTools.Recording;
 
 internal static class TasActionTokens {
     internal static readonly string Pause = "S";

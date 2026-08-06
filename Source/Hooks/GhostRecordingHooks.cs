@@ -1,7 +1,7 @@
-using Celeste.Mod.QuicksaveMod.Ghost;
+using Celeste.Mod.QuickTools.Ghost;
 using Monocle;
 
-namespace Celeste.Mod.QuicksaveMod.Hooks;
+namespace Celeste.Mod.QuickTools.Hooks;
 
 internal static class GhostRecordingHooks {
     public static void Apply() {

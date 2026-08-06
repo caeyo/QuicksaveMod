@@ -1,12 +1,12 @@
-using Celeste.Mod.QuicksaveMod.Ghost.Playback;
-using Celeste.Mod.QuicksaveMod.Interop;
-using Celeste.Mod.QuicksaveMod.Module;
-using Celeste.Mod.QuicksaveMod.Quicksave;
-using Celeste.Mod.QuicksaveMod.Quicksave.Storage;
-using Celeste.Mod.QuicksaveMod.Recording;
+using Celeste.Mod.QuickTools.Ghost.Playback;
+using Celeste.Mod.QuickTools.Interop;
+using Celeste.Mod.QuickTools.Module;
+using Celeste.Mod.QuickTools.Quicksave;
+using Celeste.Mod.QuickTools.Quicksave.Storage;
+using Celeste.Mod.QuickTools.Recording;
 using TAS;
 
-namespace Celeste.Mod.QuicksaveMod.Playback;
+namespace Celeste.Mod.QuickTools.Playback;
 
 internal static class QuicksavePlayback {
     private static bool watching;
@@ -128,7 +128,7 @@ internal static class QuicksavePlayback {
     }
 
     private static bool ShouldSavestateOnLoad() {
-        return QuicksaveModModule.Settings.SavestateOnQuicksaveLoad
+        return QuickToolsModule.Settings.SavestateOnQuicksaveLoad
             && SpeedrunToolBridge.IsLoaded
             && SpeedrunToolBridge.IsEnabled;
     }

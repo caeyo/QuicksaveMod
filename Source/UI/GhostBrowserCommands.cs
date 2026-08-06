@@ -1,8 +1,8 @@
-using Celeste.Mod.QuicksaveMod.Ghost;
-using Celeste.Mod.QuicksaveMod.Ghost.Storage;
+using Celeste.Mod.QuickTools.Ghost;
+using Celeste.Mod.QuickTools.Ghost.Storage;
 using ImGuiNET;
 
-namespace Celeste.Mod.QuicksaveMod.UI;
+namespace Celeste.Mod.QuickTools.UI;
 
 internal sealed class GhostBrowserCommands(
     BrowserProfile profile,

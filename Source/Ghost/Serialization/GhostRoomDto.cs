@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Celeste.Mod.QuicksaveMod.Ghost.Serialization;
+namespace Celeste.Mod.QuickTools.Ghost.Serialization;
 
 internal sealed class GhostRoomDto {
     [JsonPropertyName("l")]

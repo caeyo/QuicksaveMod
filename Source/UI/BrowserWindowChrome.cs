@@ -1,10 +1,10 @@
-using Celeste.Mod.QuicksaveMod.Hooks;
-using Celeste.Mod.QuicksaveMod.Module;
-using Celeste.Mod.QuicksaveMod.Recording;
+using Celeste.Mod.QuickTools.Hooks;
+using Celeste.Mod.QuickTools.Module;
+using Celeste.Mod.QuickTools.Recording;
 using ImGuiNET;
 using Monocle;
 
-namespace Celeste.Mod.QuicksaveMod.UI;
+namespace Celeste.Mod.QuickTools.UI;
 
 internal sealed class BrowserWindowChrome {
     private const float BaseWindowWidth = 520f;
@@ -166,7 +166,7 @@ internal sealed class BrowserWindowChrome {
         }
 
         float auto = Math.Clamp(displayHeight / DesignDisplayHeight, 1f, 2f);
-        float user = Math.Clamp(QuicksaveModModule.Settings.BrowserUiScalePercent / 100f, 1f, 2f);
+        float user = Math.Clamp(QuickToolsModule.Settings.BrowserUiScalePercent / 100f, 1f, 2f);
         return Math.Clamp(auto * user, 1f, 2.5f);
     }
 }

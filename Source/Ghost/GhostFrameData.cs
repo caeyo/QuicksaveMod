@@ -1,7 +1,7 @@
 using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.QuicksaveMod.Ghost;
+namespace Celeste.Mod.QuickTools.Ghost;
 
 internal readonly struct GhostFrameData {
     public bool HasPlayer { get; init; }

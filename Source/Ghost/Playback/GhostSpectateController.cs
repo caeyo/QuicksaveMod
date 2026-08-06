@@ -1,8 +1,8 @@
-using Celeste.Mod.QuicksaveMod.Ghost.Storage;
-using Celeste.Mod.QuicksaveMod.Playback;
+using Celeste.Mod.QuickTools.Ghost.Storage;
+using Celeste.Mod.QuickTools.Playback;
 using TAS;
 
-namespace Celeste.Mod.QuicksaveMod.Ghost.Playback;
+namespace Celeste.Mod.QuickTools.Ghost.Playback;
 
 internal static class GhostSpectateController {
     private static bool watching;

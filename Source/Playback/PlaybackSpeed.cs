@@ -1,4 +1,4 @@
-namespace Celeste.Mod.QuicksaveMod.Playback;
+namespace Celeste.Mod.QuickTools.Playback;
 
 public enum PlaybackSpeed {
     Speed1 = 1,

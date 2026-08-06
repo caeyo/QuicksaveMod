@@ -1,9 +1,9 @@
-using Celeste.Mod.QuicksaveMod.Module;
+using Celeste.Mod.QuickTools.Module;
 using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.QuicksaveMod.UI;
+namespace Celeste.Mod.QuickTools.UI;
 
 internal sealed class ModBrowserCoordinator {
     private readonly QuicksaveBrowserHandler quicksaveBrowser;
@@ -22,12 +22,12 @@ internal sealed class ModBrowserCoordinator {
             return;
         }
 
-        if (!QuicksaveModModule.Settings.OpenBrowser.Pressed) {
+        if (!QuickToolsModule.Settings.OpenBrowser.Pressed) {
             return;
         }
 
-        QuicksaveModModule.Settings.OpenBrowser.ConsumePress();
-        QuicksaveModModule.Settings.OpenBrowser.ConsumeBuffer();
+        QuickToolsModule.Settings.OpenBrowser.ConsumePress();
+        QuickToolsModule.Settings.OpenBrowser.ConsumeBuffer();
         OpenBoth();
     }
 

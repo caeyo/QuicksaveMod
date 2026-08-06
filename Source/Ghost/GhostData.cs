@@ -1,6 +1,6 @@
-using Celeste.Mod.QuicksaveMod.Quicksave;
+using Celeste.Mod.QuickTools.Quicksave;
 
-namespace Celeste.Mod.QuicksaveMod.Ghost;
+namespace Celeste.Mod.QuickTools.Ghost;
 
 internal sealed class GhostData {
     public const int CurrentVersion = 1;

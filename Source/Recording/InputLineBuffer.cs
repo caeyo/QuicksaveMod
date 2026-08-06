@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Celeste.Mod.QuicksaveMod.Recording;
+namespace Celeste.Mod.QuickTools.Recording;
 
 internal class InputLineBuffer {
     private readonly List<CommittedEntry> lines = [];

@@ -1,11 +1,11 @@
-using Celeste.Mod.QuicksaveMod.Ghost;
-using Celeste.Mod.QuicksaveMod.Interop;
-using Celeste.Mod.QuicksaveMod.Module;
-using Celeste.Mod.QuicksaveMod.Playback;
-using Celeste.Mod.QuicksaveMod.Quicksave;
+using Celeste.Mod.QuickTools.Ghost;
+using Celeste.Mod.QuickTools.Interop;
+using Celeste.Mod.QuickTools.Module;
+using Celeste.Mod.QuickTools.Playback;
+using Celeste.Mod.QuickTools.Quicksave;
 using Monocle;
 
-namespace Celeste.Mod.QuicksaveMod.Ghost.Playback;
+namespace Celeste.Mod.QuickTools.Ghost.Playback;
 
 internal static class GhostRaceController {
     private static GhostData? pendingGhost;
@@ -107,7 +107,7 @@ internal static class GhostRaceController {
         }
 
         Ghost ghost = new(activeGhost.Rooms) {
-            ForceSync = QuicksaveModModule.Settings.ResyncGhostOnRoomTransition,
+            ForceSync = QuickToolsModule.Settings.ResyncGhostOnRoomTransition,
             CompletedRun = activeGhost.Finish != null,
             TintColor = Microsoft.Xna.Framework.Color.White * 0.45f,
         };
@@ -125,7 +125,7 @@ internal static class GhostRaceController {
     }
 
     private static bool ShouldConfigureRaceTimer() {
-        return QuicksaveModModule.Settings.AddTimerToRace
+        return QuickToolsModule.Settings.AddTimerToRace
             && SpeedrunToolBridge.IsLoaded
             && SpeedrunToolBridge.IsEnabled;
     }

@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using Microsoft.Xna.Framework;
 
-namespace Celeste.Mod.QuicksaveMod.Quicksave;
+namespace Celeste.Mod.QuickTools.Quicksave;
 
 internal sealed class QuicksaveStartPoint {
     public string AreaSid { get; init; } = "";

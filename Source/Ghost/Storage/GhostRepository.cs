@@ -1,6 +1,6 @@
-using Celeste.Mod.QuicksaveMod.Storage;
+using Celeste.Mod.QuickTools.Storage;
 
-namespace Celeste.Mod.QuicksaveMod.Ghost.Storage;
+namespace Celeste.Mod.QuickTools.Ghost.Storage;
 
 internal static class GhostRepository {
     private static readonly EntityRepository Repository = new(

@@ -1,8 +1,8 @@
-using Celeste.Mod.QuicksaveMod.Quicksave;
-using Celeste.Mod.QuicksaveMod.Recording;
+using Celeste.Mod.QuickTools.Quicksave;
+using Celeste.Mod.QuickTools.Recording;
 using Monocle;
 
-namespace Celeste.Mod.QuicksaveMod.Ghost;
+namespace Celeste.Mod.QuickTools.Ghost;
 
 internal static class GhostRecordingSession {
     internal static InputLineBuffer InputBuffer { get; } = new();

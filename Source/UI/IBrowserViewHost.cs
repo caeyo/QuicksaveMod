@@ -1,4 +1,4 @@
-namespace Celeste.Mod.QuicksaveMod.UI;
+namespace Celeste.Mod.QuickTools.UI;
 
 internal interface IBrowserCommands {
     void ConfirmDelete();

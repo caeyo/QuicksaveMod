@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace Celeste.Mod.QuicksaveMod.Recording;
+namespace Celeste.Mod.QuickTools.Recording;
 
 internal static class TasLineFormatter {
     private const int MaxFramesDigits = 4;

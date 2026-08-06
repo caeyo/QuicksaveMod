@@ -1,9 +1,9 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Celeste.Mod.QuicksaveMod.Ghost.Serialization;
-using Celeste.Mod.QuicksaveMod.Serialization;
+using Celeste.Mod.QuickTools.Ghost.Serialization;
+using Celeste.Mod.QuickTools.Serialization;
 
-namespace Celeste.Mod.QuicksaveMod.Ghost;
+namespace Celeste.Mod.QuickTools.Ghost;
 
 internal static class GhostSerializer {
     private static readonly JsonSerializerOptions Options = new() {

@@ -1,7 +1,7 @@
-using Celeste.Mod.QuicksaveMod.Quicksave;
-using Celeste.Mod.QuicksaveMod.Recording;
+using Celeste.Mod.QuickTools.Quicksave;
+using Celeste.Mod.QuickTools.Recording;
 
-namespace Celeste.Mod.QuicksaveMod.Hooks;
+namespace Celeste.Mod.QuickTools.Hooks;
 
 internal static class LevelLoadHooks {
     public static void Apply() {

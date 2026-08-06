@@ -1,6 +1,6 @@
-using Celeste.Mod.QuicksaveMod.Storage;
+using Celeste.Mod.QuickTools.Storage;
 
-namespace Celeste.Mod.QuicksaveMod.Quicksave.Storage;
+namespace Celeste.Mod.QuickTools.Quicksave.Storage;
 
 internal static class QuicksavePath {
     private static readonly EntityPath Path = new(EntityStoreProfile.Quicksave);

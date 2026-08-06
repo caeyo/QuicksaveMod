@@ -1,7 +1,7 @@
-using Celeste.Mod.QuicksaveMod.Ghost;
-using Celeste.Mod.QuicksaveMod.Quicksave;
+using Celeste.Mod.QuickTools.Ghost;
+using Celeste.Mod.QuickTools.Quicksave;
 
-namespace Celeste.Mod.QuicksaveMod.Storage;
+namespace Celeste.Mod.QuickTools.Storage;
 
 internal sealed record EntityStoreProfile(
     string RootFolderName,

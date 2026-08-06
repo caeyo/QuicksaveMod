@@ -1,4 +1,4 @@
-namespace Celeste.Mod.QuicksaveMod.Quicksave;
+namespace Celeste.Mod.QuickTools.Quicksave;
 
 internal sealed class QuicksaveData {
     public const int CurrentVersion = 3;

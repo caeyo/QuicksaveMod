@@ -1,7 +1,7 @@
 using System.Text;
-using Celeste.Mod.QuicksaveMod.Module;
+using Celeste.Mod.QuickTools.Module;
 
-namespace Celeste.Mod.QuicksaveMod.Quicksave;
+namespace Celeste.Mod.QuickTools.Quicksave;
 
 internal static class SaveSlotResolver {
     private const int DebugSlot = -1;
@@ -11,7 +11,7 @@ internal static class SaveSlotResolver {
             throw new InvalidOperationException("No Celeste save file is active.");
         }
 
-        return QuicksaveModModule.SaveData.EnsureSaveUid();
+        return QuickToolsModule.SaveData.EnsureSaveUid();
     }
 
     public static int ResolveSlot(string? saveUid) {
@@ -21,7 +21,7 @@ internal static class SaveSlotResolver {
 
         if (SaveData.Instance is { } current
             && string.Equals(
-                QuicksaveModModule.SaveData.SaveUid,
+                QuickToolsModule.SaveData.SaveUid,
                 saveUid,
                 StringComparison.OrdinalIgnoreCase
             )) {
@@ -65,7 +65,7 @@ internal static class SaveSlotResolver {
     private static IEnumerable<int> EnumerateSlotsWithModSave() {
         SortedSet<int> slots = [DebugSlot];
         string saveDirectory = UserIO.GetSaveFilePath();
-        string modName = QuicksaveModModule.Instance.Metadata.Name;
+        string modName = QuickToolsModule.Instance.Metadata.Name;
         string suffix = $"-modsave-{modName}.celeste";
 
         if (!Directory.Exists(saveDirectory)) {
@@ -90,21 +90,21 @@ internal static class SaveSlotResolver {
     }
 
     private static string? TryReadSlotSaveUid(int slot) {
-        byte[]? bytes = QuicksaveModModule.Instance.ReadSaveData(slot);
+        byte[]? bytes = QuickToolsModule.Instance.ReadSaveData(slot);
         if (bytes == null || bytes.Length == 0) {
             return null;
         }
 
         try {
             // Peek a disposable copy — DeserializeSaveData would replace the live module save data.
-            QuicksaveModSaveData data = YamlHelper.Deserializer.Deserialize<QuicksaveModSaveData>(
+            QuickToolsSaveData data = YamlHelper.Deserializer.Deserialize<QuickToolsSaveData>(
                 Encoding.UTF8.GetString(bytes)
             );
             return string.IsNullOrWhiteSpace(data.SaveUid) ? null : data.SaveUid;
         } catch (Exception e) {
             Logger.Warn(
                 QuicksaveConstants.LogTag,
-                $"Failed to read QuicksaveMod save identity for slot {slot}: {e.Message}"
+                $"Failed to read QuickTools save identity for slot {slot}: {e.Message}"
             );
             return null;
         }

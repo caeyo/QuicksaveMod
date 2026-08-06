@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework;
 
-namespace Celeste.Mod.QuicksaveMod.Ghost;
+namespace Celeste.Mod.QuickTools.Ghost;
 
 internal sealed class GhostFinishData {
     public string Room { get; init; } = "";

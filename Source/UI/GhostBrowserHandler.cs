@@ -1,6 +1,6 @@
 using Celeste.Mod.ImGuiHelper;
 
-namespace Celeste.Mod.QuicksaveMod.UI;
+namespace Celeste.Mod.QuickTools.UI;
 
 internal sealed class GhostBrowserHandler : ImGuiHandler {
     internal static GhostBrowserHandler? Instance { get; private set; }

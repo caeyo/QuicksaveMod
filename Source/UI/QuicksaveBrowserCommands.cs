@@ -1,8 +1,8 @@
-using Celeste.Mod.QuicksaveMod.Quicksave;
-using Celeste.Mod.QuicksaveMod.Quicksave.Storage;
+using Celeste.Mod.QuickTools.Quicksave;
+using Celeste.Mod.QuickTools.Quicksave.Storage;
 using ImGuiNET;
 
-namespace Celeste.Mod.QuicksaveMod.UI;
+namespace Celeste.Mod.QuickTools.UI;
 
 internal sealed class QuicksaveBrowserCommands(
     BrowserProfile profile,

@@ -1,10 +1,10 @@
-using Celeste.Mod.QuicksaveMod.Ghost;
+using Celeste.Mod.QuickTools.Ghost;
 using Microsoft.Xna.Framework;
 using Monocle;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Celeste.Mod.QuicksaveMod.Interop;
+namespace Celeste.Mod.QuickTools.Interop;
 
 /// <summary>
 /// Ghost-race integration with SpeedrunTool's room timer and physical EndPoint flag.
